@@ -15,7 +15,7 @@
     "api",
     "mongodb"
   ],
-  "author": "bezkoder",
+  "author": "Marcos",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",

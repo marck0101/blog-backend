@@ -1,21 +1,40 @@
-module.exports = (mongoose) => {
-  var schema = mongoose.Schema(
-    {
+const mongoose = require("mongoose");
+
+const BlogPostSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    slug: { type: String, required: true, unique: true },
+    excerpt: String,
+    content: { type: String, required: true },
+
+    category: {
+      type: String,
+      enum: ["marketing", "trafego", "growth", "tecnologia"],
+      required: true,
+    },
+
+    coverImage: String,
+
+    gallery: [
+      {
+        url: String,
+        alt: String,
+      },
+    ],
+
+    published: { type: Boolean, default: false },
+    publishedAt: Date,
+
+    seo: {
       title: String,
       description: String,
-      published: Boolean,
-      imageUrl: String,
-      imageUrls: [String]
     },
-    { timestamps: true }
-  );
 
-  schema.method("toJSON", function () {
-    const { __v, _id, ...object } = this.toObject();
-    object.id = _id;
-    return object;
-  });
+    deletedAt: { type: Date, default: null },
+  },
+  { timestamps: true }
+);
 
-  const Blogpost = mongoose.model("blogpost", schema);
-  return Blogpost;
-};
+module.exports =
+  mongoose.models.BlogPost ||
+  mongoose.model("BlogPost", BlogPostSchema);

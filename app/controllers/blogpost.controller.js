@@ -1,200 +1,217 @@
-const db = require('../models');
-const Blogpost = db.blogposts;
-const DeletedBlogposts = db.deletedBlogposts;
+const BlogPost = require("../models/blogpost.model");
 
-/** Create and Save a new Blogpost */
+/**
+ * CREATE
+ */
 exports.create = async (req, res) => {
-  console.log('req',req)
-  // console.log()
   try {
-    if (!req.body.title) {
-      return res.status(400).send({ message: 'Content can not be empty!' })
+    const data = req.body;
+
+    if (data.published && !data.publishedAt) {
+      data.publishedAt = new Date();
     }
 
-    // Normaliza os campos de imagem
-    const singleUrl =
-      typeof req.body.imageUrl === 'string' ? req.body.imageUrl : ''
-    const manyUrls = Array.isArray(req.body.imageUrls) ? req.body.imageUrls : []
-
-    const tutorial = new Blogpost({
-      title: req.body.title,
-      description: req.body.description,
-      published: !!req.body.published,
-      // compatibilidade com posts antigos:
-      imageUrl: singleUrl,
-      // nova abordagem (várias imagens):
-      imageUrls: manyUrls,
-    })
-
-    const data = await tutorial.save()
-    return res.send(data)
+    const post = await BlogPost.create(data);
+    res.status(201).json(post);
   } catch (err) {
-    console.error('CREATE ERROR:', err)
-    return res
-      .status(500)
-      .send({
-        message:
-          err.message || 'Some error occurred while creating the Blogpost.',
-      })
+    res.status(500).json({ message: err.message });
   }
-}
+};
 
-/** Retrieve all Blogposts from the database. (opcional: ordena por mais recentes) */
+/**
+ * ADMIN - LIST ALL (não deletados)
+ */
 exports.findAll = async (req, res) => {
   try {
-    const title = req.query.title
-    const condition = title
-      ? { title: { $regex: new RegExp(title), $options: 'i' } }
-      : {}
-
-    const data = await Blogpost.find(condition).sort({ createdAt: -1 })
-    return res.send(data)
+    const posts = await BlogPost.find({ deletedAt: null }).sort({
+      createdAt: -1,
+    });
+    res.json(posts);
   } catch (err) {
-    return res
-      .status(500)
-      .send({
-        message:
-          err.message || 'Some error occurred while retrieving blogposts.',
-      })
+    res.status(500).json({ message: err.message });
   }
-}
+};
 
-/** Find a single Blogpost with an id */
+/**
+ * BLOG PÚBLICO - LIST PUBLISHED
+ */
+exports.findAllPublished = async (req, res) => {
+  try {
+    const posts = await BlogPost.find({
+      published: true,
+      deletedAt: null,
+    }).sort({ publishedAt: -1 });
+
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * BLOG PÚBLICO - FIND BY SLUG
+ */
+exports.findBySlug = async (req, res) => {
+  try {
+    const post = await BlogPost.findOne({
+      slug: req.params.slug,
+      published: true,
+      deletedAt: null,
+    });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post não encontrado" });
+    }
+
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * ADMIN - FIND ONE
+ */
 exports.findOne = async (req, res) => {
   try {
-    const id = req.params.id
-    const data = await Blogpost.findById(id)
-    if (!data)
-      return res
-        .status(404)
-        .send({ message: 'Not found Blogpost with id ' + id })
-    return res.send(data)
-  } catch (err) {
-    return res
-      .status(500)
-      .send({ message: 'Error retrieving Blogpost with id=' + req.params.id })
-  }
-}
+    const post = await BlogPost.findById(req.params.id);
 
-/** Update a Blogpost by id */
+    if (!post) {
+      return res.status(404).json({ message: "Post não encontrado" });
+    }
+
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * UPDATE
+ */
 exports.update = async (req, res) => {
   try {
-    if (!req.body) {
-      return res
-        .status(400)
-        .send({ message: 'Data to update can not be empty!' })
+    const data = req.body;
+
+    if (data.published === true && !data.publishedAt) {
+      data.publishedAt = new Date();
     }
 
-    // Se vier imageUrl/imageUrls, mantém mesma normalização usada no create
-    if ('imageUrl' in req.body && typeof req.body.imageUrl !== 'string') {
-      req.body.imageUrl = ''
-    }
-    if ('imageUrls' in req.body && !Array.isArray(req.body.imageUrls)) {
-      req.body.imageUrls = []
+    if (data.published === false) {
+      data.publishedAt = null;
     }
 
-    const id = req.params.id
-    const data = await Blogpost.findByIdAndUpdate(id, req.body, {
-      new: true,
-      useFindAndModify: false,
-    })
+    const post = await BlogPost.findByIdAndUpdate(
+      req.params.id,
+      data,
+      { new: true }
+    );
 
-    if (!data) {
-      return res
-        .status(404)
-        .send({ message: `Cannot update Blogpost with id=${id}.` })
+    if (!post) {
+      return res.status(404).json({ message: "Post não encontrado" });
     }
-    return res.send(data)
+
+    res.json(post);
   } catch (err) {
-    return res
-      .status(500)
-      .send({ message: 'Error updating Blogpost with id=' + req.params.id })
+    res.status(500).json({ message: err.message });
   }
-}
+};
 
-/** Delete a Blogpost by id */
-exports.delete = async (req, res) => {
-  try {
-    const id = req.params.id
-    const data = await Blogpost.findByIdAndRemove(id, {
-      useFindAndModify: false,
-    })
-    if (!data) {
-      return res
-        .status(404)
-        .send({
-          message: `Cannot delete Blogpost with id=${id}. Maybe Blogpost was not found!`,
-        })
-    }
-    return res.send({ message: 'Blogpost was deleted successfully!' })
-  } catch (err) {
-    return res
-      .status(500)
-      .send({ message: 'Could not delete Blogpost with id=' + req.params.id })
-  }
-}
-
-/** Delete all Blogposts */
-exports.deleteAll = async (_req, res) => {
-  try {
-    const data = await Blogpost.deleteMany({})
-    return res.send({
-      message: `${data.deletedCount} Blogposts were deleted successfully!`,
-    })
-  } catch (err) {
-    return res
-      .status(500)
-      .send({
-        message:
-          err.message || 'Some error occurred while removing all blogposts.',
-      })
-  }
-}
-
+/**
+ * SOFT DELETE (LIXEIRA)
+ */
 exports.softDelete = async (req, res) => {
   try {
-    const id = req.params.id
+    const post = await BlogPost.findByIdAndUpdate(
+      req.params.id,
+      { deletedAt: new Date() },
+      { new: true }
+    );
 
-    const tutorial = await Blogpost.findById(id)
-    if (!tutorial) {
-      return res
-        .status(404)
-        .send({ message: `Blogpost com id=${id} não encontrado.` })
+    if (!post) {
+      return res.status(404).json({ message: "Post não encontrado" });
     }
 
-    // move para collection "deletedBlogposts"
-    const deleted = new DeletedBlogposts({
-      ...tutorial.toObject(),
-      deletedAt: new Date(),
-    })
-    await deleted.save()
-
-    // remove da coleção principal
-    await Blogpost.findByIdAndDelete(id)
-
-    return res.send({
-      message: 'Publicação movida para a lixeira com sucesso!',
-    })
+    res.json(post);
   } catch (err) {
-    console.error(err)
-    return res.status(500).send({ message: 'Erro ao mover a publicação.' })
+    res.status(500).json({ message: err.message });
   }
-}
+};
 
-
-/** Find all published Blogposts */
-exports.findAllPublished = async (_req, res) => {
+/**
+ * RESTORE FROM TRASH
+ */
+exports.restore = async (req, res) => {
   try {
-    const data = await Blogpost.find({ published: true }).sort({
-      createdAt: -1,
-    })
-    return res.send(data)
+    const post = await BlogPost.findByIdAndUpdate(
+      req.params.id,
+      { deletedAt: null },
+      { new: true }
+    );
+
+    if (!post) {
+      return res.status(404).json({ message: "Post não encontrado" });
+    }
+
+    res.json(post);
   } catch (err) {
-    return res
-      .status(500)
-      .send({
-        message:
-          err.message || 'Some error occurred while retrieving blogposts.',
-      })
+    res.status(500).json({ message: err.message });
   }
-}
+};
+
+/**
+ * LIST TRASH
+ */
+exports.findAllDeleted = async (req, res) => {
+  try {
+    const posts = await BlogPost.find({
+      deletedAt: { $ne: null },
+    }).sort({ deletedAt: -1 });
+
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * DELETE PERMANENT
+ */
+exports.deletePermanent = async (req, res) => {
+  try {
+    const post = await BlogPost.findByIdAndDelete(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post não encontrado" });
+    }
+
+    res.json({ message: "Post removido definitivamente" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * REMOVE IMAGE FROM GALLERY
+ */
+exports.removeImage = async (req, res) => {
+  try {
+    const { imageUrl } = req.body;
+
+    const post = await BlogPost.findByIdAndUpdate(
+      req.params.id,
+      {
+        $pull: { gallery: { url: imageUrl } },
+      },
+      { new: true }
+    );
+
+    if (!post) {
+      return res.status(404).json({ message: "Post não encontrado" });
+    }
+
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

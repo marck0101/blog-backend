@@ -1,30 +1,33 @@
-module.exports = (app) => {
-  const blogpost = require('../controllers/blogpost.controller.js')
+module.exports = app => {
+  const post = require("../controllers/blogpost.controller");
+  const router = require("express").Router();
 
-  var router = require('express').Router()
+  /**
+   * BLOG PÚBLICO (sempre primeiro)
+   */
+  router.get("/published", post.findAllPublished);
+  router.get("/slug/:slug", post.findBySlug);
 
-  // Create a new Tutorial
-  router.post('/', blogpost.create)
+  /**
+   * ADMIN
+   */
+  router.post("/", post.create);
+  router.get("/", post.findAll);
+  router.get("/deleted/all", post.findAllDeleted);
+  router.get("/:id", post.findOne);
+  router.put("/:id", post.update);
 
-  // Retrieve all Tutorials
-  router.get('/', blogpost.findAll)
+  /**
+   * IMAGENS
+   */
+  router.delete("/:id/images", post.removeImage);
 
-  // Retrieve all published Tutorials
-  router.get('/published', blogpost.findAllPublished)
+  /**
+   * LIXEIRA
+   */
+  router.delete("/:id", post.softDelete);
+  router.patch("/:id/restore", post.restore);
+  router.delete("/:id/hard", post.deletePermanent);
 
-  // Retrieve a single Tutorial with id
-  router.get('/:id', blogpost.findOne)
-
-  // Update a Tutorial with id
-  router.put('/:id', blogpost.update)
-
-  // Delete a Tutorial with id
-  router.delete('/:id', blogpost.delete)
-
-  // Create a new Tutorial
-  router.delete('/', blogpost.deleteAll)
-
-  router.delete('/soft/:id', blogpost.softDelete)
-
-  app.use('/api/blogposts', router)
-}
+  app.use("/api/posts", router);
+};
