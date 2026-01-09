@@ -3,14 +3,16 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./app/config/db.config");
+const seedAdminIfNeeded = require("./app/seed/seedAdmin");
 
 const app = express();
-
-// Ambiente
 const isProd = process.env.NODE_ENV === "production";
 
-// Banco
-connectDB();
+// DB
+(async () => {
+  await connectDB();
+  await seedAdminIfNeeded(); // 👈 SEED AUTOMÁTICO EM DEV
+})();
 
 // Middlewares
 app.use(
@@ -23,7 +25,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rotas
+// Health check
 app.get("/", (req, res) => {
   res.json({
     status: "ok",
@@ -31,15 +33,12 @@ app.get("/", (req, res) => {
   });
 });
 
+// Routes
+require("./app/routes/auth.routes")(app);
 require("./app/routes/blogposts.routes")(app);
 
 // Server
 const PORT = process.env.PORT || 8080;
-
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(
-    `🚀 API rodando em ${
-      isProd ? "PRODUÇÃO" : "DESENVOLVIMENTO"
-    } na porta ${PORT}`
-  );
+  console.log(`🚀 API rodando na porta ${PORT}`);
 });
