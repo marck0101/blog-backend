@@ -19,6 +19,27 @@ exports.create = async (req, res) => {
 };
 
 /**
+ * BLOG PÚBLICO - FIND BY ID
+ */
+exports.findPublicById = async (req, res) => {
+  try {
+    const post = await BlogPost.findOne({
+      _id: req.params.id,
+      published: true,
+      deletedAt: null,
+    });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post não encontrado" });
+    }
+
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
  * ADMIN - LIST ALL (não deletados)
  */
 exports.findAll = async (req, res) => {
@@ -101,11 +122,9 @@ exports.update = async (req, res) => {
       data.publishedAt = null;
     }
 
-    const post = await BlogPost.findByIdAndUpdate(
-      req.params.id,
-      data,
-      { new: true }
-    );
+    const post = await BlogPost.findByIdAndUpdate(req.params.id, data, {
+      new: true,
+    });
 
     if (!post) {
       return res.status(404).json({ message: "Post não encontrado" });

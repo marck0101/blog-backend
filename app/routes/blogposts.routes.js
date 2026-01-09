@@ -1,11 +1,9 @@
-module.exports = app => {
+module.exports = (app) => {
   const post = require("../controllers/blogpost.controller");
   const router = require("express").Router();
 
-  /**
-   * BLOG PÚBLICO (sempre primeiro)
-   */
   router.get("/published", post.findAllPublished);
+  router.get("/public/:id", post.findPublicById);
   router.get("/slug/:slug", post.findBySlug);
 
   /**
