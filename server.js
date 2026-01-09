@@ -17,7 +17,7 @@ const isProd = process.env.NODE_ENV === "production";
 // Middlewares
 app.use(
   cors({
-    origin: isProd ? process.env.CORS_PROD : process.env.VITE_API_BASE_URL_PROD,
+    origin: isProd ? process.env.CORS_PROD : process.env.CORS_DEV,
     credentials: true,
   })
 );
