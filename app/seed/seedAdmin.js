@@ -2,7 +2,7 @@ const User = require("../models/user.model");
 
 async function seedAdminIfNeeded() {
   if (process.env.NODE_ENV !== "development") {
-    return; // segurança: nunca roda fora de DEV
+    return;
   }
 
   const email = "marck_mhc";

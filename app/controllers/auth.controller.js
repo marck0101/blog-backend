@@ -6,6 +6,12 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email e senha são obrigatórios" });
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "Usuário não encontrado" });
@@ -30,8 +36,8 @@ exports.login = async (req, res) => {
         email: user.email,
       },
     });
-  } catch (err) {
-    console.error(err); // 👈 importante
-    return res.status(500).json({ message: "Erro ao autenticar" });
+  } catch (error) {
+    console.error("Erro no login:", error);
+    return res.status(500).json({ message: "Erro interno no servidor" });
   }
 };

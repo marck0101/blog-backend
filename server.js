@@ -17,7 +17,7 @@ const isProd = process.env.NODE_ENV === "production";
 // Middlewares
 app.use(
   cors({
-    origin: isProd ? process.env.CORS_PROD : process.env.CORS_DEV,
+    origin: isProd ? process.env.CORS_PROD : process.env.VITE_API_BASE_URL_PROD,
     credentials: true,
   })
 );
@@ -38,7 +38,16 @@ require("./app/routes/auth.routes")(app);
 require("./app/routes/blogposts.routes")(app);
 
 // Server
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, "0.0.0.0", () => {
+const PORT = process.env.PORT || 3333;
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 API rodando na porta ${PORT}`);
+});
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`❌ Porta ${PORT} já está em uso`);
+    process.exit(1);
+  } else {
+    console.error(err);
+  }
 });

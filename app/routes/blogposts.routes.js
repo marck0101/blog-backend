@@ -20,12 +20,12 @@ module.exports = (app) => {
   router.put("/:id", auth, post.update);
 
   /**
-   * IMAGENS
+   * ================= IMAGENS =================
    */
   router.delete("/:id/images", auth, post.removeImage);
 
   /**
-   * LIXEIRA
+   * ================= LIXEIRA =================
    */
   router.delete("/:id", auth, post.softDelete);
   router.patch("/:id/restore", auth, post.restore);
