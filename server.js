@@ -11,7 +11,10 @@ const isProd = process.env.NODE_ENV === "production";
 // DB
 (async () => {
   await connectDB();
-  await seedAdminIfNeeded(); // 👈 SEED AUTOMÁTICO EM DEV
+
+  if (!isProd) {
+    await seedAdminIfNeeded(); // seed só em DEV
+  }
 })();
 
 // Middlewares
@@ -39,6 +42,7 @@ require("./app/routes/blogposts.routes")(app);
 
 // Server
 const PORT = process.env.PORT || 3333;
+
 const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 API rodando na porta ${PORT}`);
 });
