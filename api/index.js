@@ -10,33 +10,45 @@ const blogRoutes = require("../app/routes/blogposts.routes");
 
 const app = express();
 
-// Middlewares
+// ===== MIDDLEWARES =====
 app.use(express.json());
-app.use(cors({
-  origin: process.env.NODE_ENV === "production"
-    ? process.env.CORS_PROD
-    : process.env.CORS_DEV,
-  credentials: true
-}));
 
-// DB
-let isConnected = false;
-async function db() {
-  if (!isConnected) {
-    await connectDB();
-    isConnected = true;
-  }
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.CORS_PROD
+        : process.env.CORS_DEV || "*",
+    credentials: true,
+  })
+);
+
+// ===== DB (CACHEADO PARA SERVERLESS) =====
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null };
 }
 
-// Health
+async function dbConnect() {
+  if (cached.conn) return cached.conn;
+  cached.conn = await connectDB();
+  return cached.conn;
+}
+
+// ===== HEALTH =====
 app.get("/api/health", async (req, res) => {
-  await db();
-  res.json({ status: "ok", env: process.env.NODE_ENV });
+  try {
+    await dbConnect();
+    res.json({ status: "ok", env: process.env.NODE_ENV });
+  } catch (err) {
+    res.status(500).json({ error: "DB connection failed" });
+  }
 });
 
-// Routes
+// ===== ROUTES =====
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", blogRoutes);
 
-// Exporta handler
+// ===== EXPORT SERVERLESS =====
 module.exports.handler = serverless(app);

@@ -7,6 +7,7 @@ const connectDB = require("./app/config/db.config");
 const seedAdminIfNeeded = require("./app/seed/seedAdmin");
 
 const authRoutes = require("./app/routes/auth.routes");
+const blogRoutes = require("./app/routes/blogposts.routes");
 
 const app = express();
 const PORT = process.env.PORT || 3333;
@@ -16,22 +17,18 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: isProd
-      ? process.env.CORS_PROD
-      : process.env.CORS_DEV || "*",
+    origin: isProd ? process.env.CORS_PROD : process.env.CORS_DEV || "*",
     credentials: true,
   })
 );
 
-// ROTAS
 app.use("/api/auth", authRoutes);
+app.use("/api/posts", blogRoutes);
 
-// HEALTH CHECK
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", env: process.env.NODE_ENV });
 });
 
-// START
 (async () => {
   await connectDB();
   await seedAdminIfNeeded();
