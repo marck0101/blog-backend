@@ -1,27 +1,36 @@
+const bcrypt = require("bcryptjs");
 const User = require("../models/user.model");
 
 const seedAdminIfNeeded = async () => {
-  const { ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+  try {
+    const { ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME } = process.env;
 
-  if (!ADMIN_NAME || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
-    console.log("⚠️ Seed admin ignorado (variáveis não definidas)");
-    return;
+    if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+      console.log("ℹ️ Seed admin ignorado (variáveis não definidas)");
+      return;
+    }
+
+    const adminExists = await User.findOne({ role: "admin" });
+
+    if (adminExists) {
+      console.log("ℹ️ Usuário admin já existe");
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+
+    await User.create({
+      name: ADMIN_NAME || "Administrador",
+      email: ADMIN_EMAIL,
+      password: hashedPassword,
+      role: "admin",
+      active: true,
+    });
+
+    console.log("✅ Usuário ADMIN criado com sucesso");
+  } catch (err) {
+    console.error("❌ Erro ao criar admin:", err.message);
   }
-
-  const exists = await User.findOne({ email: ADMIN_EMAIL });
-  if (exists) {
-    console.log("ℹ️ Usuário admin já existe");
-    return;
-  }
-
-  await User.create({
-    name: ADMIN_NAME,
-    email: ADMIN_EMAIL,
-    password: ADMIN_PASSWORD,
-    role: "admin",
-  });
-
-  console.log("✅ Usuário admin criado com sucesso");
 };
 
 module.exports = seedAdminIfNeeded;
