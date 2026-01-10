@@ -1,7 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+
 const connectDB = require("./app/config/db.config");
+const seedAdminIfNeeded = require("./app/seed/seedAdmin");
+
 const authRoutes = require("./app/routes/auth.routes");
 
 const app = express();
@@ -10,8 +13,8 @@ const app = express();
    ENV
 ====================== */
 const isProd = process.env.NODE_ENV === "production";
-
 const PORT = process.env.PORT || 3333;
+
 const CORS_ORIGIN = isProd
   ? process.env.CORS_PROD
   : process.env.CORS_DEV;
@@ -20,7 +23,6 @@ const CORS_ORIGIN = isProd
    MIDDLEWARES
 ====================== */
 app.use(express.json());
-
 app.use(
   cors({
     origin: CORS_ORIGIN,
@@ -41,10 +43,11 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 
 /* ======================
-   SERVER
+   BOOTSTRAP
 ====================== */
 (async () => {
   await connectDB();
+  await seedAdminIfNeeded();
 })();
 
 app.listen(PORT, "0.0.0.0", () => {

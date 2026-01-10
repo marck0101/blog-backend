@@ -3,14 +3,13 @@ const User = require("../models/user.model");
 const seedAdminIfNeeded = async () => {
   const { ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
 
-  if (!ADMIN_EMAIL || !ADMIN_PASSWORD || !ADMIN_NAME) {
+  if (!ADMIN_NAME || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
     console.log("⚠️ Seed admin ignorado (variáveis não definidas)");
     return;
   }
 
-  const existingAdmin = await User.findOne({ email: ADMIN_EMAIL });
-
-  if (existingAdmin) {
+  const exists = await User.findOne({ email: ADMIN_EMAIL });
+  if (exists) {
     console.log("ℹ️ Usuário admin já existe");
     return;
   }
