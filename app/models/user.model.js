@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 
 const UserSchema = new mongoose.Schema(
   {
@@ -8,6 +7,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+
     email: {
       type: String,
       required: true,
@@ -15,26 +15,24 @@ const UserSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+
     password: {
       type: String,
       required: true,
-      minlength: 6,
+    },
+
+    role: {
+      type: String,
+      enum: ["admin", "editor", "user"],
+      default: "user",
+    },
+
+    active: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }
 );
 
-// Hash automático da senha
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  try {
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
-
-module.exports =
-  mongoose.models.User || mongoose.model("User", UserSchema);
+module.exports = mongoose.model("User", UserSchema);

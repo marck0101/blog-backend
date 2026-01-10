@@ -2,25 +2,21 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+
 const connectDB = require("./app/config/db.config");
 const seedAdminIfNeeded = require("./app/seed/seedAdmin");
 
 const app = express();
 const isProd = process.env.NODE_ENV === "production";
 
-// DB
-(async () => {
-  await connectDB();
-
-  if (!isProd) {
-    await seedAdminIfNeeded(); // seed só em DEV
-  }
-})();
-
+// =====================
 // Middlewares
+// =====================
 app.use(
   cors({
-    origin: isProd ? process.env.CORS_PROD : process.env.CORS_DEV,
+    origin: isProd
+      ? process.env.CORS_PROD
+      : process.env.CORS_DEV,
     credentials: true,
   })
 );
@@ -28,7 +24,9 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
+// =====================
+// Health Check
+// =====================
 app.get("/", (req, res) => {
   res.json({
     status: "ok",
@@ -36,22 +34,27 @@ app.get("/", (req, res) => {
   });
 });
 
+// =====================
 // Routes
+// =====================
 require("./app/routes/auth.routes")(app);
 require("./app/routes/blogposts.routes")(app);
 
-// Server
+// =====================
+// Start Server
+// =====================
 const PORT = process.env.PORT || 3333;
 
-const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 API rodando na porta ${PORT}`);
-});
+(async () => {
+  try {
+    await connectDB();
+    await seedAdminIfNeeded();
 
-server.on("error", (err) => {
-  if (err.code === "EADDRINUSE") {
-    console.error(`❌ Porta ${PORT} já está em uso`);
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 API rodando na porta ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ Falha crítica:", err.message);
     process.exit(1);
-  } else {
-    console.error(err);
   }
-});
+})();
