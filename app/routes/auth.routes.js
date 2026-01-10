@@ -1,12 +1,11 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 
-module.exports = (app) => {
-  const router = express.Router();
+const router = express.Router();
 
-  router.post("/login", async (req, res) => {
+router.post("/login", async (req, res) => {
+  try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
@@ -14,19 +13,22 @@ module.exports = (app) => {
       return res.status(401).json({ message: "Credenciais inválidas" });
     }
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
+    const valid = await user.comparePassword(password);
+    if (!valid) {
       return res.status(401).json({ message: "Credenciais inválidas" });
     }
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "1d" }
     );
 
     res.json({ token });
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro interno" });
+  }
+});
 
-  app.use("/api/auth", router);
-};
+module.exports = router;
