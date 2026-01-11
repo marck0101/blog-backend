@@ -4,7 +4,6 @@ const cors = require("cors");
 require("dotenv").config();
 
 const connectDB = require("../app/config/db.config");
-
 const authRoutes = require("../app/routes/auth.routes");
 const blogRoutes = require("../app/routes/blogposts.routes");
 
@@ -15,20 +14,14 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.CORS_PROD
-        : process.env.CORS_DEV || "*",
+    origin: process.env.CORS_PROD || "*",
     credentials: true,
   })
 );
 
-// ===== DB (CACHEADO PARA SERVERLESS) =====
+// ===== DB CACHE (SERVERLESS SAFE) =====
 let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null };
-}
+if (!cached) cached = global.mongoose = { conn: null };
 
 async function dbConnect() {
   if (cached.conn) return cached.conn;
@@ -36,19 +29,24 @@ async function dbConnect() {
   return cached.conn;
 }
 
-// ===== HEALTH =====
-app.get("/api/health", async (req, res) => {
+// 🔴 ISSO É CRÍTICO: conectar DB ANTES DAS ROTAS
+app.use(async (req, res, next) => {
   try {
     await dbConnect();
-    res.json({ status: "ok", env: process.env.NODE_ENV });
+    next();
   } catch (err) {
+    console.error("DB error:", err);
     res.status(500).json({ error: "DB connection failed" });
   }
 });
 
 // ===== ROUTES =====
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", env: process.env.NODE_ENV });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", blogRoutes);
 
-// ===== EXPORT SERVERLESS =====
-module.exports.handler = serverless(app);
+// ❌ NÃO USE app.listen
+module.exports = serverless(app);
