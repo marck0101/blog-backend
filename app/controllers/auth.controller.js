@@ -1,5 +1,5 @@
 const User = require("../models/user.model");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.login = async (req, res) => {
@@ -33,8 +33,8 @@ exports.login = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
-        email: user.email,
-      },
+        email: user.email
+      }
     });
   } catch (error) {
     console.error("Erro no login:", error);

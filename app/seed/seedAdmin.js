@@ -24,7 +24,7 @@ const seedAdminIfNeeded = async () => {
       email: ADMIN_EMAIL,
       password: hashedPassword,
       role: "admin",
-      active: true,
+      active: true
     });
 
     console.log("✅ Usuário ADMIN criado com sucesso");
