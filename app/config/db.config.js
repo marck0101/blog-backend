@@ -11,7 +11,10 @@ module.exports = async function connectDB() {
     throw new Error("MONGO_URI não definida");
   }
 
+  mongoose.set("strictQuery", false);
+
   await mongoose.connect(mongoURI);
+
   console.log(
     `✅ MongoDB conectado em modo ${isProd ? "PRODUÇÃO" : "DESENVOLVIMENTO"}`
   );
