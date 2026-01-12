@@ -1,3 +1,4 @@
+const connectDB = require("../config/db.config");
 const BlogPost = require("../models/blogpost.model");
 
 /**
@@ -5,6 +6,8 @@ const BlogPost = require("../models/blogpost.model");
  */
 exports.create = async (req, res) => {
   try {
+    await connectDB();
+
     const data = req.body;
 
     if (data.published && !data.publishedAt) {
@@ -14,6 +17,7 @@ exports.create = async (req, res) => {
     const post = await BlogPost.create(data);
     res.status(201).json(post);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -23,6 +27,8 @@ exports.create = async (req, res) => {
  */
 exports.findPublicById = async (req, res) => {
   try {
+    await connectDB();
+
     const post = await BlogPost.findOne({
       _id: req.params.id,
       published: true,
@@ -35,20 +41,25 @@ exports.findPublicById = async (req, res) => {
 
     res.json(post);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
 
 /**
- * ADMIN - LIST ALL (não deletados)
+ * ADMIN - LIST ALL
  */
 exports.findAll = async (req, res) => {
   try {
+    await connectDB();
+
     const posts = await BlogPost.find({ deletedAt: null }).sort({
       createdAt: -1,
     });
+
     res.json(posts);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -58,6 +69,8 @@ exports.findAll = async (req, res) => {
  */
 exports.findAllPublished = async (req, res) => {
   try {
+    await connectDB();
+
     const posts = await BlogPost.find({
       published: true,
       deletedAt: null,
@@ -65,6 +78,7 @@ exports.findAllPublished = async (req, res) => {
 
     res.json(posts);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -74,6 +88,8 @@ exports.findAllPublished = async (req, res) => {
  */
 exports.findBySlug = async (req, res) => {
   try {
+    await connectDB();
+
     const post = await BlogPost.findOne({
       slug: req.params.slug,
       published: true,
@@ -86,6 +102,7 @@ exports.findBySlug = async (req, res) => {
 
     res.json(post);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -95,6 +112,8 @@ exports.findBySlug = async (req, res) => {
  */
 exports.findOne = async (req, res) => {
   try {
+    await connectDB();
+
     const post = await BlogPost.findById(req.params.id);
 
     if (!post) {
@@ -103,6 +122,7 @@ exports.findOne = async (req, res) => {
 
     res.json(post);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -112,6 +132,8 @@ exports.findOne = async (req, res) => {
  */
 exports.update = async (req, res) => {
   try {
+    await connectDB();
+
     const data = req.body;
 
     if (data.published === true && !data.publishedAt) {
@@ -132,15 +154,18 @@ exports.update = async (req, res) => {
 
     res.json(post);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
 
 /**
- * SOFT DELETE (LIXEIRA)
+ * SOFT DELETE
  */
 exports.softDelete = async (req, res) => {
   try {
+    await connectDB();
+
     const post = await BlogPost.findByIdAndUpdate(
       req.params.id,
       { deletedAt: new Date() },
@@ -153,15 +178,18 @@ exports.softDelete = async (req, res) => {
 
     res.json(post);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
 
 /**
- * RESTORE FROM TRASH
+ * RESTORE
  */
 exports.restore = async (req, res) => {
   try {
+    await connectDB();
+
     const post = await BlogPost.findByIdAndUpdate(
       req.params.id,
       { deletedAt: null },
@@ -174,6 +202,7 @@ exports.restore = async (req, res) => {
 
     res.json(post);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -183,12 +212,15 @@ exports.restore = async (req, res) => {
  */
 exports.findAllDeleted = async (req, res) => {
   try {
+    await connectDB();
+
     const posts = await BlogPost.find({
       deletedAt: { $ne: null },
     }).sort({ deletedAt: -1 });
 
     res.json(posts);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -198,6 +230,8 @@ exports.findAllDeleted = async (req, res) => {
  */
 exports.deletePermanent = async (req, res) => {
   try {
+    await connectDB();
+
     const post = await BlogPost.findByIdAndDelete(req.params.id);
 
     if (!post) {
@@ -206,15 +240,18 @@ exports.deletePermanent = async (req, res) => {
 
     res.json({ message: "Post removido definitivamente" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
 
 /**
- * REMOVE IMAGE FROM GALLERY
+ * REMOVE IMAGE
  */
 exports.removeImage = async (req, res) => {
   try {
+    await connectDB();
+
     const { imageUrl } = req.body;
 
     const post = await BlogPost.findByIdAndUpdate(
@@ -231,6 +268,7 @@ exports.removeImage = async (req, res) => {
 
     res.json(post);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };

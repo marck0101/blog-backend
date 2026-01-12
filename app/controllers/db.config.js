@@ -1,18 +1,28 @@
 const mongoose = require("mongoose");
 
-module.exports = async function connectDB() {
-  const isProd = process.env.NODE_ENV === "production";
+let cached = global.mongoose;
 
-  const mongoURI = isProd
-    ? process.env.MONGO_URI_PROD
-    : process.env.MONGO_URI_DEV;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 
-  if (!mongoURI) {
-    throw new Error("MONGO_URI não definida");
+async function connectDB() {
+  if (cached.conn) return cached.conn;
+
+  if (!cached.promise) {
+    const uri =
+      process.env.NODE_ENV === "production"
+        ? process.env.MONGO_URI_PROD
+        : process.env.MONGO_URI_DEV;
+
+    cached.promise = mongoose.connect(uri, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
+    });
   }
 
-  await mongoose.connect(mongoURI);
-  console.log(
-    `✅ MongoDB conectado em modo ${isProd ? "PRODUÇÃO" : "DESENVOLVIMENTO"}`
-  );
-};
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
+
+module.exports = connectDB;
