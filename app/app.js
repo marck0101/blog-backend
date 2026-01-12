@@ -1,20 +1,10 @@
 const express = require("express");
 const cors = require("cors");
-const morgan = require("morgan");
-
-const connectDB = require("./config/db.config");
 
 const authRoutes = require("./routes/auth.routes");
 const blogpostRoutes = require("./routes/blogposts.routes");
 
 const app = express();
-
-/**
- * ===============================
- * DATABASE
- * ===============================
- */
-connectDB();
 
 /**
  * ===============================
@@ -34,7 +24,13 @@ app.use(
   })
 );
 
+/**
+ * ===============================
+ * DEV LOGS
+ * ===============================
+ */
 if (process.env.NODE_ENV !== "production") {
+  const morgan = require("morgan");
   app.use(morgan("dev"));
 }
 
