@@ -1,64 +1,32 @@
-const express = require("express");
-const cors = require("cors");
+const mongoose = require("mongoose");
 
-const authRoutes = require("./routes/auth.routes");
-const blogpostRoutes = require("./routes/blogposts.routes");
+let cached = global.mongoose;
 
-const app = express();
-
-/**
- * ===============================
- * MIDDLEWARES
- * ===============================
- */
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.CORS_PROD
-        : process.env.CORS_DEV,
-    credentials: true,
-  })
-);
-
-/**
- * ===============================
- * DEV LOGS
- * ===============================
- */
-if (process.env.NODE_ENV !== "production") {
-  const morgan = require("morgan");
-  app.use(morgan("dev"));
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
-/**
- * ===============================
- * ROUTES
- * ===============================
- */
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    environment: process.env.NODE_ENV,
-  });
-});
+async function connectDB() {
+  if (cached.conn) return cached.conn;
 
-app.use("/api/auth", authRoutes);
-app.use("/api/blogposts", blogpostRoutes);
+  if (!cached.promise) {
+    const uri =
+      process.env.NODE_ENV === "production"
+        ? process.env.MONGO_URI_PROD
+        : process.env.MONGO_URI_DEV;
 
-/**
- * ===============================
- * ERROR HANDLER
- * ===============================
- */
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({
-    message: "Internal server error",
-  });
-});
+    if (!uri) {
+      throw new Error("MongoDB URI não definida");
+    }
 
-module.exports = app;
+    cached.promise = mongoose.connect(uri, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
+    });
+  }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
+
+module.exports = connectDB;
