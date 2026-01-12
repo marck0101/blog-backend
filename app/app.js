@@ -1,50 +1,68 @@
-require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
+const morgan = require("morgan");
 
 const connectDB = require("./config/db.config");
+
 const authRoutes = require("./routes/auth.routes");
-const blogRoutes = require("./routes/blogposts.routes");
+const blogpostRoutes = require("./routes/blogposts.routes");
 
 const app = express();
-const isProd = process.env.NODE_ENV === "production";
 
+/**
+ * ===============================
+ * DATABASE
+ * ===============================
+ */
+connectDB();
+
+/**
+ * ===============================
+ * MIDDLEWARES
+ * ===============================
+ */
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 app.use(
   cors({
-    origin: isProd ? process.env.CORS_PROD : process.env.CORS_DEV || "*",
-    credentials: true
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.CORS_PROD
+        : process.env.CORS_DEV,
+    credentials: true,
   })
 );
 
-// ===== DB CACHE =====
-let cached = global.mongoose;
-if (!cached) cached = global.mongoose = { conn: null };
-
-async function dbConnect() {
-  if (cached.conn) return cached.conn;
-  cached.conn = await connectDB();
-  return cached.conn;
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("dev"));
 }
 
-app.use(async (req, res, next) => {
-  try {
-    await dbConnect();
-    next();
-  } catch (err) {
-    console.error("DB error:", err);
-    res.status(500).json({ error: "DB connection failed" });
-  }
-});
-
-// ===== ROUTES =====
+/**
+ * ===============================
+ * ROUTES
+ * ===============================
+ */
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", env: process.env.NODE_ENV });
+  res.status(200).json({
+    status: "ok",
+    environment: process.env.NODE_ENV,
+  });
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/posts", blogRoutes);
+app.use("/api/blogposts", blogpostRoutes);
+
+/**
+ * ===============================
+ * ERROR HANDLER
+ * ===============================
+ */
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({
+    message: "Internal server error",
+  });
+});
 
 module.exports = app;
