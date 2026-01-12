@@ -8,25 +8,44 @@ const app = express();
 
 /**
  * ===============================
- * MIDDLEWARES
+ * MIDDLEWARES BÁSICOS
  * ===============================
  */
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+/**
+ * ===============================
+ * CORS (DEV + PROD)
+ * ===============================
+ */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://192.168.0.112:5173",
+  "https://blog.marck0101.com.br",
+  "https://www.blog.marck0101.com.br",
+];
+
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.CORS_PROD
-        : process.env.CORS_DEV,
+    origin(origin, callback) {
+      // Permite chamadas server-to-server ou tools (Postman, curl)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
 
 /**
  * ===============================
- * DEV LOGS
+ * LOGS EM DEV
  * ===============================
  */
 if (process.env.NODE_ENV !== "production") {
@@ -36,7 +55,7 @@ if (process.env.NODE_ENV !== "production") {
 
 /**
  * ===============================
- * ROUTES
+ * ROTAS
  * ===============================
  */
 app.get("/api/health", (req, res) => {
@@ -47,7 +66,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/blogposts", blogpostRoutes);
+app.use("/api/posts", blogpostRoutes);
 
 /**
  * ===============================
@@ -55,7 +74,7 @@ app.use("/api/blogposts", blogpostRoutes);
  * ===============================
  */
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error("Erro global:", err.message);
   res.status(500).json({
     message: "Internal server error",
   });
