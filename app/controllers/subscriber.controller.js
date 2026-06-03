@@ -70,7 +70,6 @@ exports.findAll = async (req, res, next) => {
 
     const {
       status,
-      category,
       page: rawPage = 1,
       limit: rawLimit = 20,
     } = req.query;
@@ -81,7 +80,26 @@ exports.findAll = async (req, res, next) => {
 
     const filter = {};
     if (status) filter.status = status;
-    if (category) filter.categories = category;
+
+    if (req.query.categories) {
+      const cats = req.query.categories.split(",").map((s) => s.trim()).filter(Boolean);
+      if (cats.length) filter.categories = { $in: cats };
+    }
+
+    if (req.query.search) {
+      const regex = { $regex: req.query.search.trim(), $options: "i" };
+      filter.$or = [{ name: regex }, { email: regex }];
+    }
+
+    if (req.query.dateFrom || req.query.dateTo) {
+      filter.createdAt = {};
+      if (req.query.dateFrom) filter.createdAt.$gte = new Date(req.query.dateFrom);
+      if (req.query.dateTo) {
+        const to = new Date(req.query.dateTo);
+        to.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = to;
+      }
+    }
 
     const [subscribers, total] = await Promise.all([
       Subscriber.find(filter, "-token")

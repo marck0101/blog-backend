@@ -86,6 +86,25 @@ exports.findAll = async (req, res, next) => {
     if (req.query.published === "true") filter.published = true;
     if (req.query.published === "false") filter.published = false;
 
+    if (req.query.categories) {
+      const cats = req.query.categories.split(",").map((s) => s.trim()).filter(Boolean);
+      if (cats.length) filter.category = { $in: cats };
+    }
+
+    if (req.query.search) {
+      filter.title = { $regex: req.query.search.trim(), $options: "i" };
+    }
+
+    if (req.query.dateFrom || req.query.dateTo) {
+      filter.createdAt = {};
+      if (req.query.dateFrom) filter.createdAt.$gte = new Date(req.query.dateFrom);
+      if (req.query.dateTo) {
+        const to = new Date(req.query.dateTo);
+        to.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = to;
+      }
+    }
+
     const [posts, total] = await Promise.all([
       BlogPost.find(filter)
         .sort({ createdAt: -1 })
@@ -112,6 +131,25 @@ exports.findAllPublished = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const filter = { published: true, deletedAt: null };
+
+    if (req.query.categories) {
+      const cats = req.query.categories.split(",").map((s) => s.trim()).filter(Boolean);
+      if (cats.length) filter.category = { $in: cats };
+    }
+
+    if (req.query.search) {
+      filter.title = { $regex: req.query.search.trim(), $options: "i" };
+    }
+
+    if (req.query.dateFrom || req.query.dateTo) {
+      filter.publishedAt = {};
+      if (req.query.dateFrom) filter.publishedAt.$gte = new Date(req.query.dateFrom);
+      if (req.query.dateTo) {
+        const to = new Date(req.query.dateTo);
+        to.setHours(23, 59, 59, 999);
+        filter.publishedAt.$lte = to;
+      }
+    }
 
     const [posts, total] = await Promise.all([
       BlogPost.find(filter)
