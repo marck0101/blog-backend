@@ -9,7 +9,9 @@ function validatePost(data, isCreate) {
     if (title.length < 3)
       return "O título deve ter pelo menos 3 caracteres";
   }
-  if (isCreate || data.content !== undefined) {
+  // Posts planejados não precisam de conteúdo
+  const isPlanned = data.status === "planned";
+  if (!isPlanned && (isCreate || data.content !== undefined)) {
     const content = (data.content || "").trim();
     if (content.length < 10)
       return "O conteúdo deve ter pelo menos 10 caracteres";
@@ -21,6 +23,21 @@ function validatePost(data, isCreate) {
     return `Categoria inválida. Valores permitidos: ${ALLOWED_CATEGORIES.join(", ")}`;
   }
   return null;
+}
+
+/** Sincroniza o campo `published` a partir do `status` */
+function syncPublished(data) {
+  // Suporte a legado: se `status` não veio, deriva do boolean `published`
+  if (!data.status) {
+    data.status = data.published === true ? "published" : "draft";
+  }
+  if (data.status === "published") {
+    data.published = true;
+    if (!data.publishedAt) data.publishedAt = new Date();
+  } else {
+    data.published = false;
+    if (data.status !== "planned") data.plannedAt = null;
+  }
 }
 
 /**
@@ -37,9 +54,7 @@ exports.create = async (req, res, next) => {
       return res.status(422).json({ error: validationError });
     }
 
-    if (data.published && !data.publishedAt) {
-      data.publishedAt = new Date();
-    }
+    syncPublished(data);
 
     const post = await BlogPost.create(data);
     res.status(201).json(post);
@@ -221,17 +236,13 @@ exports.update = async (req, res, next) => {
       return res.status(422).json({ error: validationError });
     }
 
-    if (data.published === true && !data.publishedAt) {
-      // Só define publishedAt se o post ainda não tem uma data registrada
+    // Preserva publishedAt existente ao publicar
+    if (data.status === "published" && !data.publishedAt) {
       const existing = await BlogPost.findById(req.params.id).select("publishedAt").lean();
-      if (!existing?.publishedAt) {
-        data.publishedAt = new Date();
-      }
+      if (existing?.publishedAt) data.publishedAt = existing.publishedAt;
     }
 
-    if (data.published === false) {
-      data.publishedAt = null;
-    }
+    syncPublished(data);
 
     const post = await BlogPost.findByIdAndUpdate(req.params.id, data, {
       new: true,
@@ -325,6 +336,93 @@ exports.deletePermanent = async (req, res, next) => {
     }
 
     res.json({ message: "Post removido definitivamente" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * CALENDAR — posts do mês com plannedAt ou publishedAt
+ */
+exports.calendar = async (req, res, next) => {
+  try {
+    await connectDB();
+
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    const month = parseInt(req.query.month) || new Date().getMonth() + 1;
+
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 0, 23, 59, 59, 999);
+
+    const posts = await BlogPost.find({
+      deletedAt: null,
+      $or: [
+        { plannedAt: { $gte: start, $lte: end } },
+        { publishedAt: { $gte: start, $lte: end } },
+        { createdAt: { $gte: start, $lte: end }, status: "draft" },
+      ],
+    })
+      .select("_id title slug status plannedAt publishedAt createdAt")
+      .sort({ plannedAt: 1, publishedAt: 1, createdAt: 1 });
+
+    res.json(posts);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * HEATMAP — contagem de publicações por dia no ano
+ */
+exports.heatmap = async (req, res, next) => {
+  try {
+    await connectDB();
+
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    const start = new Date(year, 0, 1);
+    const end = new Date(year, 11, 31, 23, 59, 59, 999);
+
+    const posts = await BlogPost.find({
+      published: true,
+      deletedAt: null,
+      publishedAt: { $gte: start, $lte: end },
+    })
+      .select("publishedAt")
+      .lean();
+
+    const result = {};
+    posts.forEach((p) => {
+      const d = new Date(p.publishedAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      result[key] = (result[key] || 0) + 1;
+    });
+
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * TODAY PLANNED — posts planejados para hoje
+ */
+exports.todayPlanned = async (req, res, next) => {
+  try {
+    await connectDB();
+
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    const posts = await BlogPost.find({
+      status: "planned",
+      deletedAt: null,
+      plannedAt: { $gte: start, $lte: end },
+    })
+      .select("_id title slug plannedAt")
+      .lean();
+
+    res.json(posts);
   } catch (err) {
     next(err);
   }

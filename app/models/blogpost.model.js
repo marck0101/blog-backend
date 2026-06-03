@@ -33,9 +33,16 @@ const BlogPostSchema = new mongoose.Schema(
     excerpt: String,
     content: {
       type: String,
-      required: [true, "O conteúdo é obrigatório"],
-      minlength: [10, "O conteúdo deve ter pelo menos 10 caracteres"],
+      default: "",
     },
+
+    status: {
+      type: String,
+      enum: ["draft", "published", "planned"],
+      default: "draft",
+    },
+
+    plannedAt: { type: Date, default: null },
 
     category: {
       type: String,

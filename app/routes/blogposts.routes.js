@@ -16,6 +16,12 @@ router.get("/slug/:slug", post.findBySlug);
 router.post("/", auth, post.create);
 router.get("/", auth, post.findAll);
 router.get("/deleted/all", auth, post.findAllDeleted);
+
+// Rotas específicas antes de /:id para evitar colisão
+router.get("/calendar", auth, post.calendar);
+router.get("/heatmap", auth, post.heatmap);
+router.get("/today-planned", auth, post.todayPlanned);
+
 router.get("/:id", auth, post.findOne);
 router.put("/:id", auth, post.update);
 
