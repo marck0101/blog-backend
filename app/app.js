@@ -6,6 +6,7 @@ const blogpostRoutes = require("./routes/blogposts.routes");
 const uploadRoutes = require("./routes/upload.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const subscriberRoutes = require("./routes/subscriber.routes");
+const sitemapRoutes = require("./routes/sitemap.routes");
 const CATEGORIES = require("./config/categories");
 
 const app = express();
@@ -71,6 +72,7 @@ app.use("/api/posts", blogpostRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/subscribers", subscriberRoutes);
+app.use("/", sitemapRoutes);
 
 /**
  * ===============================
