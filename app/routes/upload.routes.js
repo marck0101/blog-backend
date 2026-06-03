@@ -33,12 +33,14 @@ router.post("/cover", auth, upload.single("cover"), async (req, res, next) => {
 
     res.status(201).json({ url });
   } catch (err) {
+    console.error("Upload error:", err);
     next(err);
   }
 });
 
 // Tratamento de erros do multer
 router.use((err, req, res, next) => {
+  console.error("Upload middleware error:", err.code, err.message);
   if (err.code === "LIMIT_FILE_SIZE") {
     return res.status(422).json({ error: "Imagem muito grande. Máximo: 2MB" });
   }
