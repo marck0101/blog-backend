@@ -1,10 +1,16 @@
 node_modules/
-.env
-.env.*
 dist/
 build/
 logs/
-node_modules
-package-lock.json
+
+# Variáveis de ambiente — todos ignorados exceto o exemplo
 .env
-nodemon.json
+.env.*
+!.env.example
+
+# Firebase Admin SDK — credenciais da service account (nunca commitar)
+service-account.json
+
+# Uploads — ignora arquivos mas mantém a pasta via .gitkeep
+public/uploads/covers/*
+!public/uploads/covers/.gitkeep
