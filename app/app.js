@@ -5,6 +5,8 @@ const authRoutes = require("./routes/auth.routes");
 const blogpostRoutes = require("./routes/blogposts.routes");
 const uploadRoutes = require("./routes/upload.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
+const subscriberRoutes = require("./routes/subscriber.routes");
+const CATEGORIES = require("./config/categories");
 
 const app = express();
 
@@ -62,10 +64,13 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+app.get("/api/categories", (req, res) => res.json(CATEGORIES));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", blogpostRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/subscribers", subscriberRoutes);
 
 /**
  * ===============================
