@@ -82,12 +82,16 @@ exports.findAll = async (req, res, next) => {
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
     const skip = (page - 1) * limit;
 
+    const filter = { deletedAt: null };
+    if (req.query.published === "true") filter.published = true;
+    if (req.query.published === "false") filter.published = false;
+
     const [posts, total] = await Promise.all([
-      BlogPost.find({ deletedAt: null })
+      BlogPost.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
-      BlogPost.countDocuments({ deletedAt: null }),
+      BlogPost.countDocuments(filter),
     ]);
 
     res.json({ posts, total, page, totalPages: Math.ceil(total / limit) });

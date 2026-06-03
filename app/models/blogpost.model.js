@@ -50,6 +50,7 @@ const BlogPostSchema = new mongoose.Schema(
 
     gallery: [
       {
+        _id: false,
         url: String,
         alt: String,
       },
