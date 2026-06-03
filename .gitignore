@@ -17,3 +17,4 @@ public/uploads/covers/*
 
 grep "service-account" ~/Documentos/DEV/BLOG/node-express-mongodb/.gitignore
 # deve retornar: service-account.json
+.vercel
