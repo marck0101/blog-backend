@@ -14,3 +14,6 @@ service-account.json
 # Uploads — ignora arquivos mas mantém a pasta via .gitkeep
 public/uploads/covers/*
 !public/uploads/covers/.gitkeep
+
+grep "service-account" ~/Documentos/DEV/BLOG/node-express-mongodb/.gitignore
+# deve retornar: service-account.json
