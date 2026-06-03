@@ -42,7 +42,7 @@ router.post("/cover", auth, upload.single("cover"), async (req, res, next) => {
 router.use((err, req, res, next) => {
   console.error("Upload middleware error:", err.code, err.message);
   if (err.code === "LIMIT_FILE_SIZE") {
-    return res.status(422).json({ error: "Imagem muito grande. Máximo: 2MB" });
+    return res.status(422).json({ error: "Imagem muito grande. Máximo: 5MB" });
   }
   if (err.message?.includes("Formato inválido")) {
     return res.status(422).json({ error: err.message });
