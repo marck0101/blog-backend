@@ -222,7 +222,11 @@ exports.update = async (req, res, next) => {
     }
 
     if (data.published === true && !data.publishedAt) {
-      data.publishedAt = new Date();
+      // Só define publishedAt se o post ainda não tem uma data registrada
+      const existing = await BlogPost.findById(req.params.id).select("publishedAt").lean();
+      if (!existing?.publishedAt) {
+        data.publishedAt = new Date();
+      }
     }
 
     if (data.published === false) {
