@@ -1,6 +1,6 @@
 const express = require("express");
-const path = require("path");
 const router = express.Router();
+const sharp = require("sharp");
 const auth = require("../middlewares/auth.middleware");
 const upload = require("../middlewares/upload.middleware");
 const admin = require("../config/firebase.admin");
@@ -17,14 +17,18 @@ router.post("/cover", auth, upload.single("cover"), async (req, res, next) => {
       });
     }
 
+    const webpBuffer = await sharp(req.file.buffer)
+      .resize({ width: 1200, withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+
     const bucket = admin.storage().bucket();
-    const ext = path.extname(req.file.originalname).toLowerCase() || ".jpg";
-    const filename = `covers/${Date.now()}${ext}`;
+    const filename = `covers/${Date.now()}.webp`;
 
     const fileRef = bucket.file(filename);
 
-    await fileRef.save(req.file.buffer, {
-      metadata: { contentType: req.file.mimetype },
+    await fileRef.save(webpBuffer, {
+      metadata: { contentType: "image/webp" },
     });
 
     await fileRef.makePublic();
