@@ -1,7 +1,7 @@
 const connectDB = require("../config/db.config");
 const BlogPost = require("../models/blogpost.model");
 
-const ALLOWED_CATEGORIES = ["marketing", "trafego", "growth", "tecnologia"];
+const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
 
 function validatePost(data, isCreate) {
   if (isCreate || data.title !== undefined) {
