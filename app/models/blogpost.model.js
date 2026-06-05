@@ -47,8 +47,8 @@ const BlogPostSchema = new mongoose.Schema(
     category: {
       type: String,
       enum: {
-        values: ["marketing", "trafego", "growth", "tecnologia"],
-        message: "Categoria inválida. Valores permitidos: marketing, trafego, growth, tecnologia",
+        values: ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"],
+        message: "Categoria inválida. Valores permitidos: tecnologia, design, carreira, negocios, marketing, trafego, growth",
       },
       required: [true, "A categoria é obrigatória"],
     },
