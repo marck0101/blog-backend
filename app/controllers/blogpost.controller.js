@@ -1,5 +1,6 @@
 const connectDB = require("../config/db.config");
 const BlogPost = require("../models/blogpost.model");
+const { notifySubscribers } = require("../services/emailNotification.service");
 
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
 
@@ -57,6 +58,11 @@ exports.create = async (req, res, next) => {
     syncPublished(data);
 
     const post = await BlogPost.create(data);
+
+    if (post.status === "published") {
+      notifySubscribers(post).catch((err) => console.error("[EMAIL]", err));
+    }
+
     res.status(201).json(post);
   } catch (err) {
     next(err);
@@ -236,10 +242,11 @@ exports.update = async (req, res, next) => {
       return res.status(422).json({ error: validationError });
     }
 
+    const existing = await BlogPost.findById(req.params.id).select("status publishedAt").lean();
+
     // Preserva publishedAt existente ao publicar
-    if (data.status === "published" && !data.publishedAt) {
-      const existing = await BlogPost.findById(req.params.id).select("publishedAt").lean();
-      if (existing?.publishedAt) data.publishedAt = existing.publishedAt;
+    if (data.status === "published" && !data.publishedAt && existing?.publishedAt) {
+      data.publishedAt = existing.publishedAt;
     }
 
     syncPublished(data);
@@ -251,6 +258,10 @@ exports.update = async (req, res, next) => {
 
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
+    }
+
+    if (post.status === "published" && existing?.status !== "published") {
+      notifySubscribers(post).catch((err) => console.error("[EMAIL]", err));
     }
 
     res.json(post);
