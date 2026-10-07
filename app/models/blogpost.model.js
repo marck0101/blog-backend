@@ -69,6 +69,7 @@ const BlogPostSchema = new mongoose.Schema(
     seo: {
       title: String,
       description: String,
+      faqSchema: { type: Boolean, default: false },
     },
 
     deletedAt: { type: Date, default: null },
