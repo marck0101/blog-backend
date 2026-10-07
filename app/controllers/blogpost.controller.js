@@ -1,5 +1,6 @@
 const connectDB = require("../config/db.config");
 const BlogPost = require("../models/blogpost.model");
+const SearchQuery = require("../models/searchquery.model");
 const { notifySubscribers } = require("../services/emailNotification.service");
 
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
@@ -159,7 +160,13 @@ exports.findAllPublished = async (req, res, next) => {
     }
 
     if (req.query.search) {
-      filter.title = { $regex: req.query.search.trim(), $options: "i" };
+      const term = req.query.search.trim();
+      filter.title = { $regex: term, $options: "i" };
+
+      // Log best-effort — não deve atrapalhar a busca se falhar.
+      if (term.length >= 2) {
+        SearchQuery.create({ term }).catch(() => {});
+      }
     }
 
     if (req.query.dateFrom || req.query.dateTo) {
@@ -193,11 +200,11 @@ exports.findBySlug = async (req, res, next) => {
   try {
     await connectDB();
 
-    const post = await BlogPost.findOne({
-      slug: req.params.slug,
-      published: true,
-      deletedAt: null,
-    });
+    const post = await BlogPost.findOneAndUpdate(
+      { slug: req.params.slug, published: true, deletedAt: null },
+      { $inc: { views: 1 } },
+      { new: true }
+    );
 
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });

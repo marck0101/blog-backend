@@ -66,6 +66,8 @@ const BlogPostSchema = new mongoose.Schema(
     published: { type: Boolean, default: false },
     publishedAt: Date,
 
+    views: { type: Number, default: 0 },
+
     seo: {
       title: String,
       description: String,
