@@ -57,6 +57,15 @@ async function safeNotify(post) {
   }
 }
 
+// Data "YYYY-MM-DD" do formulário → meio-dia UTC: cai no mesmo dia em todos os
+// fusos do Brasil (meia-noite UTC apareceria no dia anterior) e fica antes do
+// cron diário das 12h UTC.
+function normalizePlannedAt(data) {
+  if (typeof data.plannedAt === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.plannedAt)) {
+    data.plannedAt = `${data.plannedAt}T12:00:00.000Z`;
+  }
+}
+
 function syncPublished(data) {
   // Suporte a legado: se `status` não veio, deriva do boolean `published`
   if (!data.status && data.published !== undefined) {
@@ -88,6 +97,7 @@ exports.create = async (req, res, next) => {
       return res.status(422).json({ error: validationError });
     }
 
+    normalizePlannedAt(data);
     syncPublished(data);
 
     const post = await BlogPost.create(data);
@@ -296,6 +306,7 @@ exports.update = async (req, res, next) => {
       data.publishedAt = existing.publishedAt;
     }
 
+    normalizePlannedAt(data);
     syncPublished(data);
 
     const post = await BlogPost.findByIdAndUpdate(req.params.id, data, {
