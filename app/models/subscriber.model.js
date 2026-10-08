@@ -18,6 +18,22 @@ const SubscriberSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    // "member" recebe os envios exclusivos; "free" só as notificações de novos posts
+    tier: {
+      type: String,
+      enum: ["free", "member"],
+      default: "free",
+    },
+    memberSince: {
+      type: Date,
+      default: null,
+    },
+    // Anotação interna do admin (ex.: "pagou via Pix em 10/2026")
+    notes: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     status: {
       type: String,
       enum: ["active", "unsubscribed"],
@@ -36,6 +52,7 @@ const SubscriberSchema = new mongoose.Schema(
 
 SubscriberSchema.index({ email: 1 });
 SubscriberSchema.index({ token: 1 });
+SubscriberSchema.index({ status: 1, tier: 1 });
 
 SubscriberSchema.pre("save", function (next) {
   if (!this.token) {

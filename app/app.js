@@ -6,6 +6,7 @@ const blogpostRoutes = require("./routes/blogposts.routes");
 const uploadRoutes = require("./routes/upload.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const subscriberRoutes = require("./routes/subscriber.routes");
+const campaignRoutes = require("./routes/campaign.routes");
 const sitemapRoutes = require("./routes/sitemap.routes");
 const CATEGORIES = require("./config/categories");
 
@@ -28,6 +29,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://192.168.0.112:5173",
+  "http://192.168.0.145:5173",
   "https://blog.marck0101.com.br",
   "https://www.blog.marck0101.com.br",
 ];
@@ -72,6 +74,7 @@ app.use("/api/posts", blogpostRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/subscribers", subscriberRoutes);
+app.use("/api/campaigns", campaignRoutes);
 app.use("/", sitemapRoutes);
 
 /**

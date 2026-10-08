@@ -1,9 +1,7 @@
 const transporter = require("../config/mailer");
 const Subscriber = require("../models/subscriber.model");
 const newPostEmail = require("../templates/newPost.email");
-
-const SITE_URL = "https://blog.marck0101.com.br";
-const API_URL = "https://api.blog.marck0101.com.br";
+const { SITE_URL, unsubscribeUrl } = require("../config/urls");
 
 async function notifySubscribers(post) {
   const subscribers = await Subscriber.find({
@@ -20,8 +18,6 @@ async function notifySubscribers(post) {
 
   const results = await Promise.allSettled(
     subscribers.map((subscriber) => {
-      const unsubscribeUrl = `${API_URL}/api/subscribers/unsubscribe/${subscriber.token}`;
-
       return transporter.sendMail({
         from: `"marck0101" <${process.env.GMAIL_USER}>`,
         to: subscriber.email,
@@ -31,7 +27,7 @@ async function notifySubscribers(post) {
           postTitle: post.title,
           postSummary: post.excerpt,
           postUrl,
-          unsubscribeUrl,
+          unsubscribeUrl: unsubscribeUrl(subscriber.token),
         }),
       });
     })

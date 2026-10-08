@@ -4,6 +4,7 @@ const CATEGORIES = require("../config/categories");
 
 const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TIERS = ["free", "member"];
 
 exports.subscribe = async (req, res, next) => {
   try {
@@ -45,6 +46,42 @@ exports.subscribe = async (req, res, next) => {
   }
 };
 
+// Cadastro feito pelo admin (ex.: alguém que virou membro fora do formulário)
+exports.createManual = async (req, res, next) => {
+  try {
+    await connectDB();
+
+    const { email, name, categories = [], tier = "free", notes } = req.body;
+
+    if (!email || !EMAIL_RE.test(email)) {
+      return res.status(422).json({ error: "Email inválido" });
+    }
+    if (!TIERS.includes(tier)) {
+      return res.status(422).json({ error: "Plano inválido" });
+    }
+    const invalidCats = categories.filter((c) => !VALID_SLUGS.includes(c));
+    if (invalidCats.length > 0) {
+      return res
+        .status(422)
+        .json({ error: `Categorias inválidas: ${invalidCats.join(", ")}` });
+    }
+
+    const subscriber = await Subscriber.create({
+      email,
+      name,
+      categories,
+      tier,
+      notes,
+      memberSince: tier === "member" ? new Date() : null,
+    });
+
+    const { token, ...data } = subscriber.toObject();
+    res.status(201).json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.unsubscribe = async (req, res, next) => {
   try {
     await connectDB();
@@ -80,6 +117,7 @@ exports.findAll = async (req, res, next) => {
 
     const filter = {};
     if (status) filter.status = status;
+    if (req.query.tier) filter.tier = req.query.tier;
 
     if (req.query.categories) {
       const cats = req.query.categories.split(",").map((s) => s.trim()).filter(Boolean);
@@ -134,8 +172,18 @@ exports.update = async (req, res, next) => {
   try {
     await connectDB();
 
-    const { status, categories } = req.body;
+    const { status, categories, tier, notes } = req.body;
     const patch = {};
+
+    if (tier !== undefined) {
+      if (!TIERS.includes(tier)) {
+        return res.status(422).json({ error: "Plano inválido" });
+      }
+      patch.tier = tier;
+      patch.memberSince = tier === "member" ? new Date() : null;
+    }
+
+    if (notes !== undefined) patch.notes = String(notes).trim();
 
     if (status !== undefined) {
       if (!["active", "unsubscribed"].includes(status)) {
