@@ -7,6 +7,7 @@ module.exports = function campaignEmail({
   preheader,
   content,
   isMemberContent,
+  postUrl,
   unsubscribeUrl,
 }) {
   return `
@@ -45,6 +46,17 @@ module.exports = function campaignEmail({
               <div class="content" style="font-size:16px; line-height:1.6; color:#111827;">
                 ${content}
               </div>
+              ${
+                postUrl
+                  ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:24px;">
+                <tr>
+                  <td style="border-radius:8px; background-color:#2563eb;">
+                    <a href="${postUrl}" style="display:inline-block; padding:14px 28px; font-size:16px; color:#ffffff; text-decoration:none; font-weight:bold;">Ler no blog →</a>
+                  </td>
+                </tr>
+              </table>`
+                  : ""
+              }
             </td>
           </tr>
           <tr>

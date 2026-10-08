@@ -36,7 +36,13 @@ const CampaignSchema = new mongoose.Schema(
       },
       categories: { type: [String], default: [] },
       subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subscriber" }],
+      // Vale para "all" e "categories": conteúdo que os membros já dominam
+      excludeMembers: { type: Boolean, default: false },
     },
+
+    // Post do blog que originou o conteúdo (opcional). Se estiver publicado
+    // na hora do envio, o email ganha o botão "Ler no blog".
+    post: { type: mongoose.Schema.Types.ObjectId, ref: "BlogPost", default: null },
 
     status: {
       type: String,

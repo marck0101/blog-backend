@@ -1,7 +1,8 @@
 const transporter = require("../config/mailer");
 const Subscriber = require("../models/subscriber.model");
+const BlogPost = require("../models/blogpost.model");
 const campaignEmail = require("../templates/campaign.email");
-const { unsubscribeUrl } = require("../config/urls");
+const { SITE_URL, unsubscribeUrl } = require("../config/urls");
 
 // Orçamento de tempo por chamada de /send. A Vercel encerra a função
 // (10s no plano hobby), então paramos antes e o painel chama de novo.
@@ -26,6 +27,10 @@ function audienceFilter(audience = {}) {
       break;
   }
 
+  if (audience.excludeMembers && ["all", "categories"].includes(audience.type)) {
+    filter.tier = { $ne: "member" };
+  }
+
   return filter;
 }
 
@@ -33,7 +38,17 @@ function countAudience(audience) {
   return Subscriber.countDocuments(audienceFilter(audience));
 }
 
-function buildMail(campaign, subscriber) {
+// Link do post só se ele estiver publicado (rascunho não tem página pública)
+async function resolvePostUrl(campaign) {
+  if (!campaign.post) return null;
+  const post = await BlogPost.findOne(
+    { _id: campaign.post, published: true, deletedAt: null },
+    "slug"
+  );
+  return post ? `${SITE_URL}/blog/${post.slug}` : null;
+}
+
+function buildMail(campaign, subscriber, postUrl) {
   const unsub = unsubscribeUrl(subscriber.token);
 
   return {
@@ -47,13 +62,15 @@ function buildMail(campaign, subscriber) {
       preheader: campaign.preheader,
       content: campaign.content,
       isMemberContent: campaign.audience?.type === "members",
+      postUrl,
       unsubscribeUrl: unsub,
     }),
   };
 }
 
-function sendTest(campaign, email) {
-  const mail = buildMail(campaign, { email, name: "teste", token: "teste" });
+async function sendTest(campaign, email) {
+  const postUrl = await resolvePostUrl(campaign);
+  const mail = buildMail(campaign, { email, name: "teste", token: "teste" }, postUrl);
   return transporter.sendMail({ ...mail, subject: `[TESTE] ${mail.subject}` });
 }
 
@@ -71,6 +88,7 @@ async function processCampaign(campaign) {
   }
 
   const started = Date.now();
+  const postUrl = await resolvePostUrl(campaign);
   const pending = campaign.recipients.filter((r) => r.status === "pending");
 
   // Carrega nome/token atualizados (e descarta quem cancelou nesse meio tempo)
@@ -95,7 +113,7 @@ async function processCampaign(campaign) {
         }
 
         try {
-          await transporter.sendMail(buildMail(campaign, subscriber));
+          await transporter.sendMail(buildMail(campaign, subscriber, postUrl));
           recipient.status = "sent";
           recipient.sentAt = new Date();
         } catch (err) {

@@ -32,9 +32,14 @@ function validateAudience(audience) {
   return null;
 }
 
+function validatePost(post) {
+  if (post === undefined || post === null || post === "") return null;
+  return mongoose.isValidObjectId(post) ? null : "Post inválido";
+}
+
 function pickEditable(body) {
   const data = {};
-  for (const key of ["subject", "preheader", "content", "audience"]) {
+  for (const key of ["subject", "preheader", "content", "audience", "post"]) {
     if (body[key] !== undefined) data[key] = body[key];
   }
   return data;
@@ -73,10 +78,9 @@ exports.findAll = async (req, res, next) => {
 exports.findOne = async (req, res, next) => {
   try {
     await connectDB();
-    const campaign = await Campaign.findById(req.params.id).populate(
-      "audience.subscribers",
-      "name email tier"
-    );
+    const campaign = await Campaign.findById(req.params.id)
+      .populate("audience.subscribers", "name email tier")
+      .populate("post", "title slug status published");
     if (!campaign) return res.status(404).json({ error: "Envio não encontrado" });
     res.json(serialize(campaign, { withRecipients: true }));
   } catch (err) {
@@ -89,8 +93,9 @@ exports.create = async (req, res, next) => {
     await connectDB();
     const data = pickEditable(req.body);
 
-    const audienceError = validateAudience(data.audience);
+    const audienceError = validateAudience(data.audience) || validatePost(data.post);
     if (audienceError) return res.status(422).json({ error: audienceError });
+    if (data.post === "") data.post = null;
 
     const campaign = await Campaign.create(data);
     res.status(201).json(serialize(campaign));
@@ -106,8 +111,9 @@ exports.update = async (req, res, next) => {
     if (!campaign) return;
 
     const data = pickEditable(req.body);
-    const audienceError = validateAudience(data.audience);
+    const audienceError = validateAudience(data.audience) || validatePost(data.post);
     if (audienceError) return res.status(422).json({ error: audienceError });
+    if (data.post === "") data.post = null;
 
     campaign.set(data);
     await campaign.save();
@@ -221,13 +227,19 @@ exports.duplicate = async (req, res, next) => {
       if (members.length === 0) {
         return res.status(422).json({ error: "Todos os membros ativos já receberam este conteúdo" });
       }
-      audience = { type: "selected", categories: [], subscribers: members.map((m) => m._id) };
+      audience = {
+        type: "selected",
+        categories: [],
+        subscribers: members.map((m) => m._id),
+        excludeMembers: false,
+      };
     }
 
     const copy = await Campaign.create({
       subject: original.subject,
       preheader: original.preheader,
       content: original.content,
+      post: original.post,
       audience,
     });
     res.status(201).json(serialize(copy));
