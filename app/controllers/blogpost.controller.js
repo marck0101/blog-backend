@@ -6,18 +6,37 @@ const { notifyNewPost } = require("../services/campaign.service");
 
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
 
-function validatePost(data, isCreate) {
+// Status do post:
+//   draft     = rascunho (pode ter plannedAt: data no calendário editorial)
+//   planned   = agendado: pronto, vai ao ar sozinho na data (cron diário)
+//   published = no ar
+// "Na lixeira" é deletedAt, independente do status.
+function effectiveStatus(data, existing) {
+  if (data.status) return data.status;
+  if (data.published !== undefined) return data.published ? "published" : "draft";
+  return existing?.status ?? "draft";
+}
+
+function validatePost(data, isCreate, existing = null) {
   if (isCreate || data.title !== undefined) {
     const title = (data.title || "").trim();
     if (title.length < 3)
       return "O título deve ter pelo menos 3 caracteres";
   }
-  // Posts planejados não precisam de conteúdo
-  const isPlanned = data.status === "planned";
-  if (!isPlanned && (isCreate || data.content !== undefined)) {
-    const content = (data.content || "").trim();
+
+  const status = effectiveStatus(data, existing);
+
+  // Rascunho pode ser só uma ideia; agendado e publicado precisam de conteúdo
+  if (status !== "draft") {
+    const content = (data.content ?? existing?.content ?? "").trim();
     if (content.length < 10)
-      return "O conteúdo deve ter pelo menos 10 caracteres";
+      return "O conteúdo deve ter pelo menos 10 caracteres para agendar ou publicar";
+  }
+
+  if (status === "planned") {
+    const plannedAt = data.plannedAt !== undefined ? data.plannedAt : existing?.plannedAt;
+    if (!plannedAt || Number.isNaN(new Date(plannedAt).getTime()))
+      return "Informe a data de publicação do post agendado";
   }
   if (isCreate && data.category === undefined) {
     return "A categoria é obrigatória";
@@ -40,15 +59,18 @@ async function safeNotify(post) {
 
 function syncPublished(data) {
   // Suporte a legado: se `status` não veio, deriva do boolean `published`
-  if (!data.status) {
+  if (!data.status && data.published !== undefined) {
     data.status = data.published === true ? "published" : "draft";
   }
+  // Atualização parcial (sem status nem published) não mexe na publicação
+  if (!data.status) return;
+
   if (data.status === "published") {
     data.published = true;
     if (!data.publishedAt) data.publishedAt = new Date();
   } else {
+    // Rascunho e agendado mantêm a data planejada (calendário)
     data.published = false;
-    if (data.status !== "planned") data.plannedAt = null;
   }
 }
 
@@ -117,6 +139,9 @@ exports.findAll = async (req, res, next) => {
     const filter = { deletedAt: null };
     if (req.query.published === "true") filter.published = true;
     if (req.query.published === "false") filter.published = false;
+    if (["draft", "planned", "published"].includes(req.query.status)) {
+      filter.status = req.query.status;
+    }
 
     if (req.query.categories) {
       const cats = req.query.categories.split(",").map((s) => s.trim()).filter(Boolean);
@@ -257,12 +282,14 @@ exports.update = async (req, res, next) => {
 
     const data = req.body;
 
-    const validationError = validatePost(data, false);
+    const existing = await BlogPost.findById(req.params.id)
+      .select("status publishedAt plannedAt content")
+      .lean();
+
+    const validationError = validatePost(data, false, existing);
     if (validationError) {
       return res.status(422).json({ error: validationError });
     }
-
-    const existing = await BlogPost.findById(req.params.id).select("status publishedAt").lean();
 
     // Preserva publishedAt existente ao publicar
     if (data.status === "published" && !data.publishedAt && existing?.publishedAt) {
@@ -325,6 +352,12 @@ exports.restore = async (req, res, next) => {
       { deletedAt: null },
       { new: true }
     );
+
+    // Agendado com data já passada voltaria ao ar sozinho no próximo cron
+    if (post && post.status === "planned" && post.plannedAt && post.plannedAt < new Date()) {
+      post.status = "draft";
+      await post.save();
+    }
 
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });

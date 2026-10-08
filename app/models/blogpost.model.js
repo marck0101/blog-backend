@@ -38,12 +38,14 @@ const BlogPostSchema = new mongoose.Schema(
       default: "",
     },
 
+    // draft = rascunho | planned = agendado (publica sozinho em plannedAt) | published
     status: {
       type: String,
       enum: ["draft", "published", "planned"],
       default: "draft",
     },
 
+    // Rascunho: data no calendário editorial. Agendado: data de publicação.
     plannedAt: { type: Date, default: null },
 
     category: {

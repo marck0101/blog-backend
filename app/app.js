@@ -7,6 +7,7 @@ const uploadRoutes = require("./routes/upload.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const subscriberRoutes = require("./routes/subscriber.routes");
 const campaignRoutes = require("./routes/campaign.routes");
+const cronRoutes = require("./routes/cron.routes");
 const sitemapRoutes = require("./routes/sitemap.routes");
 const CATEGORIES = require("./config/categories");
 
@@ -75,6 +76,7 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/subscribers", subscriberRoutes);
 app.use("/api/campaigns", campaignRoutes);
+app.use("/api/cron", cronRoutes);
 app.use("/", sitemapRoutes);
 
 /**
