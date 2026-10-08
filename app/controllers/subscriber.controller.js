@@ -172,8 +172,10 @@ exports.update = async (req, res, next) => {
   try {
     await connectDB();
 
-    const { status, categories, tier, notes } = req.body;
+    const { status, categories, tier, notes, name } = req.body;
     const patch = {};
+
+    if (name !== undefined) patch.name = String(name).trim();
 
     if (tier !== undefined) {
       if (!TIERS.includes(tier)) {

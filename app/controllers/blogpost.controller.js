@@ -1,7 +1,8 @@
 const connectDB = require("../config/db.config");
 const BlogPost = require("../models/blogpost.model");
 const SearchQuery = require("../models/searchquery.model");
-const { notifySubscribers } = require("../services/emailNotification.service");
+require("../models/subscriber.model"); // para o populate de emailAudience.subscribers
+const { notifyNewPost } = require("../services/campaign.service");
 
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
 
@@ -28,6 +29,15 @@ function validatePost(data, isCreate) {
 }
 
 /** Sincroniza o campo `published` a partir do `status` */
+// Falha no email não pode impedir a publicação do post
+async function safeNotify(post) {
+  try {
+    await notifyNewPost(post);
+  } catch (err) {
+    console.error("[EMAIL]", err);
+  }
+}
+
 function syncPublished(data) {
   // Suporte a legado: se `status` não veio, deriva do boolean `published`
   if (!data.status) {
@@ -61,7 +71,7 @@ exports.create = async (req, res, next) => {
     const post = await BlogPost.create(data);
 
     if (post.status === "published") {
-      notifySubscribers(post).catch((err) => console.error("[EMAIL]", err));
+      await safeNotify(post);
     }
 
     res.status(201).json(post);
@@ -223,7 +233,10 @@ exports.findOne = async (req, res, next) => {
   try {
     await connectDB();
 
-    const post = await BlogPost.findById(req.params.id);
+    const post = await BlogPost.findById(req.params.id).populate(
+      "emailAudience.subscribers",
+      "name email tier"
+    );
 
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
@@ -268,7 +281,7 @@ exports.update = async (req, res, next) => {
     }
 
     if (post.status === "published" && existing?.status !== "published") {
-      notifySubscribers(post).catch((err) => console.error("[EMAIL]", err));
+      await safeNotify(post);
     }
 
     res.json(post);

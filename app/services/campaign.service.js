@@ -1,7 +1,9 @@
 const transporter = require("../config/mailer");
 const Subscriber = require("../models/subscriber.model");
 const BlogPost = require("../models/blogpost.model");
+const Campaign = require("../models/campaign.model");
 const campaignEmail = require("../templates/campaign.email");
+const escapeHtml = require("../utils/escapeHtml");
 const { SITE_URL, unsubscribeUrl } = require("../config/urls");
 
 // Orçamento de tempo por chamada de /send. A Vercel encerra a função
@@ -34,8 +36,50 @@ function audienceFilter(audience = {}) {
   return filter;
 }
 
+function isMailerConfigured() {
+  return Boolean(process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD);
+}
+
 function countAudience(audience) {
   return Subscriber.countDocuments(audienceFilter(audience));
+}
+
+// Contagem + amostra de quem vai receber (para conferir antes de enviar)
+async function previewAudience(audience, limit = 8) {
+  const filter = audienceFilter(audience);
+  const [count, sample] = await Promise.all([
+    Subscriber.countDocuments(filter),
+    Subscriber.find(filter, "name email tier").sort({ tier: -1, name: 1 }).limit(limit),
+  ]);
+  return { count, sample };
+}
+
+// Público configurado no post → público do envio ("post-category" segue a categoria atual)
+function postAudience(post) {
+  const a = post.emailAudience || {};
+  if (!a.type || a.type === "post-category") {
+    return { type: "categories", categories: [post.category], excludeMembers: Boolean(a.excludeMembers) };
+  }
+  return {
+    type: a.type,
+    categories: a.categories || [],
+    subscribers: a.subscribers || [],
+    excludeMembers: Boolean(a.excludeMembers),
+  };
+}
+
+const defaultPostSubject = (post) => `Novo artigo: ${post.title} | marck0101`;
+
+// Monta o envio (sem salvar) a partir do post e do que foi preparado nele
+function campaignFromPost(post) {
+  return new Campaign({
+    kind: "post-notification",
+    post: post._id,
+    subject: (post.emailSubject || "").trim() || defaultPostSubject(post),
+    preheader: (post.emailPreheader || "").trim() || post.excerpt || "",
+    content: postTeaserHtml(post),
+    audience: postAudience(post),
+  });
 }
 
 // Link do post só se ele estiver publicado (rascunho não tem página pública)
@@ -68,8 +112,9 @@ function buildMail(campaign, subscriber, postUrl) {
   };
 }
 
-async function sendTest(campaign, email) {
-  const postUrl = await resolvePostUrl(campaign);
+// postUrl permite testar o botão de um post que ainda não foi publicado
+async function sendTest(campaign, email, postUrlOverride) {
+  const postUrl = postUrlOverride || (await resolvePostUrl(campaign));
   const mail = buildMail(campaign, { email, name: "teste", token: "teste" }, postUrl);
   return transporter.sendMail({ ...mail, subject: `[TESTE] ${mail.subject}` });
 }
@@ -137,4 +182,63 @@ async function processCampaign(campaign) {
   return campaign;
 }
 
-module.exports = { audienceFilter, countAudience, sendTest, processCampaign };
+// Chamada do post para email: desperta interesse e leva ao blog (botão
+// "Continuar lendo" vem do template), em vez de copiar o artigo inteiro.
+function postTeaserHtml(post) {
+  const teaser = (post.emailTeaser || "").trim() || post.excerpt || "";
+  const paragraphs = teaser
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => `<p>${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
+    .join("");
+
+  return [
+    post.coverImage
+      ? `<p><img src="${escapeHtml(post.coverImage)}" alt="" style="width: 100%; height: auto; display: block;"></p>`
+      : "",
+    `<h2>${escapeHtml(post.title)}</h2>`,
+    paragraphs,
+  ].join("");
+}
+
+/**
+ * Aviso de post novo: vira um envio registrado (aparece em Envios, com
+ * destinatários e "tentar de novo"). Um aviso por post, mesmo que ele seja
+ * despublicado e publicado de novo.
+ */
+async function notifyNewPost(post) {
+  if (post.emailNotify === false) return null;
+
+  const existing = await Campaign.findOne({ kind: "post-notification", post: post._id });
+  if (existing) return existing;
+
+  const campaign = await campaignFromPost(post).save();
+
+  const count = await countAudience(campaign.audience);
+  if (count === 0) {
+    console.log(`[EMAIL] Nenhum destinatário para o aviso de "${post.title}"; fica como rascunho`);
+    return campaign;
+  }
+
+  // Sem credenciais fica como rascunho, para enviar depois pelo painel
+  if (!isMailerConfigured()) {
+    console.error("[EMAIL] GMAIL_USER/GMAIL_APP_PASSWORD ausentes; aviso fica como rascunho");
+    return campaign;
+  }
+
+  // Envia dentro da própria requisição (serverless não roda em background).
+  // Se sobrar alguém, o envio fica "enviando" e dá para continuar em Envios.
+  return processCampaign(campaign);
+}
+
+module.exports = {
+  audienceFilter,
+  countAudience,
+  previewAudience,
+  campaignFromPost,
+  isMailerConfigured,
+  sendTest,
+  processCampaign,
+  notifyNewPost,
+};

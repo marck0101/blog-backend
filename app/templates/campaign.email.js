@@ -51,7 +51,7 @@ module.exports = function campaignEmail({
                   ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:24px;">
                 <tr>
                   <td style="border-radius:8px; background-color:#2563eb;">
-                    <a href="${postUrl}" style="display:inline-block; padding:14px 28px; font-size:16px; color:#ffffff; text-decoration:none; font-weight:bold;">Ler no blog →</a>
+                    <a href="${postUrl}" style="display:inline-block; padding:14px 28px; font-size:16px; color:#ffffff; text-decoration:none; font-weight:bold;">Continuar lendo no blog →</a>
                   </td>
                 </tr>
               </table>`

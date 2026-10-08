@@ -31,6 +31,8 @@ const BlogPostSchema = new mongoose.Schema(
       index: true,
     },
     excerpt: String,
+    // Chamada curta usada nos emails (aviso de post novo e Envios). Se vazia, usa o excerpt.
+    emailTeaser: { type: String, default: "" },
     content: {
       type: String,
       default: "",
@@ -64,6 +66,27 @@ const BlogPostSchema = new mongoose.Schema(
     ],
 
     published: { type: Boolean, default: false },
+
+    // Avisar assinantes da categoria por email quando o post for publicado
+    emailNotify: { type: Boolean, default: true },
+
+    // Email preparado junto com o post; vira um envio em Envios ao publicar.
+    // Campos vazios usam sugestões (assunto "Novo artigo: …", resumo do post).
+    emailSubject: { type: String, trim: true, default: "" },
+    emailPreheader: { type: String, trim: true, default: "" },
+    emailAudience: {
+      type: {
+        type: String,
+        enum: {
+          values: ["post-category", "members", "all", "categories", "selected"],
+          message: "Público do email inválido",
+        },
+        default: "post-category",
+      },
+      categories: { type: [String], default: [] },
+      subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subscriber" }],
+      excludeMembers: { type: Boolean, default: false },
+    },
     publishedAt: Date,
 
     views: { type: Number, default: 0 },

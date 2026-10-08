@@ -44,6 +44,13 @@ const CampaignSchema = new mongoose.Schema(
     // na hora do envio, o email ganha o botão "Ler no blog".
     post: { type: mongoose.Schema.Types.ObjectId, ref: "BlogPost", default: null },
 
+    // "post-notification" = aviso automático de post novo
+    kind: {
+      type: String,
+      enum: ["custom", "post-notification"],
+      default: "custom",
+    },
+
     status: {
       type: String,
       enum: ["draft", "sending", "sent"],
@@ -59,6 +66,11 @@ const CampaignSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+CampaignSchema.index({ kind: 1, post: 1 });
+
+// Busca "este email recebeu quais envios?"
+CampaignSchema.index({ "recipients.email": 1 });
 
 CampaignSchema.methods.stats = function () {
   const stats = { total: this.recipients.length, pending: 0, sent: 0, failed: 0 };

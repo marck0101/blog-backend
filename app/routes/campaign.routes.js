@@ -9,6 +9,8 @@ router.use(auth);
 router.get("/", campaign.findAll);
 router.post("/", campaign.create);
 router.post("/audience-count", campaign.audienceCount);
+router.get("/calendar", campaign.calendar);
+router.post("/test-post", campaign.sendPostTest);
 router.get("/:id", campaign.findOne);
 router.patch("/:id", campaign.update);
 router.delete("/:id", campaign.remove);

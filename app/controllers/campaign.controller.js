@@ -5,6 +5,7 @@ const User = require("../models/user.model");
 const CATEGORIES = require("../config/categories");
 const Subscriber = require("../models/subscriber.model");
 const campaignService = require("../services/campaign.service");
+const { SITE_URL } = require("../config/urls");
 
 const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,6 +31,16 @@ function validateAudience(audience) {
   }
 
   return null;
+}
+
+// Sem credenciais o nodemailer falha com "Missing credentials for PLAIN" em
+// cada destinatário; melhor recusar antes de marcar todo mundo como falha.
+function mailerNotConfigured(res) {
+  if (campaignService.isMailerConfigured()) return false;
+  res.status(503).json({
+    error: "Envio de email não configurado no servidor: defina GMAIL_USER e GMAIL_APP_PASSWORD",
+  });
+  return true;
 }
 
 function validatePost(post) {
@@ -68,8 +79,67 @@ async function findDraft(id, res) {
 exports.findAll = async (req, res, next) => {
   try {
     await connectDB();
-    const campaigns = await Campaign.find().sort({ createdAt: -1 });
-    res.json(campaigns.map((c) => serialize(c)));
+
+    // ?post= envios ligados a um post (ex.: o aviso automático dele)
+    if (req.query.post && !mongoose.isValidObjectId(req.query.post)) {
+      return res.status(400).json({ error: "Post inválido" });
+    }
+
+    // ?email= filtra envios que tiveram esse destinatário (busca parcial)
+    const email = req.query.email?.trim().toLowerCase();
+    const emailRe = email
+      ? new RegExp(email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i")
+      : null;
+    const filter = emailRe ? { "recipients.email": emailRe } : {};
+    if (req.query.post) filter.post = req.query.post;
+
+    const campaigns = await Campaign.find(filter).sort({ createdAt: -1 });
+
+    res.json(
+      campaigns.map((c) => {
+        const obj = serialize(c);
+        obj.audienceSize = c.audience?.subscribers?.length ?? 0;
+        if (emailRe) {
+          obj.matches = c.recipients
+            .filter((r) => emailRe.test(r.email))
+            .map(({ email, status, sentAt, error }) => ({ email, status, sentAt, error }));
+        }
+        return obj;
+      })
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Envios do mês para o calendário: data = envio, início do envio ou última edição (rascunho)
+exports.calendar = async (req, res, next) => {
+  try {
+    await connectDB();
+
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    const month = parseInt(req.query.month) || new Date().getMonth() + 1;
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 0, 23, 59, 59, 999);
+
+    const campaigns = await Campaign.find({
+      $or: [
+        { sentAt: { $gte: start, $lte: end } },
+        { status: "sending", startedAt: { $gte: start, $lte: end } },
+        { status: "draft", updatedAt: { $gte: start, $lte: end } },
+      ],
+    }).sort({ createdAt: 1 });
+
+    res.json(
+      campaigns.map((c) => ({
+        _id: c._id,
+        subject: c.subject,
+        kind: c.kind,
+        status: c.status,
+        date: c.sentAt || c.startedAt || c.updatedAt,
+        stats: c.stats(),
+      }))
+    );
   } catch (err) {
     next(err);
   }
@@ -80,7 +150,8 @@ exports.findOne = async (req, res, next) => {
     await connectDB();
     const campaign = await Campaign.findById(req.params.id)
       .populate("audience.subscribers", "name email tier")
-      .populate("post", "title slug status published");
+      .populate("post", "title slug status published")
+      .populate("recipients.subscriber", "name tier");
     if (!campaign) return res.status(404).json({ error: "Envio não encontrado" });
     res.json(serialize(campaign, { withRecipients: true }));
   } catch (err) {
@@ -140,10 +211,9 @@ exports.audienceCount = async (req, res, next) => {
   try {
     await connectDB();
     const audienceError = validateAudience(req.body.audience);
-    if (audienceError) return res.json({ count: 0 });
+    if (audienceError) return res.json({ count: 0, sample: [] });
 
-    const count = await campaignService.countAudience(req.body.audience);
-    res.json({ count });
+    res.json(await campaignService.previewAudience(req.body.audience));
   } catch (err) {
     next(err);
   }
@@ -151,6 +221,7 @@ exports.audienceCount = async (req, res, next) => {
 
 exports.sendTest = async (req, res, next) => {
   try {
+    if (mailerNotConfigured(res)) return;
     await connectDB();
     const campaign = await Campaign.findById(req.params.id);
     if (!campaign) return res.status(404).json({ error: "Envio não encontrado" });
@@ -171,9 +242,47 @@ exports.sendTest = async (req, res, next) => {
   }
 };
 
+/**
+ * Teste do email preparado no editor de post, antes de salvar/publicar.
+ * Recebe os campos do post como estão na tela.
+ */
+exports.sendPostTest = async (req, res, next) => {
+  try {
+    if (mailerNotConfigured(res)) return;
+    await connectDB();
+
+    const { post = {}, email: rawEmail } = req.body;
+    if (!post.title?.trim()) {
+      return res.status(422).json({ error: "Preencha o título do post antes de testar" });
+    }
+
+    let email = rawEmail;
+    if (!email) {
+      const admin = await User.findById(req.userId, "email");
+      email = admin?.email;
+    }
+    if (!email || !EMAIL_RE.test(email)) {
+      return res.status(422).json({ error: "Email de teste inválido" });
+    }
+
+    const campaign = campaignService.campaignFromPost({
+      ...post,
+      _id: mongoose.isValidObjectId(post._id) ? post._id : undefined,
+    });
+    // Mostra o botão mesmo antes de publicar, para conferir o visual final
+    const postUrl = post.slug ? `${SITE_URL}/blog/${post.slug}` : null;
+
+    await campaignService.sendTest(campaign, email, postUrl);
+    res.json({ message: `Teste enviado para ${email}` });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Envia um lote. O painel chama de novo enquanto stats.pending > 0.
 exports.send = async (req, res, next) => {
   try {
+    if (mailerNotConfigured(res)) return;
     await connectDB();
     const campaign = await Campaign.findById(req.params.id);
     if (!campaign) return res.status(404).json({ error: "Envio não encontrado" });
@@ -251,6 +360,7 @@ exports.duplicate = async (req, res, next) => {
 // Volta as falhas para "pendente"; o painel então chama /send em lotes
 exports.retryFailed = async (req, res, next) => {
   try {
+    if (mailerNotConfigured(res)) return;
     await connectDB();
     const campaign = await Campaign.findById(req.params.id);
     if (!campaign) return res.status(404).json({ error: "Envio não encontrado" });
