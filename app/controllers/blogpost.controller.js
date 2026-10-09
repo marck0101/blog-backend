@@ -249,7 +249,9 @@ exports.findBySlug = async (req, res, next) => {
     const post = await BlogPost.findOneAndUpdate(
       { slug: req.params.slug, published: true, deletedAt: null },
       { $inc: { views: 1 } },
-      { new: true }
+      // Visualização não é edição: sem isso o updatedAt mudava a cada leitura e
+      // o sitemap/dados estruturados diziam que todo post foi alterado hoje
+      { new: true, timestamps: false }
     );
 
     if (!post) {

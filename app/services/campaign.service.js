@@ -1,6 +1,7 @@
 const transporter = require("../config/mailer");
 const Subscriber = require("../models/subscriber.model");
 const BlogPost = require("../models/blogpost.model");
+const slugify = require("slugify");
 const Campaign = require("../models/campaign.model");
 const campaignEmail = require("../templates/campaign.email");
 const escapeHtml = require("../utils/escapeHtml");
@@ -92,8 +93,40 @@ async function resolvePostUrl(campaign) {
   return post ? `${SITE_URL}/blog/${post.slug}` : null;
 }
 
+// UTMs nos links para o blog: sem eles, quem chega pelo email aparece como
+// tráfego "direto" no GA4. Links para outros sites ficam como estão.
+function utmCampaignName(campaign) {
+  const prefix = campaign.kind === "post-notification" ? "aviso-post" : "envio";
+  const slug = slugify(campaign.subject || "", { lower: true, strict: true });
+  return `${prefix}-${slug}`.slice(0, 80).replace(/-+$/, "");
+}
+
+function withUtm(url, campaignName, content) {
+  if (!url || !url.startsWith(SITE_URL)) return url;
+  try {
+    const u = new URL(url);
+    if (u.searchParams.has("utm_source")) return url;
+    u.searchParams.set("utm_source", "newsletter");
+    u.searchParams.set("utm_medium", "email");
+    u.searchParams.set("utm_campaign", campaignName);
+    u.searchParams.set("utm_content", content);
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
+function contentWithUtm(html, campaignName) {
+  return (html || "").replace(/href="([^"]+)"/g, (match, href) => {
+    const decoded = href.replace(/&amp;/g, "&");
+    const tagged = withUtm(decoded, campaignName, "link_texto");
+    return tagged === decoded ? match : `href="${tagged.replace(/&/g, "&amp;")}"`;
+  });
+}
+
 function buildMail(campaign, subscriber, postUrl) {
   const unsub = unsubscribeUrl(subscriber.token);
+  const utmName = utmCampaignName(campaign);
 
   return {
     from: `"marck0101" <${process.env.GMAIL_USER}>`,
@@ -104,9 +137,9 @@ function buildMail(campaign, subscriber, postUrl) {
       subscriberName: subscriber.name,
       subject: campaign.subject,
       preheader: campaign.preheader,
-      content: campaign.content,
+      content: contentWithUtm(campaign.content, utmName),
       isMemberContent: campaign.audience?.type === "members",
-      postUrl,
+      postUrl: withUtm(postUrl, utmName, "botao_ler_no_blog"),
       unsubscribeUrl: unsub,
     }),
   };
