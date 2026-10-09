@@ -63,6 +63,15 @@ function serialize(campaign, { withRecipients = false } = {}) {
   return obj;
 }
 
+// Mesmo critério do front (utils/campaignAudience.js → campaignStatusKey)
+function statusKey(campaign) {
+  if (campaign.status !== "sent") return campaign.status;
+  const { sent, failed } = campaign.stats();
+  if (failed > 0 && sent === 0) return "failed";
+  if (failed > 0) return "partial";
+  return "sent";
+}
+
 async function findDraft(id, res) {
   const campaign = await Campaign.findById(id);
   if (!campaign) {
@@ -93,20 +102,42 @@ exports.findAll = async (req, res, next) => {
     const filter = emailRe ? { "recipients.email": emailRe } : {};
     if (req.query.post) filter.post = req.query.post;
 
+    if (req.query.kind === "custom") filter.kind = { $ne: "post-notification" };
+    else if (req.query.kind === "post-notification") filter.kind = "post-notification";
+
     const campaigns = await Campaign.find(filter).sort({ createdAt: -1 });
 
-    res.json(
-      campaigns.map((c) => {
-        const obj = serialize(c);
-        obj.audienceSize = c.audience?.subscribers?.length ?? 0;
-        if (emailRe) {
-          obj.matches = c.recipients
-            .filter((r) => emailRe.test(r.email))
-            .map(({ email, status, sentAt, error }) => ({ email, status, sentAt, error }));
-        }
-        return obj;
-      })
-    );
+    const toJson = (c) => {
+      const obj = serialize(c);
+      obj.audienceSize = c.audience?.subscribers?.length ?? 0;
+      if (emailRe) {
+        obj.matches = c.recipients
+          .filter((r) => emailRe.test(r.email))
+          .map(({ email, status, sentAt, error }) => ({ email, status, sentAt, error }));
+      }
+      return obj;
+    };
+
+    // Sem ?page= mantém a resposta antiga (array completo), usada pelo editor de post
+    if (!req.query.page) return res.json(campaigns.map(toJson));
+
+    // Mais recente primeiro pela data que a tela mostra: envio, início ou última edição
+    const activity = (c) => (c.sentAt || c.startedAt || c.updatedAt || c.createdAt).getTime();
+    let list = campaigns.sort((a, b) => activity(b) - activity(a));
+
+    const status = req.query.status;
+    if (status && status !== "all") list = list.filter((c) => statusKey(c) === status);
+
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const total = list.length;
+
+    res.json({
+      campaigns: list.slice((page - 1) * limit, page * limit).map(toJson),
+      total,
+      page,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    });
   } catch (err) {
     next(err);
   }

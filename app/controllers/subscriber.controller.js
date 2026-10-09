@@ -141,7 +141,7 @@ exports.findAll = async (req, res, next) => {
 
     const [subscribers, total] = await Promise.all([
       Subscriber.find(filter, "-token")
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1, _id: -1 })
         .skip(skip)
         .limit(limit),
       Subscriber.countDocuments(filter),

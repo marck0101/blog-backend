@@ -226,7 +226,8 @@ exports.findAllPublished = async (req, res, next) => {
 
     const [posts, total] = await Promise.all([
       BlogPost.find(filter)
-        .sort({ publishedAt: -1 })
+        // createdAt/_id desempatam posts sem publishedAt e evitam repetição entre páginas
+        .sort({ publishedAt: -1, createdAt: -1, _id: -1 })
         .skip(skip)
         .limit(limit),
       BlogPost.countDocuments(filter),
