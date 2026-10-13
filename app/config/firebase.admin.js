@@ -1,31 +1,41 @@
 const admin = require("firebase-admin");
+const fs = require("fs");
 const path = require("path");
 
+// Credencial da service account (nunca vai para o git):
+// - Produção (Vercel): FIREBASE_SERVICE_ACCOUNT_JSON com o JSON inteiro
+// - Dev: arquivo service-account.json na raiz do backend
+const SERVICE_ACCOUNT_FILE = path.join(__dirname, "../../service-account.json");
+
+function loadServiceAccount() {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    return JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+  }
+  if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
+    return JSON.parse(fs.readFileSync(SERVICE_ACCOUNT_FILE, "utf8"));
+  }
+  return null;
+}
+
 if (!admin.apps.length) {
-  let credential;
-
   try {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-      // Produção (Vercel): JSON armazenado como variável de ambiente
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-      credential = admin.credential.cert(serviceAccount);
-    } else {
-      // Desenvolvimento: arquivo local service-account.json na raiz do projeto
-      const serviceAccount = require(path.join(__dirname, "../../service-account.json"));
-      credential = admin.credential.cert(serviceAccount);
-    }
+    const serviceAccount = loadServiceAccount();
 
-    admin.initializeApp({
-      credential,
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    });
+    if (!serviceAccount) {
+      // A API funciona normalmente; só o upload de imagens fica indisponível (503)
+      console.warn(
+        "⚠️  Firebase sem credencial: upload de imagens desativado.\n" +
+          "   → Copie o service-account.json para a raiz do blog-backend\n" +
+          "   → ou defina FIREBASE_SERVICE_ACCOUNT_JSON no .env"
+      );
+    } else {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      });
+    }
   } catch (err) {
-    console.warn(
-      "⚠️  Firebase Admin não inicializado:",
-      err.message,
-      "\n   → Coloque service-account.json na raiz do projeto",
-      "\n   → Ou defina FIREBASE_SERVICE_ACCOUNT_JSON no .env"
-    );
+    console.warn("⚠️  Firebase Admin não inicializado:", err.message);
   }
 }
 

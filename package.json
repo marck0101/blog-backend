@@ -8,8 +8,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "PORT=3333 NODE_ENV=development nodemon server.js",
-    "start": "NODE_ENV=production node server.js"
+    "dev": "cross-env PORT=3333 NODE_ENV=development nodemon server.js",
+    "start": "cross-env NODE_ENV=production node server.js",
+    "prod": "cross-env PORT=3333 NODE_ENV=production nodemon server.js"
   },
   "keywords": [
     "nodejs",
@@ -34,6 +35,7 @@
     "slugify": "^1.6.9"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.10"
   }
