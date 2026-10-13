@@ -1,16 +1,29 @@
 const connectDB = require("../config/db.config");
 const Subscriber = require("../models/subscriber.model");
 const CATEGORIES = require("../config/categories");
+const { recordUnsubscribe } = require("../services/tracking.service");
 
 const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TIERS = ["free", "member"];
+
+// Origem enviada pelo formulário do blog: só texto curto, campos conhecidos
+const SOURCE_FIELDS = ["location", "path", "post", "landingPath", "referrer", "utmSource", "utmMedium", "utmCampaign"];
+function pickSource(raw) {
+  if (!raw || typeof raw !== "object") return undefined;
+  const source = {};
+  for (const field of SOURCE_FIELDS) {
+    if (typeof raw[field] === "string") source[field] = raw[field].trim().slice(0, 200);
+  }
+  return source;
+}
 
 exports.subscribe = async (req, res, next) => {
   try {
     await connectDB();
 
     const { email, name, categories = [] } = req.body;
+    const source = pickSource(req.body.source);
 
     if (!email || !EMAIL_RE.test(email)) {
       return res.status(422).json({ error: "Email inválido" });
@@ -35,11 +48,14 @@ exports.subscribe = async (req, res, next) => {
       existing.categories = categories;
       if (name) existing.name = name;
       existing.confirmedAt = new Date();
+      existing.unsubscribedAt = null;
+      existing.unsubscribeCampaign = null;
+      if (source) existing.source = source;
       await existing.save();
       return res.status(200).json({ message: "Inscrição reativada com sucesso!" });
     }
 
-    await Subscriber.create({ email, name, categories });
+    await Subscriber.create({ email, name, categories, source });
     res.status(201).json({ message: "Inscrição realizada com sucesso!" });
   } catch (err) {
     next(err);
@@ -73,6 +89,7 @@ exports.createManual = async (req, res, next) => {
       tier,
       notes,
       memberSince: tier === "member" ? new Date() : null,
+      source: { location: "manual" },
     });
 
     const { token, ...data } = subscriber.toObject();
@@ -92,8 +109,18 @@ exports.unsubscribe = async (req, res, next) => {
       return res.status(404).json({ error: "Token inválido ou não encontrado" });
     }
 
-    subscriber.status = "unsubscribed";
-    await subscriber.save();
+    // Link repetido não conta duas vezes nem muda a data da saída
+    if (subscriber.status !== "unsubscribed") {
+      subscriber.status = "unsubscribed";
+      subscriber.unsubscribedAt = new Date();
+      if (req.query.c && /^[a-f0-9]{24}$/.test(req.query.c)) {
+        subscriber.unsubscribeCampaign = req.query.c;
+        await recordUnsubscribe(req.query.c, subscriber._id).catch((err) =>
+          console.error("[TRACK] unsubscribe:", err.message)
+        );
+      }
+      await subscriber.save();
+    }
 
     res.json({ message: "Inscrição cancelada com sucesso." });
   } catch (err) {

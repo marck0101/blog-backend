@@ -13,6 +13,13 @@ const RecipientSchema = new mongoose.Schema(
     },
     error: String,
     sentAt: Date,
+
+    // Engajamento (só em envios com rastreio): primeira vez e total
+    openedAt: Date,
+    opens: { type: Number, default: 0 },
+    clickedAt: Date,
+    clicks: { type: Number, default: 0 },
+    unsubscribedAt: Date,
   },
   { _id: false }
 );
@@ -63,6 +70,10 @@ const CampaignSchema = new mongoose.Schema(
 
     startedAt: Date,
     sentAt: Date,
+
+    // Pixel de abertura e links rastreados. Envios anteriores ao rastreio
+    // ficam sem taxas (não dá para saber quem abriu).
+    tracking: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
@@ -73,8 +84,28 @@ CampaignSchema.index({ kind: 1, post: 1 });
 CampaignSchema.index({ "recipients.email": 1 });
 
 CampaignSchema.methods.stats = function () {
-  const stats = { total: this.recipients.length, pending: 0, sent: 0, failed: 0 };
-  for (const r of this.recipients) stats[r.status]++;
+  const stats = {
+    total: this.recipients.length,
+    pending: 0,
+    sent: 0,
+    failed: 0,
+    opened: 0,
+    clicked: 0,
+    unsubscribed: 0,
+  };
+  for (const r of this.recipients) {
+    stats[r.status]++;
+    if (r.openedAt) stats.opened++;
+    if (r.clickedAt) stats.clicked++;
+    if (r.unsubscribedAt) stats.unsubscribed++;
+  }
+  // Taxas sobre os entregues; null quando não há rastreio
+  const rate = (n) => (this.tracking && stats.sent > 0 ? n / stats.sent : null);
+  stats.openRate = rate(stats.opened);
+  stats.clickRate = rate(stats.clicked);
+  stats.unsubscribeRate = rate(stats.unsubscribed);
+  // CTOR: de quem abriu, quantos clicaram
+  stats.clickToOpenRate = this.tracking && stats.opened > 0 ? stats.clicked / stats.opened : null;
   return stats;
 };
 

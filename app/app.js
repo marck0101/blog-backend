@@ -9,6 +9,8 @@ const subscriberRoutes = require("./routes/subscriber.routes");
 const campaignRoutes = require("./routes/campaign.routes");
 const cronRoutes = require("./routes/cron.routes");
 const linkedinRoutes = require("./routes/linkedin.routes");
+const trackingRoutes = require("./routes/tracking.routes");
+const metricsRoutes = require("./routes/metrics.routes");
 const sitemapRoutes = require("./routes/sitemap.routes");
 const CATEGORIES = require("./config/categories");
 
@@ -79,6 +81,8 @@ app.use("/api/subscribers", subscriberRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/cron", cronRoutes);
 app.use("/api/linkedin", linkedinRoutes);
+app.use("/api/t", trackingRoutes);
+app.use("/api/metrics", metricsRoutes);
 app.use("/", sitemapRoutes);
 
 /**

@@ -46,6 +46,21 @@ const SubscriberSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    unsubscribedAt: { type: Date, default: null },
+    // Envio cujo link de cancelamento foi usado
+    unsubscribeCampaign: { type: mongoose.Schema.Types.ObjectId, ref: "Campaign", default: null },
+
+    // De onde veio a inscrição (formulário do blog). "manual" = cadastrado pelo admin.
+    source: {
+      location: { type: String, default: "" }, // home | post | manual
+      path: { type: String, default: "" }, // página do formulário
+      post: { type: String, default: "" }, // slug, quando assinou num post
+      landingPath: { type: String, default: "" }, // primeira página da visita
+      referrer: { type: String, default: "" }, // domínio de origem da visita
+      utmSource: { type: String, default: "" },
+      utmMedium: { type: String, default: "" },
+      utmCampaign: { type: String, default: "" },
+    },
   },
   { timestamps: true }
 );
@@ -53,6 +68,7 @@ const SubscriberSchema = new mongoose.Schema(
 SubscriberSchema.index({ email: 1 });
 SubscriberSchema.index({ token: 1 });
 SubscriberSchema.index({ status: 1, tier: 1 });
+SubscriberSchema.index({ createdAt: 1 });
 
 SubscriberSchema.pre("save", function (next) {
   if (!this.token) {

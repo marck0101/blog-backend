@@ -9,6 +9,7 @@ module.exports = function campaignEmail({
   isMemberContent,
   postUrl,
   unsubscribeUrl,
+  openPixelUrl,
 }) {
   return `
 <!DOCTYPE html>
@@ -69,6 +70,7 @@ module.exports = function campaignEmail({
                 }
               </p>
               <a href="${unsubscribeUrl}" style="font-size:12px; color:#9ca3af; text-decoration:underline;">Cancelar inscrição</a>
+              ${openPixelUrl ? `<img src="${escapeHtml(openPixelUrl)}" width="1" height="1" alt="" style="display:block; width:1px; height:1px; border:0;" />` : ""}
             </td>
           </tr>
         </table>

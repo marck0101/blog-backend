@@ -6,6 +6,7 @@ const Campaign = require("../models/campaign.model");
 const campaignEmail = require("../templates/campaign.email");
 const escapeHtml = require("../utils/escapeHtml");
 const { SITE_URL, unsubscribeUrl } = require("../config/urls");
+const tracking = require("./tracking.service");
 
 // Orçamento de tempo por chamada de /send. A Vercel encerra a função
 // (10s no plano hobby), então paramos antes e o painel chama de novo.
@@ -125,8 +126,17 @@ function contentWithUtm(html, campaignName) {
 }
 
 function buildMail(campaign, subscriber, postUrl) {
-  const unsub = unsubscribeUrl(subscriber.token);
+  // Teste (sem _id de assinante) não rastreia: não suja as métricas
+  const tracked = campaign.tracking && campaign._id && subscriber._id;
+  const unsub = unsubscribeUrl(subscriber.token, tracked ? campaign._id : null);
   const utmName = utmCampaignName(campaign);
+
+  let content = contentWithUtm(campaign.content, utmName);
+  let buttonUrl = withUtm(postUrl, utmName, "botao_ler_no_blog");
+  if (tracked) {
+    content = tracking.trackLinks(content, campaign._id, subscriber._id);
+    if (buttonUrl) buttonUrl = tracking.clickUrl(campaign._id, subscriber._id, buttonUrl);
+  }
 
   return {
     from: `"marck0101" <${process.env.GMAIL_USER}>`,
@@ -137,10 +147,11 @@ function buildMail(campaign, subscriber, postUrl) {
       subscriberName: subscriber.name,
       subject: campaign.subject,
       preheader: campaign.preheader,
-      content: contentWithUtm(campaign.content, utmName),
+      content,
       isMemberContent: campaign.audience?.type === "members",
-      postUrl: withUtm(postUrl, utmName, "botao_ler_no_blog"),
+      postUrl: buttonUrl,
       unsubscribeUrl: unsub,
+      openPixelUrl: tracked ? tracking.openPixelUrl(campaign._id, subscriber._id) : null,
     }),
   };
 }
@@ -162,6 +173,7 @@ async function processCampaign(campaign) {
     campaign.recipients = subscribers.map((s) => ({ subscriber: s._id, email: s.email }));
     campaign.status = "sending";
     campaign.startedAt = new Date();
+    campaign.tracking = true;
     await campaign.save();
   }
 
