@@ -4,8 +4,19 @@ const SearchQuery = require("../models/searchquery.model");
 require("../models/subscriber.model"); // para o populate de emailAudience.subscribers
 const { notifyNewPost } = require("../services/campaign.service");
 const { safeShareArticle } = require("../services/linkedin.service");
+const SEASONS = require("../config/seasons");
 
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
+const ALLOWED_SEASONS = SEASONS.map((s) => s.slug);
+
+/** Season vazia vira null (post sem season); ordem vazia também */
+function normalizeSeason(data) {
+  if (data.season !== undefined && !data.season) data.season = null;
+  if (data.seasonOrder !== undefined) {
+    const order = parseInt(data.seasonOrder, 10);
+    data.seasonOrder = Number.isFinite(order) ? order : null;
+  }
+}
 
 // Status do post:
 //   draft     = rascunho (pode ter plannedAt: data no calendário editorial)
@@ -44,6 +55,9 @@ function validatePost(data, isCreate, existing = null) {
   }
   if (data.category !== undefined && !ALLOWED_CATEGORIES.includes(data.category)) {
     return `Categoria inválida. Valores permitidos: ${ALLOWED_CATEGORIES.join(", ")}`;
+  }
+  if (data.season && !ALLOWED_SEASONS.includes(data.season)) {
+    return `Season inválida. Valores permitidos: ${ALLOWED_SEASONS.join(", ")}`;
   }
   return null;
 }
@@ -111,6 +125,7 @@ exports.create = async (req, res, next) => {
     await connectDB();
 
     const data = req.body;
+    normalizeSeason(data);
 
     const validationError = validatePost(data, true);
     if (validationError) {
@@ -177,6 +192,7 @@ exports.findAll = async (req, res, next) => {
     if (["draft", "planned", "published"].includes(req.query.status)) {
       filter.status = req.query.status;
     }
+    if (req.query.season) filter.season = req.query.season.trim();
 
     if (req.query.categories) {
       const cats = req.query.categories.split(",").map((s) => s.trim()).filter(Boolean);
@@ -223,6 +239,7 @@ exports.findAllPublished = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const filter = { published: true, deletedAt: null };
+    if (req.query.season) filter.season = req.query.season.trim();
 
     if (req.query.categories) {
       const cats = req.query.categories.split(",").map((s) => s.trim()).filter(Boolean);
@@ -265,6 +282,32 @@ exports.findAllPublished = async (req, res, next) => {
 };
 
 /**
+ * BLOG PÚBLICO - EPISÓDIOS PUBLICADOS DE UMA SEASON (navegação)
+ */
+exports.findSeasonEpisodes = async (req, res, next) => {
+  try {
+    await connectDB();
+
+    const season = SEASONS.find((s) => s.slug === req.params.season);
+    if (!season) {
+      return res.status(404).json({ error: "Season não encontrada" });
+    }
+
+    const posts = await BlogPost.find({
+      season: season.slug,
+      published: true,
+      deletedAt: null,
+    })
+      .select("_id title slug excerpt seasonOrder publishedAt")
+      .sort({ seasonOrder: 1, publishedAt: 1 });
+
+    res.json({ season, posts });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
  * BLOG PÚBLICO - FIND BY SLUG
  */
 exports.findBySlug = async (req, res, next) => {
@@ -280,6 +323,9 @@ exports.findBySlug = async (req, res, next) => {
     );
 
     if (!post) {
+      // ?soft=1 (front): "não encontrado" é resposta normal, sem erro de rede no
+      // console. Sem o parâmetro (prerender, crawlers) continua 404 de verdade.
+      if (req.query.soft === "1") return res.json(null);
       return res.status(404).json({ error: "Post não encontrado" });
     }
 
@@ -319,6 +365,7 @@ exports.update = async (req, res, next) => {
     await connectDB();
 
     const data = req.body;
+    normalizeSeason(data);
 
     const existing = await BlogPost.findById(req.params.id)
       .select("status publishedAt plannedAt content")

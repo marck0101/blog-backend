@@ -9,6 +9,7 @@ const auth = require("../middlewares/auth.middleware");
 router.get("/published", post.findAllPublished);
 router.get("/public/:id", post.findPublicById);
 router.get("/slug/:slug", post.findBySlug);
+router.get("/season/:season", post.findSeasonEpisodes);
 
 /**
  * ================= ADMIN (PROTEGIDO) =================
