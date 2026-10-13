@@ -1,0 +1,157 @@
+{
+  "season": "midia-paga-na-pratica",
+  "posts": [
+    {
+      "seasonOrder": 0,
+      "file": "00-processo-nomenclatura-utm.html",
+      "title": "Mídia paga na prática: por que documentar o processo (e como nomear campanhas)",
+      "slug": "midia-paga-na-pratica-processo-nomenclatura-utm",
+      "excerpt": "Como transformei o processo de mídia paga em checklists por canal e objetivo, e o padrão de nomenclatura e UTM que uso em todas as campanhas.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 1,
+      "file": "01-google-ads-do-zero.html",
+      "title": "Como criar uma campanha no Google Ads do zero: objetivo, meta e tipo",
+      "slug": "como-criar-campanha-google-ads-do-zero",
+      "excerpt": "A lógica que vale para qualquer campanha no Google Ads: escolher objetivo, meta de conversão e tipo de campanha sem aceitar o padrão.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 2,
+      "file": "02-pesquisa-criar.html",
+      "title": "Como criar uma campanha de Pesquisa no Google Ads",
+      "slug": "como-criar-campanha-pesquisa-google-ads",
+      "excerpt": "Passo a passo para criar uma campanha de Pesquisa no Google Ads: lance, locais, palavras-chave, anúncio responsivo e o que desmarcar antes de publicar.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 3,
+      "file": "03-pesquisa-otimizar.html",
+      "title": "Como otimizar uma campanha de Pesquisa: termos, dispositivos, horários e locais",
+      "slug": "como-otimizar-campanha-pesquisa-google-ads",
+      "excerpt": "Os quatro relatórios que olho para otimizar uma campanha de Pesquisa no Google Ads e o que fazer com cada um.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 4,
+      "file": "04-performance-max.html",
+      "title": "Como criar uma campanha de Performance Max no Google Ads",
+      "slug": "como-criar-campanha-performance-max-google-ads",
+      "excerpt": "Passo a passo para criar uma Performance Max no Google Ads, o que o Google deixa ligado por padrão, como otimizar e um checklist para copiar.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 5,
+      "file": "05-demand-gen.html",
+      "title": "Demand Gen no Google Ads: como criar e o que muda com a migração do Display",
+      "slug": "como-criar-campanha-demand-gen-google-ads",
+      "excerpt": "Como criar uma campanha de Geração de demanda no Google Ads, o que vem errado por padrão e o que muda com a migração do Display.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 6,
+      "file": "06-shopping.html",
+      "title": "Como criar uma campanha de Shopping no Google Ads",
+      "slug": "como-criar-campanha-shopping-google-ads",
+      "excerpt": "Passo a passo de uma campanha de Shopping no Google Ads: Merchant Center, prioridade, grupos de produtos e como otimizar por produto.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 7,
+      "file": "07-checklist-padroes-google.html",
+      "title": "Checklist do Google Ads: o que vem ligado e você deveria desligar",
+      "slug": "checklist-google-ads-configuracoes-padrao",
+      "excerpt": "Todas as configurações padrão do Google Ads que revisei na season, em um checklist único para usar antes de publicar qualquer campanha.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 8,
+      "file": "08-meta-objetivos.html",
+      "title": "Objetivos do Meta Ads: qual escolher para cada campanha",
+      "slug": "objetivos-meta-ads-qual-escolher",
+      "excerpt": "Os seis objetivos do Gerenciador de Anúncios da Meta, quando usar cada um e como a estrutura campanha, conjunto e anúncio funciona.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 9,
+      "file": "09-meta-leads-whatsapp.html",
+      "title": "Como criar uma campanha de Cadastros e WhatsApp no Meta Ads",
+      "slug": "campanha-leads-whatsapp-meta-ads",
+      "excerpt": "Passo a passo para gerar cadastros e conversas no WhatsApp com o Meta Ads: formulário instantâneo, mensagens e o que revisar antes de publicar.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 10,
+      "file": "10-meta-vendas.html",
+      "title": "Como criar uma campanha de Vendas no Meta Ads",
+      "slug": "campanha-vendas-meta-ads",
+      "excerpt": "Como criar campanhas de Vendas no Meta Ads, manuais ou Advantage+, com Pixel, API de Conversões e catálogo bem configurados.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 11,
+      "file": "11-meta-trafego.html",
+      "title": "Como criar uma campanha de Tráfego no Meta Ads",
+      "slug": "campanha-trafego-meta-ads",
+      "excerpt": "Quando usar o objetivo Tráfego no Meta Ads, como configurar visualização da página de destino e o que esperar dele.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 12,
+      "file": "12-meta-reconhecimento.html",
+      "title": "Como criar uma campanha de Reconhecimento no Meta Ads",
+      "slug": "campanha-reconhecimento-meta-ads",
+      "excerpt": "Como criar uma campanha de Reconhecimento no Meta Ads: alcance, frequência e como medir se a marca está sendo vista.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 13,
+      "file": "13-meta-otimizacao-criativos-publicos.html",
+      "title": "Como otimizar criativos e públicos no Meta Ads",
+      "slug": "otimizar-criativos-publicos-meta-ads",
+      "excerpt": "Fadiga de criativo, frequência, CTR, CPM e públicos: o que olho para otimizar campanhas no Meta Ads e o que mudar em cada caso.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 14,
+      "file": "14-meta-checklist.html",
+      "title": "Checklist do Meta Ads: o que revisar antes de publicar",
+      "slug": "checklist-meta-ads",
+      "excerpt": "O checklist que uso antes de publicar qualquer campanha no Meta Ads, por objetivo, para não depender da memória.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 15,
+      "file": "15-linkedin-objetivos.html",
+      "title": "Objetivos do LinkedIn Ads: qual escolher e como segmentar",
+      "slug": "objetivos-linkedin-ads",
+      "excerpt": "Os objetivos de campanha do LinkedIn Ads, quando usar cada um e como segmentar por cargo, função, senioridade, empresa e setor.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 16,
+      "file": "16-linkedin-document-ads.html",
+      "title": "Document Ads no LinkedIn: como criar e otimizar anúncios de documento",
+      "slug": "document-ads-linkedin",
+      "excerpt": "Como criar anúncios de documento no LinkedIn Ads, com ou sem formulário de leads, e o que olhar para otimizar.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 17,
+      "file": "17-linkedin-lead-gen.html",
+      "title": "Formulário de geração de leads no LinkedIn Ads: como configurar",
+      "slug": "formulario-geracao-leads-linkedin-ads",
+      "excerpt": "Como configurar o formulário de geração de leads do LinkedIn Ads: campos, perguntas, integração e o que revisar antes de publicar.",
+      "category": "trafego"
+    },
+    {
+      "seasonOrder": 18,
+      "file": "18-linkedin-checklist.html",
+      "title": "Checklist do LinkedIn Ads: o que revisar antes de publicar",
+      "slug": "checklist-linkedin-ads",
+      "excerpt": "O checklist que uso antes de publicar campanhas no LinkedIn Ads, com foco em Document Ads e geração de leads.",
+      "category": "trafego"
+    }
+  ]
+}
