@@ -3,10 +3,11 @@ const router = express.Router();
 const connectDB = require("../config/db.config");
 const auth = require("../middlewares/auth.middleware");
 const linkedin = require("../services/linkedin.service");
+const { SITE_URL } = require("../config/urls");
 
 // Painel para onde o callback volta
 const panelUrl = () =>
-  process.env.NODE_ENV === "production" ? process.env.CORS_PROD : process.env.CORS_DEV;
+  process.env.NODE_ENV === "production" ? SITE_URL : process.env.CORS_DEV || "http://localhost:5173";
 
 // { configured, connected, expired, name, picture, expiresAt, daysLeft }
 router.get("/status", auth, async (req, res, next) => {
