@@ -13,7 +13,6 @@ const trackingRoutes = require("./routes/tracking.routes");
 const metricsRoutes = require("./routes/metrics.routes");
 const sitemapRoutes = require("./routes/sitemap.routes");
 const CATEGORIES = require("./config/categories");
-const SEASONS = require("./config/seasons");
 
 const app = express();
 
@@ -87,10 +86,10 @@ app.get("/api/health", (req, res) => {
 });
 
 app.get("/api/categories", (req, res) => res.json(CATEGORIES));
-app.get("/api/seasons", (req, res) => res.json(SEASONS));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", blogpostRoutes);
+app.use("/api/seasons", require("./routes/season.routes"));
 app.use("/api/upload", uploadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/subscribers", subscriberRoutes);

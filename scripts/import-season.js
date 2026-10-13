@@ -17,6 +17,8 @@ const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
 const BlogPost = require("../app/models/blogpost.model");
+const Season = require("../app/models/season.model");
+const { ensureDefaultSeasons } = require("../app/services/season.service");
 
 // Trechos que não podem aparecer no conteúdo público (prefixo interno de nomenclatura etc.)
 const FORBIDDEN = [/\bGH_/];
@@ -61,6 +63,13 @@ async function main() {
   console.log(`[season] ${posts.length} posts · banco ${PROD ? "PROD" : "DEV"} · ${APPLY ? "GRAVANDO" : "simulação"}${UPDATE ? " · --update" : ""}`);
 
   await mongoose.connect(MONGO_URI);
+
+  // A season precisa existir no banco (as iniciais são cadastradas sozinhas)
+  if (APPLY) await ensureDefaultSeasons();
+  const seasonSlug = posts[0]?.season;
+  if (APPLY && seasonSlug && !(await Season.exists({ slug: seasonSlug }))) {
+    throw new Error(`Season "${seasonSlug}" não existe. Crie em /admin/seasons antes de importar.`);
+  }
 
   for (const data of posts) {
     const existing = await BlogPost.findOne({ slug: data.slug }).select("_id status deletedAt");

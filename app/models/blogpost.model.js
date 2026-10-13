@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
-const SEASON_SLUGS = require("../config/seasons").map((s) => s.slug);
 
 async function generateUniqueSlug(title, excludeId) {
   const base = slugify(title, { lower: true, strict: true });
@@ -58,16 +57,8 @@ const BlogPostSchema = new mongoose.Schema(
       required: [true, "A categoria é obrigatória"],
     },
 
-    // Season (série) opcional — slugs em app/config/seasons.js
-    season: {
-      type: String,
-      enum: {
-        values: [...SEASON_SLUGS, null],
-        message: `Season inválida. Valores permitidos: ${SEASON_SLUGS.join(", ")}`,
-      },
-      default: null,
-      index: true,
-    },
+    // Season (série) opcional: slug de uma Season (gerenciadas no admin)
+    season: { type: String, default: null, index: true },
     // Ordem do episódio dentro da season (navegação anterior/próximo)
     seasonOrder: { type: Number, default: null },
 

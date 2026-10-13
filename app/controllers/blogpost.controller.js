@@ -4,7 +4,8 @@ const SearchQuery = require("../models/searchquery.model");
 require("../models/subscriber.model"); // para o populate de emailAudience.subscribers
 const { notifyNewPost } = require("../services/campaign.service");
 const { safeShareArticle } = require("../services/linkedin.service");
-const SEASONS = require("../config/seasons");
+const Season = require("../models/season.model");
+const { seasonExists } = require("../services/season.service");
 const { str, escapeRegex } = require("../utils/sanitize");
 
 // Campos que as rotas públicas podem devolver. Lista de permitidos (não de
@@ -13,7 +14,6 @@ const PUBLIC_FIELDS =
   "_id title slug excerpt content category coverImage gallery seo season seasonOrder publishedAt createdAt updatedAt";
 
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
-const ALLOWED_SEASONS = SEASONS.map((s) => s.slug);
 
 /** Season vazia vira null (post sem season); ordem vazia também */
 function normalizeSeason(data) {
@@ -61,9 +61,6 @@ function validatePost(data, isCreate, existing = null) {
   }
   if (data.category !== undefined && !ALLOWED_CATEGORIES.includes(data.category)) {
     return `Categoria inválida. Valores permitidos: ${ALLOWED_CATEGORIES.join(", ")}`;
-  }
-  if (data.season && !ALLOWED_SEASONS.includes(data.season)) {
-    return `Season inválida. Valores permitidos: ${ALLOWED_SEASONS.join(", ")}`;
   }
   return null;
 }
@@ -136,6 +133,9 @@ exports.create = async (req, res, next) => {
     const validationError = validatePost(data, true);
     if (validationError) {
       return res.status(422).json({ error: validationError });
+    }
+    if (data.season && !(await seasonExists(data.season))) {
+      return res.status(422).json({ error: "Season inválida" });
     }
 
     normalizePlannedAt(data);
@@ -303,20 +303,19 @@ exports.findSeasonEpisodes = async (req, res, next) => {
   try {
     await connectDB();
 
-    const season = SEASONS.find((s) => s.slug === req.params.season);
-    if (!season) {
+    const season = await Season.findOne({ slug: str(req.params.season) }).lean();
+    const posts = season
+      ? await BlogPost.find({ season: season.slug, published: true, deletedAt: null })
+          .select("_id title slug excerpt seasonOrder publishedAt")
+          .sort({ seasonOrder: 1, publishedAt: 1 })
+      : [];
+
+    // Season sem episódio publicado não existe para o leitor (nem o nome)
+    if (!season || posts.length === 0) {
       return res.status(404).json({ error: "Season não encontrada" });
     }
 
-    const posts = await BlogPost.find({
-      season: season.slug,
-      published: true,
-      deletedAt: null,
-    })
-      .select("_id title slug excerpt seasonOrder publishedAt")
-      .sort({ seasonOrder: 1, publishedAt: 1 });
-
-    res.json({ season, posts });
+    res.json({ season: { slug: season.slug, title: season.title }, posts });
   } catch (err) {
     next(err);
   }
@@ -389,6 +388,9 @@ exports.update = async (req, res, next) => {
     const validationError = validatePost(data, false, existing);
     if (validationError) {
       return res.status(422).json({ error: validationError });
+    }
+    if (data.season && !(await seasonExists(data.season))) {
+      return res.status(422).json({ error: "Season inválida" });
     }
 
     // Preserva publishedAt existente ao publicar

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const connectDB = require("../config/db.config");
 const BlogPost = require("../models/blogpost.model");
+const Season = require("../models/season.model");
 
 const SITE_URL = "https://blog.marck0101.com.br";
 
@@ -36,8 +37,19 @@ router.get("/sitemap.xml", async (req, res) => {
 
     const posts = await BlogPost.find(
       { published: true, deletedAt: null },
-      { slug: 1, updatedAt: 1, publishedAt: 1 }
+      { slug: 1, updatedAt: 1, publishedAt: 1, season: 1 }
     ).sort({ publishedAt: -1 });
+
+    // Seasons entram só se têm episódio publicado; lastmod = episódio mais recente
+    const seasonLastmod = new Map();
+    for (const p of posts) {
+      if (p.season && !seasonLastmod.has(p.season)) seasonLastmod.set(p.season, p.updatedAt || p.publishedAt);
+    }
+    const seasons = await Season.find({ slug: { $in: [...seasonLastmod.keys()] } }, { slug: 1 }).lean();
+    const seasonEntries = seasons.length
+      ? urlEntry(`${SITE_URL}/seasons`, toW3CDate(Math.max(...seasons.map((x) => new Date(seasonLastmod.get(x.slug))))) ) +
+        seasons.map((x) => urlEntry(`${SITE_URL}/seasons/${x.slug}`, toW3CDate(seasonLastmod.get(x.slug)))).join("")
+      : "";
 
     const latest = posts[0]
       ? toW3CDate(posts[0].updatedAt || posts[0].publishedAt)
@@ -55,7 +67,7 @@ router.get("/sitemap.xml", async (req, res) => {
       .join("");
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticEntries}${postEntries}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticEntries}${seasonEntries}${postEntries}
 </urlset>`;
 
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
