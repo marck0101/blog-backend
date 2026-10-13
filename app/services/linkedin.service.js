@@ -205,16 +205,35 @@ function postUrl(postUrn) {
   return postUrn ? `https://www.linkedin.com/feed/update/${postUrn}/` : null;
 }
 
+// Comentário como membro: a rota versionada (/rest/socialActions) é só para
+// parceiros aprovados (403 partnerApiSocialActions); com "Share on LinkedIn"
+// vale a /v2, sem LinkedIn-Version. A /rest fica como segunda tentativa.
 async function createComment(account, postUrn, text) {
-  const res = await linkedinFetch(
-    account,
-    `/rest/socialActions/${encodeURIComponent(postUrn)}/comments`,
-    {
-      method: "POST",
-      body: { actor: account.personUrn, object: postUrn, message: { text } },
-    }
-  );
-  return res.headers.get("x-restli-id") || "created";
+  const path = `/socialActions/${encodeURIComponent(postUrn)}/comments`;
+  const body = { actor: account.personUrn, object: postUrn, message: { text } };
+
+  const res = await fetch(`${API}/v2${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${account.accessToken}`,
+      "X-Restli-Protocol-Version": "2.0.0",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  });
+  if (res.ok) {
+    const created = await res.json().catch(() => ({}));
+    return res.headers.get("x-restli-id") || created.$URN || created.id || "created";
+  }
+  const v2Error = `v2 ${res.status}: ${(await res.text().catch(() => "")).slice(0, 150)}`;
+
+  try {
+    const rest = await linkedinFetch(account, `/rest${path}`, { method: "POST", body });
+    return rest.headers.get("x-restli-id") || "created";
+  } catch (err) {
+    throw new Error(`Comentário recusado (${v2Error}; ${err.message})`.slice(0, 300));
+  }
 }
 
 /**
