@@ -1,14 +1,15 @@
 const BlogPost = require("../models/blogpost.model");
 const Campaign = require("../models/campaign.model");
 const { notifyNewPost, processCampaign, isMailerConfigured } = require("./campaign.service");
+const { shareArticle } = require("./linkedin.service");
 
 /**
  * Rotina diária (cron da Vercel):
- * 1. publica os posts agendados cuja data já chegou, disparando o email do post
+ * 1. publica os posts agendados cuja data já chegou, disparando o email e o LinkedIn do post
  * 2. continua envios que ficaram "enviando" (lote não coube no tempo)
  */
 async function runDailyJobs(now = new Date()) {
-  const summary = { published: [], resumed: [], errors: [] };
+  const summary = { published: [], linkedin: [], resumed: [], errors: [] };
 
   const due = await BlogPost.find({
     status: "planned",
@@ -28,12 +29,19 @@ async function runDailyJobs(now = new Date()) {
       continue;
     }
 
-    // Falha no email não desfaz a publicação; o aviso fica em Envios
-    try {
-      await notifyNewPost(post);
-    } catch (err) {
-      summary.errors.push(`email de "${post.title}": ${err.message}`);
-    }
+    // Falha no email ou no LinkedIn não desfaz a publicação; o aviso fica em
+    // Envios e o LinkedIn pode ser repetido pelo editor do post
+    await Promise.all([
+      notifyNewPost(post).catch((err) => {
+        summary.errors.push(`email de "${post.title}": ${err.message}`);
+      }),
+      post.linkedin?.enabled &&
+        shareArticle(post._id)
+          .then((r) => r && summary.linkedin.push(post.title))
+          .catch((err) => {
+            summary.errors.push(`LinkedIn de "${post.title}": ${err.message}`);
+          }),
+    ]);
   }
 
   if (isMailerConfigured()) {

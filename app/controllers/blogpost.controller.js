@@ -3,6 +3,7 @@ const BlogPost = require("../models/blogpost.model");
 const SearchQuery = require("../models/searchquery.model");
 require("../models/subscriber.model"); // para o populate de emailAudience.subscribers
 const { notifyNewPost } = require("../services/campaign.service");
+const { safeShareArticle } = require("../services/linkedin.service");
 
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
 
@@ -47,13 +48,32 @@ function validatePost(data, isCreate, existing = null) {
   return null;
 }
 
-/** Sincroniza o campo `published` a partir do `status` */
 // Falha no email não pode impedir a publicação do post
 async function safeNotify(post) {
   try {
     await notifyNewPost(post);
   } catch (err) {
     console.error("[EMAIL]", err);
+  }
+}
+
+// Primeira publicação: email e LinkedIn em paralelo (cabem juntos no tempo
+// da função serverless). Nenhum dos dois desfaz a publicação se falhar.
+function announcePost(post) {
+  return Promise.all([safeNotify(post), safeShareArticle(post)]);
+}
+
+// Do LinkedIn, o painel só edita o conteúdo; status, URNs e erros são do sistema
+const LINKEDIN_EDITABLE = ["enabled", "text", "imageUrl", "comment"];
+function pickLinkedIn(data) {
+  if (!data.linkedin || typeof data.linkedin !== "object") {
+    delete data.linkedin;
+    return;
+  }
+  const input = data.linkedin;
+  delete data.linkedin;
+  for (const field of LINKEDIN_EDITABLE) {
+    if (input[field] !== undefined) data[`linkedin.${field}`] = input[field];
   }
 }
 
@@ -99,11 +119,16 @@ exports.create = async (req, res, next) => {
 
     normalizePlannedAt(data);
     syncPublished(data);
+    if (data.linkedin) {
+      data.linkedin = Object.fromEntries(
+        LINKEDIN_EDITABLE.filter((f) => data.linkedin[f] !== undefined).map((f) => [f, data.linkedin[f]])
+      );
+    }
 
     const post = await BlogPost.create(data);
 
     if (post.status === "published") {
-      await safeNotify(post);
+      await announcePost(post);
     }
 
     res.status(201).json(post);
@@ -311,6 +336,7 @@ exports.update = async (req, res, next) => {
 
     normalizePlannedAt(data);
     syncPublished(data);
+    pickLinkedIn(data);
 
     const post = await BlogPost.findByIdAndUpdate(req.params.id, data, {
       new: true,
@@ -322,7 +348,7 @@ exports.update = async (req, res, next) => {
     }
 
     if (post.status === "published" && existing?.status !== "published") {
-      await safeNotify(post);
+      await announcePost(post);
     }
 
     res.json(post);

@@ -91,6 +91,26 @@ const BlogPostSchema = new mongoose.Schema(
     },
     publishedAt: Date,
 
+    // Post no LinkedIn (perfil pessoal), preparado junto com o artigo.
+    // Sai na publicação: texto + imagem próprios, link do artigo no 1º comentário.
+    linkedin: {
+      enabled: { type: Boolean, default: false },
+      text: { type: String, default: "" },
+      // Imagem do post; vazia usa a capa do artigo
+      imageUrl: { type: String, default: "" },
+      // Comentário com o link; {link} vira a URL do artigo
+      comment: { type: String, default: "" },
+
+      // Preenchidos pelo sistema
+      // posting = em andamento (ou interrompido: conferir no LinkedIn antes de repetir)
+      status: { type: String, enum: ["idle", "posting", "posted", "failed"], default: "idle" },
+      postUrn: { type: String, default: "" },
+      commentUrn: { type: String, default: "" },
+      attemptedAt: Date,
+      postedAt: Date,
+      error: { type: String, default: "" },
+    },
+
     views: { type: Number, default: 0 },
 
     seo: {
