@@ -22,7 +22,8 @@ const SCOPES = ["openid", "profile", "w_member_social"];
 const API_VERSION = process.env.LINKEDIN_API_VERSION || "202609";
 const REQUEST_TIMEOUT_MS = 8000;
 
-// Texto padrão do comentário; {link} vira a URL do artigo
+// Texto padrão do comentário; {link} vira a URL do artigo (igual ao do painel,
+// em src/utils/linkedin.js do blog-panel)
 const DEFAULT_COMMENT = "Artigo completo no blog: {link}";
 
 function isConfigured() {
@@ -187,13 +188,16 @@ function articleUrl(post) {
   u.searchParams.set("utm_source", "linkedin");
   u.searchParams.set("utm_medium", "social");
   u.searchParams.set("utm_campaign", `post-${post.slug}`.slice(0, 80));
+  u.searchParams.set("utm_content", "comentario");
   return u.toString();
 }
 
 function commentText(post) {
   const template = (post.linkedin?.comment || "").trim() || DEFAULT_COMMENT;
   const link = articleUrl(post);
-  return template.includes("{link}") ? template.replaceAll("{link}", link) : `${template}\n${link}`;
+  if (template.includes("{link}")) return template.replaceAll("{link}", link);
+  // Link escrito à mão no comentário: respeita; sem nenhum link, acrescenta o do artigo
+  return /https?:\/\//.test(template) ? template : `${template}\n${link}`;
 }
 
 // URL pública do post no LinkedIn (para abrir e fixar o comentário)
