@@ -6,6 +6,14 @@ const User = require("../models/user.model");
 const connectDB = require("../config/db.config");
 const transporter = require("../config/mailer");
 const resetPasswordEmail = require("../templates/resetPassword.email");
+const { str } = require("../utils/sanitize");
+const limiter = require("../services/ratelimit.service");
+
+// Força bruta: 10 erros de login por IP a cada 15 min; 5 pedidos de nova senha por hora
+const LOGIN_MAX = 10;
+const LOGIN_WINDOW_MIN = 15;
+const FORGOT_MAX = 5;
+const FORGOT_WINDOW_MIN = 60;
 
 const router = express.Router();
 
@@ -18,22 +26,26 @@ router.post("/login", async (req, res) => {
   try {
     await connectDB();
 
-    const { email, password } = req.body;
+    // Só string: {"$ne": null} viraria operador do MongoDB
+    const email = str(req.body?.email).toLowerCase();
+    const password = typeof req.body?.password === "string" ? req.body.password : "";
 
     if (!email || !password) {
       return res.status(400).json({ message: "Dados inválidos" });
     }
 
+    const wait = await limiter.blockedFor("login", req, LOGIN_MAX);
+    if (wait) return limiter.tooMany(res, wait);
+
     const user = await User.findOne({ email });
+    const passwordMatch = user && user.active && (await bcrypt.compare(password, user.password));
 
-    if (!user || !user.active) {
-      return res.status(401).json({ message: "Credenciais inválidas" });
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
+      await limiter.hit("login", req, LOGIN_WINDOW_MIN);
       return res.status(401).json({ message: "Credenciais inválidas" });
     }
+
+    await limiter.reset("login", req);
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -60,10 +72,15 @@ router.post("/forgot-password", async (req, res) => {
   try {
     await connectDB();
 
-    const { email } = req.body;
+    const email = str(req.body?.email).toLowerCase();
     if (!email) {
       return res.status(400).json({ message: "Email é obrigatório" });
     }
+
+    // Cada pedido conta (evita usar a rota para disparar emails em massa)
+    const wait = await limiter.blockedFor("forgot", req, FORGOT_MAX);
+    if (wait) return limiter.tooMany(res, wait);
+    await limiter.hit("forgot", req, FORGOT_WINDOW_MIN);
 
     const user = await User.findOne({ email });
 
@@ -103,7 +120,8 @@ router.post("/reset-password", async (req, res) => {
   try {
     await connectDB();
 
-    const { token, password } = req.body;
+    const token = str(req.body?.token);
+    const password = typeof req.body?.password === "string" ? req.body.password : "";
     if (!token || !password) {
       return res.status(400).json({ message: "Dados inválidos" });
     }

@@ -5,6 +5,12 @@ require("../models/subscriber.model"); // para o populate de emailAudience.subsc
 const { notifyNewPost } = require("../services/campaign.service");
 const { safeShareArticle } = require("../services/linkedin.service");
 const SEASONS = require("../config/seasons");
+const { str, escapeRegex } = require("../utils/sanitize");
+
+// Campos que as rotas públicas podem devolver. Lista de permitidos (não de
+// proibidos): campo novo de admin (email, LinkedIn, views…) nunca vaza por padrão.
+const PUBLIC_FIELDS =
+  "_id title slug excerpt content category coverImage gallery seo season seasonOrder publishedAt createdAt updatedAt";
 
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
 const ALLOWED_SEASONS = SEASONS.map((s) => s.slug);
@@ -163,7 +169,7 @@ exports.findPublicById = async (req, res, next) => {
       _id: req.params.id,
       published: true,
       deletedAt: null,
-    });
+    }).select(PUBLIC_FIELDS);
 
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
@@ -192,15 +198,15 @@ exports.findAll = async (req, res, next) => {
     if (["draft", "planned", "published"].includes(req.query.status)) {
       filter.status = req.query.status;
     }
-    if (req.query.season) filter.season = req.query.season.trim();
+    if (str(req.query.season)) filter.season = str(req.query.season);
 
-    if (req.query.categories) {
-      const cats = req.query.categories.split(",").map((s) => s.trim()).filter(Boolean);
+    if (str(req.query.categories)) {
+      const cats = str(req.query.categories).split(",").map((s) => s.trim()).filter(Boolean);
       if (cats.length) filter.category = { $in: cats };
     }
 
-    if (req.query.search) {
-      filter.title = { $regex: req.query.search.trim(), $options: "i" };
+    if (str(req.query.search)) {
+      filter.title = { $regex: escapeRegex(str(req.query.search)), $options: "i" };
     }
 
     if (req.query.dateFrom || req.query.dateTo) {
@@ -238,29 +244,37 @@ exports.findAllPublished = async (req, res, next) => {
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
     const skip = (page - 1) * limit;
 
-    const filter = { published: true, deletedAt: null };
-    if (req.query.season) filter.season = req.query.season.trim();
+    // Rota pública: todo parâmetro vira texto (nada de {"$ne": ...}) e a busca é literal
+    const q = {
+      season: str(req.query.season),
+      categories: str(req.query.categories),
+      search: str(req.query.search).slice(0, 100),
+      dateFrom: str(req.query.dateFrom),
+      dateTo: str(req.query.dateTo),
+    };
 
-    if (req.query.categories) {
-      const cats = req.query.categories.split(",").map((s) => s.trim()).filter(Boolean);
+    const filter = { published: true, deletedAt: null };
+    if (q.season) filter.season = q.season;
+
+    if (q.categories) {
+      const cats = q.categories.split(",").map((s) => s.trim()).filter(Boolean);
       if (cats.length) filter.category = { $in: cats };
     }
 
-    if (req.query.search) {
-      const term = req.query.search.trim();
-      filter.title = { $regex: term, $options: "i" };
+    if (q.search) {
+      filter.title = { $regex: escapeRegex(q.search), $options: "i" };
 
       // Log best-effort — não deve atrapalhar a busca se falhar.
-      if (term.length >= 2) {
-        SearchQuery.create({ term }).catch(() => {});
+      if (q.search.length >= 2) {
+        SearchQuery.create({ term: q.search }).catch(() => {});
       }
     }
 
-    if (req.query.dateFrom || req.query.dateTo) {
+    if (q.dateFrom || q.dateTo) {
       filter.publishedAt = {};
-      if (req.query.dateFrom) filter.publishedAt.$gte = new Date(req.query.dateFrom);
-      if (req.query.dateTo) {
-        const to = new Date(req.query.dateTo);
+      if (q.dateFrom) filter.publishedAt.$gte = new Date(q.dateFrom);
+      if (q.dateTo) {
+        const to = new Date(q.dateTo);
         to.setHours(23, 59, 59, 999);
         filter.publishedAt.$lte = to;
       }
@@ -268,6 +282,7 @@ exports.findAllPublished = async (req, res, next) => {
 
     const [posts, total] = await Promise.all([
       BlogPost.find(filter)
+        .select(PUBLIC_FIELDS)
         // createdAt/_id desempatam posts sem publishedAt e evitam repetição entre páginas
         .sort({ publishedAt: -1, createdAt: -1, _id: -1 })
         .skip(skip)
@@ -319,7 +334,7 @@ exports.findBySlug = async (req, res, next) => {
       { $inc: { views: 1 } },
       // Visualização não é edição: sem isso o updatedAt mudava a cada leitura e
       // o sitemap/dados estruturados diziam que todo post foi alterado hoje
-      { new: true, timestamps: false }
+      { new: true, timestamps: false, projection: PUBLIC_FIELDS }
     );
 
     if (!post) {

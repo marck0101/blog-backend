@@ -17,6 +17,20 @@ const SEASONS = require("./config/seasons");
 
 const app = express();
 
+// Segurança básica:
+// - não anunciar o framework (X-Powered-By: Express)
+// - query string "simple": ?search[$ne]=x não vira objeto/operador do MongoDB
+app.disable("x-powered-by");
+app.set("query parser", "simple");
+app.use((req, res, next) => {
+  res.set({
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Frame-Options": "DENY",
+  });
+  next();
+});
+
 /**
  * ===============================
  * MIDDLEWARES BÁSICOS

@@ -18,12 +18,19 @@ function pickSource(raw) {
   return source;
 }
 
+// Mesma resposta para email novo e já inscrito: a rota pública não pode
+// revelar quem é assinante (um pentester testaria emails um a um).
+const SUBSCRIBED = { message: "Inscrição realizada com sucesso!" };
+
 exports.subscribe = async (req, res, next) => {
   try {
     await connectDB();
 
-    const { email, name, categories = [] } = req.body;
-    const source = pickSource(req.body.source);
+    // Só tipos esperados: objetos virariam operadores do MongoDB
+    const email = typeof req.body?.email === "string" ? req.body.email.trim().slice(0, 254) : "";
+    const name = typeof req.body?.name === "string" ? req.body.name.trim().slice(0, 100) : undefined;
+    const categories = Array.isArray(req.body?.categories) ? req.body.categories : [];
+    const source = pickSource(req.body?.source);
 
     if (!email || !EMAIL_RE.test(email)) {
       return res.status(422).json({ error: "Email inválido" });
@@ -42,7 +49,8 @@ exports.subscribe = async (req, res, next) => {
 
     if (existing) {
       if (existing.status === "active") {
-        return res.status(409).json({ error: "Email já cadastrado" });
+        // Não altera nada de quem já é assinante (nem categorias) e não revela que existe
+        return res.status(201).json(SUBSCRIBED);
       }
       existing.status = "active";
       existing.categories = categories;
@@ -52,11 +60,11 @@ exports.subscribe = async (req, res, next) => {
       existing.unsubscribeCampaign = null;
       if (source) existing.source = source;
       await existing.save();
-      return res.status(200).json({ message: "Inscrição reativada com sucesso!" });
+      return res.status(201).json(SUBSCRIBED);
     }
 
     await Subscriber.create({ email, name, categories, source });
-    res.status(201).json({ message: "Inscrição realizada com sucesso!" });
+    res.status(201).json(SUBSCRIBED);
   } catch (err) {
     next(err);
   }
