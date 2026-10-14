@@ -9,6 +9,7 @@ router.get("/unsubscribe/:token", sub.unsubscribe);
 
 // Admin
 router.get("/", auth, sub.findAll);
+router.get("/export.csv", auth, sub.exportCsv);
 router.post("/manual", auth, sub.createManual);
 router.patch("/:id", auth, sub.update);
 router.delete("/:id", auth, sub.remove);

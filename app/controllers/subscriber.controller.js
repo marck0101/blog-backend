@@ -2,6 +2,7 @@ const connectDB = require("../config/db.config");
 const Subscriber = require("../models/subscriber.model");
 const CATEGORIES = require("../config/categories");
 const { recordUnsubscribe } = require("../services/tracking.service");
+const { str, escapeRegex } = require("../utils/sanitize");
 
 const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -136,43 +137,99 @@ exports.unsubscribe = async (req, res, next) => {
   }
 };
 
+// Filtros da lista de assinantes (lista paginada e exportação CSV)
+function listFilter(query) {
+  const filter = {};
+  const status = str(query.status);
+  const tier = str(query.tier);
+  if (status) filter.status = status;
+  if (tier) filter.tier = tier;
+
+  const categories = str(query.categories);
+  if (categories) {
+    const cats = categories.split(",").map((s) => s.trim()).filter(Boolean);
+    if (cats.length) filter.categories = { $in: cats };
+  }
+
+  // Texto literal: "(a+)+$" não vira expressão regular
+  const search = str(query.search);
+  if (search) {
+    const regex = { $regex: escapeRegex(search), $options: "i" };
+    filter.$or = [{ name: regex }, { email: regex }];
+  }
+
+  const dateFrom = str(query.dateFrom);
+  const dateTo = str(query.dateTo);
+  if (dateFrom || dateTo) {
+    filter.createdAt = {};
+    if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
+    if (dateTo) {
+      const to = new Date(dateTo);
+      to.setHours(23, 59, 59, 999);
+      filter.createdAt.$lte = to;
+    }
+  }
+  return filter;
+}
+
+// Célula CSV: aspas escapadas e sem fórmula (=, +, -, @ no início viram texto
+// no Excel/Sheets — um nome "=HYPERLINK(...)" não executa nada)
+function csvCell(value) {
+  let s = value == null ? "" : String(value);
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  return `"${s.replace(/"/g, '""')}"`;
+}
+
+const csvDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : "");
+
+/**
+ * ADMIN — exporta assinantes (com os mesmos filtros da lista) em CSV.
+ * Separador ";" e BOM UTF-8: abre direto no Excel em português.
+ */
+exports.exportCsv = async (req, res, next) => {
+  try {
+    await connectDB();
+    const subscribers = await Subscriber.find(listFilter(req.query), "-token")
+      .sort({ createdAt: -1, _id: -1 })
+      .lean();
+
+    const header = [
+      "email", "nome", "status", "plano", "categorias", "inscrito_em", "cancelado_em",
+      "membro_desde", "origem", "pagina", "utm_source", "utm_medium", "utm_campaign", "anotacao",
+    ];
+    const rows = subscribers.map((s) => [
+      s.email, s.name, s.status === "active" ? "ativo" : "cancelado", s.tier === "member" ? "membro" : "gratuito",
+      (s.categories || []).join(", "), csvDate(s.createdAt), csvDate(s.unsubscribedAt), csvDate(s.memberSince),
+      s.source?.location, s.source?.path, s.source?.utmSource, s.source?.utmMedium, s.source?.utmCampaign, s.notes,
+    ]);
+
+    const csv = [header, ...rows].map((r) => r.map(csvCell).join(";")).join("\r\n");
+    const date = new Date().toISOString().slice(0, 10);
+    res.set({
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": `attachment; filename="assinantes-${date}.csv"`,
+      "Cache-Control": "no-store",
+    });
+    res.send("\uFEFF" + csv);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.findAll = async (req, res, next) => {
   try {
     await connectDB();
 
     const {
-      status,
       page: rawPage = 1,
       limit: rawLimit = 20,
     } = req.query;
 
-    const page = Math.max(1, parseInt(rawPage));
-    const limit = Math.min(100, Math.max(1, parseInt(rawLimit)));
+    const page = Math.max(1, parseInt(rawPage) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(rawLimit) || 20));
     const skip = (page - 1) * limit;
 
-    const filter = {};
-    if (status) filter.status = status;
-    if (req.query.tier) filter.tier = req.query.tier;
-
-    if (req.query.categories) {
-      const cats = req.query.categories.split(",").map((s) => s.trim()).filter(Boolean);
-      if (cats.length) filter.categories = { $in: cats };
-    }
-
-    if (req.query.search) {
-      const regex = { $regex: req.query.search.trim(), $options: "i" };
-      filter.$or = [{ name: regex }, { email: regex }];
-    }
-
-    if (req.query.dateFrom || req.query.dateTo) {
-      filter.createdAt = {};
-      if (req.query.dateFrom) filter.createdAt.$gte = new Date(req.query.dateFrom);
-      if (req.query.dateTo) {
-        const to = new Date(req.query.dateTo);
-        to.setHours(23, 59, 59, 999);
-        filter.createdAt.$lte = to;
-      }
-    }
+    const filter = listFilter(req.query);
 
     const [subscribers, total] = await Promise.all([
       Subscriber.find(filter, "-token")

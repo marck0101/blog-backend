@@ -19,4 +19,18 @@ function clientIp(req) {
   );
 }
 
-module.exports = { str, escapeRegex, clientIp };
+// Termo de busca que vale registrar/mostrar no painel: texto de gente, não
+// sondagem de ReDoS como "(a+)+$" ou "(.*){1,30}". Letras, números, espaço e
+// pontuação comum; ao menos 2 caracteres e uma letra ou número.
+function isMeaningfulSearch(term) {
+  if (typeof term !== "string") return false;
+  const t = term.trim();
+  return (
+    t.length >= 2 &&
+    t.length <= 80 &&
+    /[\p{L}\p{N}]/u.test(t) &&
+    /^[\p{L}\p{N}\s\-'".,:!?+#&/]+$/u.test(t)
+  );
+}
+
+module.exports = { str, escapeRegex, clientIp, isMeaningfulSearch };
