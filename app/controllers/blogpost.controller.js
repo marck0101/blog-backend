@@ -6,7 +6,8 @@ const { notifyNewPost } = require("../services/campaign.service");
 const { safeShareArticle } = require("../services/linkedin.service");
 const Season = require("../models/season.model");
 const { seasonExists } = require("../services/season.service");
-const { str, escapeRegex } = require("../utils/sanitize");
+const { str, escapeRegex, isMeaningfulSearch } = require("../utils/sanitize");
+const { withReadingMinutes } = require("../utils/readingTime");
 
 // Campos que as rotas públicas podem devolver. Lista de permitidos (não de
 // proibidos): campo novo de admin (email, LinkedIn, views…) nunca vaza por padrão.
@@ -265,7 +266,7 @@ exports.findAllPublished = async (req, res, next) => {
       filter.title = { $regex: escapeRegex(q.search), $options: "i" };
 
       // Log best-effort — não deve atrapalhar a busca se falhar.
-      if (q.search.length >= 2) {
+      if (isMeaningfulSearch(q.search)) {
         SearchQuery.create({ term: q.search }).catch(() => {});
       }
     }
@@ -306,8 +307,9 @@ exports.findSeasonEpisodes = async (req, res, next) => {
     const season = await Season.findOne({ slug: str(req.params.season) }).lean();
     const posts = season
       ? await BlogPost.find({ season: season.slug, published: true, deletedAt: null })
-          .select("_id title slug excerpt seasonOrder publishedAt")
+          .select("_id title slug excerpt seasonOrder publishedAt content")
           .sort({ seasonOrder: 1, publishedAt: 1 })
+          .lean()
       : [];
 
     // Season sem episódio publicado não existe para o leitor (nem o nome)
@@ -315,7 +317,7 @@ exports.findSeasonEpisodes = async (req, res, next) => {
       return res.status(404).json({ error: "Season não encontrada" });
     }
 
-    res.json({ season: { slug: season.slug, title: season.title }, posts });
+    res.json({ season: { slug: season.slug, title: season.title }, posts: posts.map(withReadingMinutes) });
   } catch (err) {
     next(err);
   }

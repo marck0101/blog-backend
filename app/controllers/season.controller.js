@@ -4,9 +4,11 @@ const Season = require("../models/season.model");
 const BlogPost = require("../models/blogpost.model");
 const { ensureDefaultSeasons } = require("../services/season.service");
 const { str } = require("../utils/sanitize");
+const { readingMinutes, withReadingMinutes } = require("../utils/readingTime");
 
 // Campos de episódio que o leitor vê (lista de permitidos, como nos posts)
-const EPISODE_FIELDS = "_id title slug excerpt coverImage category seasonOrder publishedAt";
+// (content só para calcular o tempo de leitura; não vai na resposta)
+const EPISODE_FIELDS = "_id title slug excerpt coverImage category seasonOrder publishedAt content";
 
 const PUBLISHED = { published: true, deletedAt: null };
 
@@ -21,11 +23,21 @@ async function publishedStats() {
         episodes: { $sum: 1 },
         coverImage: { $first: "$coverImage" },
         firstSlug: { $first: "$slug" },
+        // Ordem de leitura: o front calcula progresso e "continuar de onde parei"
+        episodeSlugs: { $push: "$slug" },
         lastPublishedAt: { $max: "$publishedAt" },
       },
     },
   ]);
   return new Map(rows.map((r) => [r._id, r]));
+}
+
+// Tempo total de leitura por season (soma dos episódios publicados)
+async function readingStats() {
+  const posts = await BlogPost.find({ ...PUBLISHED, season: { $ne: null } }).select("season content").lean();
+  const totals = new Map();
+  for (const p of posts) totals.set(p.season, (totals.get(p.season) || 0) + readingMinutes(p.content));
+  return totals;
 }
 
 /**
@@ -37,11 +49,14 @@ exports.publicList = async (req, res, next) => {
     await connectDB();
     await ensureDefaultSeasons();
 
-    const [seasons, stats] = await Promise.all([
+    const [seasons, stats, minutes] = await Promise.all([
       Season.find().sort({ order: 1, createdAt: 1 }).lean(),
       publishedStats(),
+      readingStats(),
     ]);
 
+    // Muda só quando um episódio é publicado: até 1 min de atraso é aceitável
+    res.set("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=300");
     res.json(
       seasons
         .filter((s) => stats.has(s.slug))
@@ -54,7 +69,9 @@ exports.publicList = async (req, res, next) => {
             episodes: st.episodes,
             coverImage: st.coverImage || "",
             firstSlug: st.firstSlug,
+            episodeSlugs: st.episodeSlugs,
             lastPublishedAt: st.lastPublishedAt,
+            readingMinutes: minutes.get(s.slug) || 0,
           };
         })
     );
@@ -88,7 +105,7 @@ exports.publicOne = async (req, res, next) => {
 
     res.json({
       season: { slug: season.slug, title: season.title, description: season.description },
-      posts,
+      posts: posts.map(withReadingMinutes),
     });
   } catch (err) {
     next(err);
