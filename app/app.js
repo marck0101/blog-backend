@@ -13,6 +13,7 @@ const trackingRoutes = require("./routes/tracking.routes");
 const metricsRoutes = require("./routes/metrics.routes");
 const sitemapRoutes = require("./routes/sitemap.routes");
 const CATEGORIES = require("./config/categories");
+const allowedOrigins = require("./config/origins");
 
 const app = express();
 
@@ -43,21 +44,15 @@ app.use(express.urlencoded({ extended: false }));
  * CORS (DEV + PROD)
  * ===============================
  */
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "http://192.168.0.112:5173",
-  "http://192.168.0.145:5173",
-  "https://blog.marck0101.com.br",
-  "https://www.blog.marck0101.com.br",
-];
-
 app.use(
   cors({
     origin(origin, callback) {
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
+      // 403, não 500: é uma recusa esperada, não falha do servidor
+      const err = new Error("Origem não permitida");
+      err.status = 403;
+      return callback(err);
     },
     credentials: true,
   })
@@ -85,7 +80,11 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-app.get("/api/categories", (req, res) => res.json(CATEGORIES));
+// Lista fixa (muda só com deploy): navegador guarda 1h, CDN 1 dia
+app.get("/api/categories", (req, res) => {
+  res.set("Cache-Control", "public, max-age=3600, s-maxage=86400");
+  res.json(CATEGORIES);
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", blogpostRoutes);
