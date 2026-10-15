@@ -804,3 +804,43 @@ exports.setHighlight = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * BLOG PÚBLICO - LEITURAS SUGERIDAS ("Continue lendo", fim do post)
+ * Mesma categoria, mais lidos primeiro; se faltar, completa com os mais lidos
+ * das outras categorias. Nunca o próprio post.
+ */
+const RELATED_LIMIT = 3;
+
+exports.findRelated = async (req, res, next) => {
+  try {
+    await connectDB();
+    const current = await BlogPost.findOne({ _id: req.params.id, published: true, deletedAt: null })
+      .select("_id category")
+      .lean();
+    if (!current) return res.status(404).json({ error: "Post não encontrado" });
+
+    const base = { published: true, deletedAt: null, _id: { $ne: current._id } };
+    const order = { views: -1, publishedAt: -1, _id: -1 };
+
+    const sameCategory = await BlogPost.find({ ...base, category: current.category })
+      .select(CARD_FIELDS)
+      .sort(order)
+      .limit(RELATED_LIMIT)
+      .lean();
+
+    let others = [];
+    if (sameCategory.length < RELATED_LIMIT) {
+      others = await BlogPost.find({ ...base, category: { $ne: current.category } })
+        .select(CARD_FIELDS)
+        .sort(order)
+        .limit(RELATED_LIMIT - sameCategory.length)
+        .lean();
+    }
+
+    res.set("Cache-Control", "public, max-age=300, s-maxage=600, stale-while-revalidate=3600");
+    res.json([...sameCategory, ...others]);
+  } catch (err) {
+    next(err);
+  }
+};
