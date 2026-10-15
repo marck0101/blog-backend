@@ -22,7 +22,7 @@ const connectDB = require("../config/db.config");
 const transporter = require("../config/mailer");
 const resetPasswordEmail = require("../templates/resetPassword.email");
 const { str } = require("../utils/sanitize");
-const { SITE_URL } = require("../config/urls");
+const { FRONTEND_URL } = require("../config/urls");
 const limiter = require("../services/ratelimit.service");
 const jwt = require("jsonwebtoken");
 
@@ -46,11 +46,6 @@ const RECOVERY_CODES = 10;
 const ISSUER = "marck0101 Blog";
 
 const router = express.Router();
-
-const FRONTEND_URL =
-  process.env.NODE_ENV === "production"
-    ? process.env.CORS_PROD || SITE_URL
-    : process.env.CORS_DEV || "http://localhost:5173";
 
 const GOOGLE_NONCE_COOKIE = "google_oauth_nonce";
 const GOOGLE_NONCE_OPTIONS = () => baseOptions("/api/auth/google");

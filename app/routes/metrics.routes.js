@@ -7,6 +7,8 @@ const Subscriber = require("../models/subscriber.model");
 const Campaign = require("../models/campaign.model");
 const EmailEvent = require("../models/emailEvent.model");
 const BlogPost = require("../models/blogpost.model");
+const Comment = require("../models/comment.model");
+const { engagementSummary } = require("../services/postStats.service");
 
 router.use(auth);
 
@@ -205,6 +207,39 @@ router.get("/campaigns/:id", async (req, res, next) => {
     ]);
 
     res.json({ links, timeline, automated });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * Engajamento do leitor no período (?days=30): favoritos, compartilhamentos
+ * por canal, visitas que chegaram por link compartilhado e comentários.
+ */
+router.get("/engagement", async (req, res, next) => {
+  try {
+    await connectDB();
+    const days = Math.min(365, Math.max(1, parseInt(req.query.days) || 30));
+    const since = new Date(Date.now() - days * 86400000);
+
+    const [summary, comments] = await Promise.all([
+      engagementSummary(days),
+      Comment.aggregate([
+        { $match: { createdAt: { $gte: since }, isAuthor: false } },
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ]),
+    ]);
+    const byStatus = Object.fromEntries(comments.map((c) => [c._id, c.count]));
+
+    res.json({
+      ...summary,
+      comments: {
+        total: comments.reduce((n, c) => n + c.count, 0),
+        pending: byStatus.pending || 0,
+        approved: byStatus.approved || 0,
+        rejected: byStatus.rejected || 0,
+      },
+    });
   } catch (err) {
     next(err);
   }

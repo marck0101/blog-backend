@@ -118,6 +118,17 @@ const BlogPostSchema = new mongoose.Schema(
 
     views: { type: Number, default: 0 },
 
+    // Vitrine da home: posição entre os fixados (1–3) ou null
+    pinnedOrder: { type: Number, default: null, min: 1, max: 3 },
+    // Destaques da semana: auto = entra pelo ranking de leituras dos últimos 7 dias
+    highlight: { type: String, enum: ["auto", "force", "hide"], default: "auto" },
+
+    // Engajamento do leitor (totais; o detalhe por dia fica em PostDailyStat)
+    favorites: { type: Number, default: 0 },
+    shares: { type: Number, default: 0 },
+    // Comentários aprovados
+    commentsCount: { type: Number, default: 0 },
+
     seo: {
       title: String,
       description: String,

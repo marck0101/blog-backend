@@ -8,11 +8,21 @@ const Season = require("../models/season.model");
 const { seasonExists } = require("../services/season.service");
 const { str, escapeRegex, isMeaningfulSearch } = require("../utils/sanitize");
 const { withReadingMinutes } = require("../utils/readingTime");
+const stats = require("../services/postStats.service");
+const limiter = require("../services/ratelimit.service");
 
 // Campos que as rotas públicas podem devolver. Lista de permitidos (não de
 // proibidos): campo novo de admin (email, LinkedIn, views…) nunca vaza por padrão.
 const PUBLIC_FIELDS =
-  "_id title slug excerpt content category coverImage gallery seo season seasonOrder publishedAt createdAt updatedAt";
+  "_id title slug excerpt content category coverImage gallery seo season seasonOrder publishedAt createdAt updatedAt commentsCount";
+
+// Cards da vitrine (fixados e destaques): sem o conteúdo inteiro
+const CARD_FIELDS = "_id title slug excerpt category coverImage season publishedAt createdAt commentsCount";
+
+const MAX_PINNED = 3;
+// Eventos do leitor (favoritar, compartilhar): 60 a cada 10 min por IP
+const ENGAGE_MAX = 60;
+const ENGAGE_WINDOW_MIN = 10;
 
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
 
@@ -256,6 +266,8 @@ exports.findAllPublished = async (req, res, next) => {
 
     const filter = { published: true, deletedAt: null };
     if (q.season) filter.season = q.season;
+    // Home sem filtro: os fixados já aparecem na vitrine, não repetem na lista
+    if (req.query.excludePinned === "1") filter.pinnedOrder = null;
 
     if (q.categories) {
       const cats = q.categories.split(",").map((s) => s.trim()).filter(Boolean);
@@ -337,6 +349,8 @@ exports.findBySlug = async (req, res, next) => {
       // o sitemap/dados estruturados diziam que todo post foi alterado hoje
       { new: true, timestamps: false, projection: PUBLIC_FIELDS }
     );
+
+    if (post) await stats.recordView(post._id);
 
     if (!post) {
       // ?soft=1 (front): "não encontrado" é resposta normal, sem erro de rede no
@@ -430,9 +444,10 @@ exports.softDelete = async (req, res, next) => {
   try {
     await connectDB();
 
+    // Na lixeira sai da vitrine (ao restaurar, fixar de novo é decisão do painel)
     const post = await BlogPost.findByIdAndUpdate(
       req.params.id,
-      { deletedAt: new Date() },
+      { deletedAt: new Date(), pinnedOrder: null },
       { new: true }
     );
 
@@ -617,6 +632,165 @@ exports.removeImage = async (req, res, next) => {
       return res.status(404).json({ error: "Post não encontrado" });
     }
 
+    res.json(post);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ================= VITRINE (PÚBLICO) ================= */
+
+/**
+ * BLOG PÚBLICO - FIXADOS (até 3, na ordem do painel)
+ */
+exports.findPinned = async (req, res, next) => {
+  try {
+    await connectDB();
+    const posts = await BlogPost.find({ published: true, deletedAt: null, pinnedOrder: { $ne: null } })
+      .select(CARD_FIELDS)
+      .sort({ pinnedOrder: 1 })
+      .limit(MAX_PINNED)
+      .lean();
+    res.set("Cache-Control", "public, max-age=60, s-maxage=60, stale-while-revalidate=300");
+    res.json(posts);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * BLOG PÚBLICO - DESTAQUES DA SEMANA (forçados + mais lidos em 7 dias)
+ */
+exports.findHighlights = async (req, res, next) => {
+  try {
+    await connectDB();
+    const list = await stats.weeklyHighlights({ fields: CARD_FIELDS });
+    res.set("Cache-Control", "public, max-age=300, s-maxage=300, stale-while-revalidate=900");
+    // Leituras ficam só no painel
+    res.json(list.map(({ post }) => post));
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * BLOG PÚBLICO - EVENTO DO LEITOR
+ * body: { type: "favorite" | "unfavorite" | "share" | "share_visit", channel? }
+ * Anônimo: só soma contadores do post, sem identificar quem fez.
+ */
+exports.engage = async (req, res, next) => {
+  try {
+    const type = str(req.body?.type);
+    const channel = str(req.body?.channel).toLowerCase();
+
+    await connectDB();
+    const wait = await limiter.blockedFor("engage", req, ENGAGE_MAX);
+    if (wait) return limiter.tooMany(res, wait);
+
+    const post = await BlogPost.findOne({ _id: req.params.id, published: true, deletedAt: null })
+      .select("_id")
+      .lean();
+    if (!post) return res.status(404).json({ error: "Post não encontrado" });
+
+    await limiter.hit("engage", req, ENGAGE_WINDOW_MIN);
+    const ok = await stats.recordEvent(post._id, type, channel);
+    if (!ok) return res.status(422).json({ error: "Evento inválido" });
+
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ================= VITRINE (ADMIN) ================= */
+
+/**
+ * ADMIN - VITRINE: fixados, prévia dos destaques e ranking dos últimos 7 dias
+ */
+exports.showcase = async (req, res, next) => {
+  try {
+    await connectDB();
+    const fields = "_id title slug coverImage category status published publishedAt pinnedOrder highlight views favorites shares commentsCount";
+
+    const [pinned, highlights, ranking, forcedOrHidden] = await Promise.all([
+      BlogPost.find({ deletedAt: null, pinnedOrder: { $ne: null } }).select(fields).sort({ pinnedOrder: 1 }).lean(),
+      stats.weeklyHighlights({ fields }),
+      stats.viewsSince(stats.HIGHLIGHT_DAYS),
+      BlogPost.find({ deletedAt: null, highlight: { $in: ["force", "hide"] } }).select(fields).lean(),
+    ]);
+
+    // Ranking: os 20 mais lidos da semana + os que têm regra manual
+    const top = ranking.slice(0, 20);
+    const viewsOf = new Map(ranking.map((r) => [String(r._id), r.views]));
+    const ids = new Set(top.map((r) => String(r._id)));
+    forcedOrHidden.forEach((p) => ids.add(String(p._id)));
+    const posts = await BlogPost.find({ _id: { $in: [...ids] }, deletedAt: null }).select(fields).lean();
+    const highlighted = new Set(highlights.map((h) => String(h.post._id)));
+
+    const rankingRows = posts
+      .map((p) => ({
+        ...p,
+        highlight: p.highlight || "auto",
+        views7d: viewsOf.get(String(p._id)) || 0,
+        inHighlights: highlighted.has(String(p._id)),
+      }))
+      .sort((a, b) => b.views7d - a.views7d);
+
+    res.json({
+      maxPinned: MAX_PINNED,
+      highlightDays: stats.HIGHLIGHT_DAYS,
+      pinned: pinned.map((p) => ({ ...p, highlight: p.highlight || "auto" })),
+      highlights: highlights.map((h) => ({ ...h.post, highlight: h.post.highlight || "auto", views7d: h.views7d, reason: h.reason })),
+      ranking: rankingRows,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ADMIN - DEFINE OS FIXADOS: body { ids: [id1, id2, id3] } na ordem da vitrine.
+ * Lista vazia desafixa todos.
+ */
+exports.setPinned = async (req, res, next) => {
+  try {
+    const ids = Array.isArray(req.body?.ids) ? [...new Set(req.body.ids.map(String))] : null;
+    if (!ids) return res.status(422).json({ error: "Envie a lista de posts fixados" });
+    if (ids.length > MAX_PINNED) return res.status(422).json({ error: `Fixe no máximo ${MAX_PINNED} posts` });
+
+    await connectDB();
+    const found = await BlogPost.countDocuments({ _id: { $in: ids }, deletedAt: null });
+    if (found !== ids.length) return res.status(422).json({ error: "Post inválido ou na lixeira" });
+
+    await BlogPost.updateMany(
+      { pinnedOrder: { $ne: null }, _id: { $nin: ids } },
+      { $set: { pinnedOrder: null } },
+      { timestamps: false }
+    );
+    await Promise.all(
+      ids.map((id, i) => BlogPost.updateOne({ _id: id }, { $set: { pinnedOrder: i + 1 } }, { timestamps: false }))
+    );
+    res.json({ ok: true, ids });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ADMIN - REGRA DO DESTAQUE: body { highlight: "auto" | "force" | "hide" }
+ */
+exports.setHighlight = async (req, res, next) => {
+  try {
+    const highlight = req.body?.highlight;
+    if (!["auto", "force", "hide"].includes(highlight)) return res.status(422).json({ error: "Opção inválida" });
+
+    await connectDB();
+    const post = await BlogPost.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null },
+      { $set: { highlight } },
+      { new: true, timestamps: false, projection: "_id highlight" }
+    );
+    if (!post) return res.status(404).json({ error: "Post não encontrado" });
     res.json(post);
   } catch (err) {
     next(err);

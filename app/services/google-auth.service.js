@@ -24,16 +24,25 @@ function isConfigured() {
  * (impede alguém de "logar você" na conta dele) e o id_token precisa trazer o
  * mesmo nonce.
  */
-function authorizationUrl() {
+// Login de leitor (comentários): mesmo app do Google, outra URL de retorno.
+// GOOGLE_READER_REDIRECT_URI é opcional: o padrão troca só o caminho da do admin.
+function readerRedirectUri() {
+  if (process.env.GOOGLE_READER_REDIRECT_URI) return process.env.GOOGLE_READER_REDIRECT_URI;
+  return new URL("/api/comments/google/callback", process.env.GOOGLE_REDIRECT_URI).toString();
+}
+
+// Opções padrão = login do painel. O leitor passa purpose "reader-login", a
+// própria redirectUri e `extra` (ex.: para onde voltar), que vai assinado no state.
+function authorizationUrl({ purpose = "google-login", redirectUri = process.env.GOOGLE_REDIRECT_URI, extra = {} } = {}) {
   const nonce = crypto.randomBytes(16).toString("hex");
-  const state = jwt.sign({ purpose: "google-login", nonce }, process.env.JWT_SECRET, {
+  const state = jwt.sign({ ...extra, purpose, nonce }, process.env.JWT_SECRET, {
     algorithm: "HS256",
     expiresIn: "10m",
   });
   const params = new URLSearchParams({
     response_type: "code",
     client_id: process.env.GOOGLE_CLIENT_ID,
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+    redirect_uri: redirectUri,
     scope: "openid email profile",
     state,
     nonce,
@@ -42,11 +51,16 @@ function authorizationUrl() {
   return { url: `${AUTH_URL}?${params}`, nonce };
 }
 
-function verifyState(state, cookieNonce) {
+// Devolve o payload do state (nonce + extra)
+function verifyStatePayload(state, cookieNonce, purpose = "google-login") {
   const payload = jwt.verify(state, process.env.JWT_SECRET, { algorithms: ["HS256"] });
-  if (payload.purpose !== "google-login") throw new Error("state inválido");
+  if (payload.purpose !== purpose) throw new Error("state inválido");
   if (!cookieNonce || payload.nonce !== cookieNonce) throw new Error("Login iniciado em outro navegador ou expirado");
-  return payload.nonce;
+  return payload;
+}
+
+function verifyState(state, cookieNonce) {
+  return verifyStatePayload(state, cookieNonce).nonce;
 }
 
 function decodeJwtPayload(token) {
@@ -62,7 +76,7 @@ function decodeJwtPayload(token) {
  * (sem baixar as chaves públicas). Público, emissor, validade, nonce e email
  * verificado são conferidos aqui.
  */
-async function exchangeCode(code, expectedNonce) {
+async function exchangeCode(code, expectedNonce, redirectUri = process.env.GOOGLE_REDIRECT_URI) {
   const res = await fetch(TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -70,7 +84,7 @@ async function exchangeCode(code, expectedNonce) {
       code: String(code || ""),
       client_id: process.env.GOOGLE_CLIENT_ID,
       client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      redirect_uri: redirectUri,
       grant_type: "authorization_code",
     }),
   });
@@ -86,7 +100,19 @@ async function exchangeCode(code, expectedNonce) {
   if (claims.nonce !== expectedNonce) throw new Error("nonce inválido");
   if (claims.email_verified !== true) throw new Error("Email do Google não verificado");
 
-  return { sub: String(claims.sub), email: String(claims.email).toLowerCase(), name: claims.name || "" };
+  return {
+    sub: String(claims.sub),
+    email: String(claims.email).toLowerCase(),
+    name: claims.name || "",
+    picture: claims.picture || "",
+  };
 }
 
-module.exports = { isConfigured, authorizationUrl, verifyState, exchangeCode };
+module.exports = {
+  isConfigured,
+  authorizationUrl,
+  verifyState,
+  verifyStatePayload,
+  exchangeCode,
+  readerRedirectUri,
+};

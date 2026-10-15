@@ -84,7 +84,42 @@ function readPending(req) {
   }
 }
 
+// Leitor que entrou com Google para comentar. Cookie próprio, só para
+// /api/comments: não serve para nenhuma rota do painel (o auth exige mfa e id
+// de usuário admin, que este token não tem).
+const READER_COOKIE = "reader_session";
+const READER_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+const READER_OPTIONS = () => baseOptions("/api/comments");
+
+function setReaderCookie(res, profile) {
+  const token = sign(
+    { purpose: "reader", sub: profile.sub, name: profile.name, email: profile.email, picture: profile.picture },
+    "30d"
+  );
+  res.cookie(READER_COOKIE, token, { ...READER_OPTIONS(), maxAge: READER_MAX_AGE_MS });
+}
+
+function clearReaderCookie(res) {
+  res.clearCookie(READER_COOKIE, READER_OPTIONS());
+}
+
+// { sub, name, email, picture } ou null
+function readReader(req) {
+  const token = readCookie(req, READER_COOKIE);
+  if (!token) return null;
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
+    if (payload.purpose !== "reader" || !payload.sub) return null;
+    return { sub: payload.sub, name: payload.name || "Leitor", email: payload.email || "", picture: payload.picture || "" };
+  } catch {
+    return null;
+  }
+}
+
 module.exports = {
+  setReaderCookie,
+  clearReaderCookie,
+  readReader,
   setSessionCookie,
   clearSessionCookie,
   readSessionCookie,

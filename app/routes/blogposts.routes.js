@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const post = require("../controllers/blogpost.controller");
 const auth = require("../middlewares/auth.middleware");
+const { requireAllowedOrigin } = require("../middlewares/auth.middleware");
 
 /**
  * ================= BLOG PÚBLICO =================
@@ -10,6 +11,9 @@ router.get("/published", post.findAllPublished);
 router.get("/public/:id", post.findPublicById);
 router.get("/slug/:slug", post.findBySlug);
 router.get("/season/:season", post.findSeasonEpisodes);
+router.get("/pinned", post.findPinned);
+router.get("/highlights", post.findHighlights);
+router.post("/public/:id/engage", requireAllowedOrigin, post.engage);
 
 /**
  * ================= ADMIN (PROTEGIDO) =================
@@ -22,6 +26,9 @@ router.get("/deleted/all", auth, post.findAllDeleted);
 router.get("/calendar", auth, post.calendar);
 router.get("/heatmap", auth, post.heatmap);
 router.get("/today-planned", auth, post.todayPlanned);
+router.get("/showcase", auth, post.showcase);
+router.put("/showcase/pinned", auth, post.setPinned);
+router.patch("/:id/highlight", auth, post.setHighlight);
 
 router.get("/:id", auth, post.findOne);
 router.put("/:id", auth, post.update);
