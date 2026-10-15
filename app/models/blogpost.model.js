@@ -85,13 +85,14 @@ const BlogPostSchema = new mongoose.Schema(
       type: {
         type: String,
         enum: {
-          values: ["post-category", "members", "all", "categories", "selected"],
+          values: ["post-category", "members", "all", "categories", "selected", "lists"],
           message: "Público do email inválido",
         },
         default: "post-category",
       },
       categories: { type: [String], default: [] },
       subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subscriber" }],
+      lists: [{ type: mongoose.Schema.Types.ObjectId, ref: "AudienceList" }],
       excludeMembers: { type: Boolean, default: false },
     },
     publishedAt: Date,

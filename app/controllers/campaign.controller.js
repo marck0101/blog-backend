@@ -30,6 +30,11 @@ function validateAudience(audience) {
     }
   }
 
+  if (audience.type === "lists") {
+    if (!audience.lists?.length) return "Selecione pelo menos 1 público";
+    if (!audience.lists.every((id) => mongoose.isValidObjectId(id))) return "Público inválido";
+  }
+
   return null;
 }
 

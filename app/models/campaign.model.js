@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const AUDIENCE_TYPES = ["members", "all", "categories", "selected"];
+const AUDIENCE_TYPES = ["members", "all", "categories", "selected", "lists"];
 
 const RecipientSchema = new mongoose.Schema(
   {
@@ -43,6 +43,8 @@ const CampaignSchema = new mongoose.Schema(
       },
       categories: { type: [String], default: [] },
       subscribers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subscriber" }],
+      // Públicos nomeados (type "lists")
+      lists: [{ type: mongoose.Schema.Types.ObjectId, ref: "AudienceList" }],
       // Vale para "all" e "categories": conteúdo que os membros já dominam
       excludeMembers: { type: Boolean, default: false },
     },

@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const connectDB = require("../config/db.config");
 const Subscriber = require("../models/subscriber.model");
 const CATEGORIES = require("../config/categories");
@@ -144,6 +145,10 @@ function listFilter(query) {
   const tier = str(query.tier);
   if (status) filter.status = status;
   if (tier) filter.tier = tier;
+
+  // Público nomeado (?list=<id>)
+  const list = str(query.list);
+  if (mongoose.isValidObjectId(list)) filter.lists = list;
 
   const categories = str(query.categories);
   if (categories) {

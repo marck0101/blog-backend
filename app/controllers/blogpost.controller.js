@@ -20,6 +20,15 @@ const PUBLIC_FIELDS =
 const CARD_FIELDS = "_id title slug excerpt category coverImage season publishedAt createdAt commentsCount";
 
 const MAX_PINNED = 3;
+
+// Ordem da lista pública (?sort=): o leitor escolhe. _id desempata e evita que
+// um post apareça em duas páginas.
+const PUBLIC_SORTS = {
+  recent: { sort: { publishedAt: -1, createdAt: -1, _id: -1 } },
+  oldest: { sort: { publishedAt: 1, createdAt: 1, _id: 1 } },
+  popular: { sort: { views: -1, publishedAt: -1, _id: -1 } },
+  az: { sort: { title: 1, _id: 1 }, collation: { locale: "pt", strength: 1 } },
+};
 // Eventos do leitor (favoritar, compartilhar): 60 a cada 10 min por IP
 const ENGAGE_MAX = 60;
 const ENGAGE_WINDOW_MIN = 10;
@@ -293,13 +302,12 @@ exports.findAllPublished = async (req, res, next) => {
       }
     }
 
+    const order = PUBLIC_SORTS[str(req.query.sort)] || PUBLIC_SORTS.recent;
+    let query = BlogPost.find(filter).select(PUBLIC_FIELDS).sort(order.sort).skip(skip).limit(limit);
+    if (order.collation) query = query.collation(order.collation);
+
     const [posts, total] = await Promise.all([
-      BlogPost.find(filter)
-        .select(PUBLIC_FIELDS)
-        // createdAt/_id desempatam posts sem publishedAt e evitam repetição entre páginas
-        .sort({ publishedAt: -1, createdAt: -1, _id: -1 })
-        .skip(skip)
-        .limit(limit),
+      query,
       BlogPost.countDocuments(filter),
     ]);
 

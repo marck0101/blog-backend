@@ -26,12 +26,15 @@ function audienceFilter(audience = {}) {
     case "selected":
       filter._id = { $in: audience.subscribers || [] };
       break;
+    case "lists":
+      filter.lists = { $in: audience.lists || [] };
+      break;
     case "all":
     default:
       break;
   }
 
-  if (audience.excludeMembers && ["all", "categories"].includes(audience.type)) {
+  if (audience.excludeMembers && ["all", "categories", "lists"].includes(audience.type)) {
     filter.tier = { $ne: "member" };
   }
 
@@ -66,6 +69,7 @@ function postAudience(post) {
     type: a.type,
     categories: a.categories || [],
     subscribers: a.subscribers || [],
+    lists: a.lists || [],
     excludeMembers: Boolean(a.excludeMembers),
   };
 }

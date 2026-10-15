@@ -28,6 +28,8 @@ const SubscriberSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Públicos nomeados (AudienceList) em que a pessoa está
+    lists: [{ type: mongoose.Schema.Types.ObjectId, ref: "AudienceList" }],
     // Anotação interna do admin (ex.: "pagou via Pix em 10/2026")
     notes: {
       type: String,
@@ -52,7 +54,8 @@ const SubscriberSchema = new mongoose.Schema(
 
     // De onde veio a inscrição (formulário do blog). "manual" = cadastrado pelo admin.
     source: {
-      location: { type: String, default: "" }, // home | post | manual
+      location: { type: String, default: "" }, // home | post | manual | import
+      list: { type: mongoose.Schema.Types.ObjectId, ref: "AudienceList", default: null }, // importação: lista de origem
       path: { type: String, default: "" }, // página do formulário
       post: { type: String, default: "" }, // slug, quando assinou num post
       landingPath: { type: String, default: "" }, // primeira página da visita
@@ -69,6 +72,7 @@ SubscriberSchema.index({ email: 1 });
 SubscriberSchema.index({ token: 1 });
 SubscriberSchema.index({ status: 1, tier: 1 });
 SubscriberSchema.index({ createdAt: 1 });
+SubscriberSchema.index({ lists: 1, status: 1 });
 
 SubscriberSchema.pre("save", function (next) {
   if (!this.token) {

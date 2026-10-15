@@ -98,6 +98,7 @@ app.use("/api/linkedin", linkedinRoutes);
 app.use("/api/t", trackingRoutes);
 app.use("/api/metrics", metricsRoutes);
 app.use("/api/comments", require("./routes/comment.routes"));
+app.use("/api/audiences", require("./routes/audience.routes"));
 app.use("/", sitemapRoutes);
 
 /**
