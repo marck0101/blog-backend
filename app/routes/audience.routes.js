@@ -6,6 +6,7 @@ const connectDB = require("../config/db.config");
 const AudienceList = require("../models/audienceList.model");
 const Subscriber = require("../models/subscriber.model");
 const Campaign = require("../models/campaign.model");
+const BlogPost = require("../models/blogpost.model");
 const CATEGORIES = require("../config/categories");
 const { str } = require("../utils/sanitize");
 
@@ -27,32 +28,72 @@ function validId(req, res) {
   return false;
 }
 
-// Públicos com o total de pessoas e quantas estão ativas (recebem envios)
+const NAME_TAKEN = "Já existe um público com esse nome";
+
+// Nome repetido: avisa se o outro está na lixeira (dá para restaurar em vez de recriar)
+async function nameTakenMessage(name) {
+  const other = await AudienceList.findOne({ name, deletedAt: { $ne: null } })
+    .collation({ locale: "pt", strength: 2 })
+    .lean();
+  return other ? `${NAME_TAKEN} na lixeira. Restaure-o ou escolha outro nome.` : NAME_TAKEN;
+}
+
+// Rascunhos que ficariam sem destinatários (ou mandariam para um público
+// apagado) se o público sair: envios em rascunho e emails de posts ainda não publicados
+async function usedInDrafts(id) {
+  const [campaigns, posts] = await Promise.all([
+    Campaign.countDocuments({ status: "draft", "audience.type": "lists", "audience.lists": id }),
+    BlogPost.countDocuments({
+      deletedAt: null,
+      published: { $ne: true },
+      "emailAudience.type": "lists",
+      "emailAudience.lists": id,
+    }),
+  ]);
+  const parts = [];
+  if (campaigns) parts.push(`${campaigns} envio(s) em rascunho`);
+  if (posts) parts.push(`${posts} post(s) não publicado(s)`);
+  return parts.length ? `Este público está em ${parts.join(" e ")}. Troque o público deles antes.` : null;
+}
+
+// Públicos (do painel ou da lixeira) com total de pessoas e quantas estão ativas
+async function listWithCounts(filter, sort) {
+  const [lists, counts] = await Promise.all([
+    AudienceList.find(filter).sort(sort).lean(),
+    Subscriber.aggregate([
+      { $match: { lists: { $exists: true, $ne: [] } } },
+      { $unwind: "$lists" },
+      {
+        $group: {
+          _id: "$lists",
+          total: { $sum: 1 },
+          active: { $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] } },
+        },
+      },
+    ]),
+  ]);
+  const byId = new Map(counts.map((c) => [String(c._id), c]));
+  return lists.map((l) => ({
+    ...l,
+    total: byId.get(String(l._id))?.total || 0,
+    active: byId.get(String(l._id))?.active || 0,
+  }));
+}
+
+// Públicos ativos (fora da lixeira): painel e seletor de envios
 router.get("/", async (req, res, next) => {
   try {
     await connectDB();
-    const [lists, counts] = await Promise.all([
-      AudienceList.find().sort({ createdAt: -1 }).lean(),
-      Subscriber.aggregate([
-        { $match: { lists: { $exists: true, $ne: [] } } },
-        { $unwind: "$lists" },
-        {
-          $group: {
-            _id: "$lists",
-            total: { $sum: 1 },
-            active: { $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] } },
-          },
-        },
-      ]),
-    ]);
-    const byId = new Map(counts.map((c) => [String(c._id), c]));
-    res.json(
-      lists.map((l) => ({
-        ...l,
-        total: byId.get(String(l._id))?.total || 0,
-        active: byId.get(String(l._id))?.active || 0,
-      }))
-    );
+    res.json(await listWithCounts({ deletedAt: null }, { createdAt: -1 }));
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/trash", async (req, res, next) => {
+  try {
+    await connectDB();
+    res.json(await listWithCounts({ deletedAt: { $ne: null } }, { deletedAt: -1 }));
   } catch (err) {
     next(err);
   }
@@ -64,7 +105,7 @@ router.post("/", async (req, res, next) => {
     const list = await AudienceList.create({ name: str(req.body?.name), description: str(req.body?.description) });
     res.status(201).json({ ...list.toObject(), total: 0, active: 0 });
   } catch (err) {
-    if (err.code === 11000) return res.status(409).json({ error: "Já existe um público com esse nome" });
+    if (err.code === 11000) return res.status(409).json({ error: await nameTakenMessage(str(req.body?.name)) });
     next(err);
   }
 });
@@ -76,31 +117,68 @@ router.patch("/:id", async (req, res, next) => {
     const update = {};
     if (req.body?.name !== undefined) update.name = str(req.body.name);
     if (req.body?.description !== undefined) update.description = str(req.body.description);
-    const list = await AudienceList.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
+    const list = await AudienceList.findOneAndUpdate({ _id: req.params.id, deletedAt: null }, update, {
+      new: true,
+      runValidators: true,
+    });
     if (!list) return res.status(404).json({ error: "Público não encontrado" });
     res.json(list);
   } catch (err) {
-    if (err.code === 11000) return res.status(409).json({ error: "Já existe um público com esse nome" });
+    if (err.code === 11000) return res.status(409).json({ error: await nameTakenMessage(str(req.body?.name)) });
     next(err);
   }
 });
 
-// Exclui o público, não as pessoas: elas continuam como assinantes
+// Manda para a lixeira. As pessoas continuam ligadas ao público, só que ele
+// some do painel e dos envios até ser restaurado.
 router.delete("/:id", async (req, res, next) => {
   try {
     if (!validId(req, res)) return;
     await connectDB();
 
-    // Envio em rascunho mirando só este público ficaria sem destinatários
-    const drafts = await Campaign.countDocuments({ status: "draft", "audience.type": "lists", "audience.lists": req.params.id });
-    if (drafts > 0 && req.query.force !== "1") {
-      return res.status(409).json({
-        error: `Este público está em ${drafts} envio(s) em rascunho. Troque o público desses envios antes de excluir.`,
-      });
-    }
+    const inUse = await usedInDrafts(req.params.id);
+    if (inUse) return res.status(409).json({ error: inUse });
 
-    const list = await AudienceList.findByIdAndDelete(req.params.id);
+    const list = await AudienceList.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null },
+      { $set: { deletedAt: new Date() } },
+      { new: true }
+    );
     if (!list) return res.status(404).json({ error: "Público não encontrado" });
+    res.json(list);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch("/:id/restore", async (req, res, next) => {
+  try {
+    if (!validId(req, res)) return;
+    await connectDB();
+    const list = await AudienceList.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: { $ne: null } },
+      { $set: { deletedAt: null } },
+      { new: true }
+    );
+    if (!list) return res.status(404).json({ error: "Público não está na lixeira" });
+    res.json(list);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Exclui de vez (só da lixeira): apaga o público e desfaz o vínculo das
+// pessoas, que continuam como assinantes
+router.delete("/:id/hard", async (req, res, next) => {
+  try {
+    if (!validId(req, res)) return;
+    await connectDB();
+
+    const inUse = await usedInDrafts(req.params.id);
+    if (inUse) return res.status(409).json({ error: inUse });
+
+    const list = await AudienceList.findOneAndDelete({ _id: req.params.id, deletedAt: { $ne: null } });
+    if (!list) return res.status(404).json({ error: "Público não está na lixeira" });
     await Subscriber.updateMany({ lists: list._id }, { $pull: { lists: list._id } });
     res.json({ ok: true });
   } catch (err) {
@@ -143,8 +221,8 @@ router.post("/:id/import", async (req, res, next) => {
     if (invalidCats.length) return res.status(422).json({ error: `Categorias inválidas: ${invalidCats.join(", ")}` });
 
     await connectDB();
-    const list = await AudienceList.findById(req.params.id).lean();
-    if (!list) return res.status(404).json({ error: "Público não encontrado" });
+    const list = await AudienceList.findOne({ _id: req.params.id, deletedAt: null }).lean();
+    if (!list) return res.status(404).json({ error: "Público não encontrado ou na lixeira" });
 
     // Limpa e tira repetidos do próprio arquivo
     const invalid = [];
