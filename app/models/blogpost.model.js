@@ -1,6 +1,15 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 
+// Texto alternativo de imagem: leitores de tela e buscadores leem até ~125 caracteres
+const ALT_MAX = 125;
+const altField = {
+  type: String,
+  trim: true,
+  default: "",
+  maxlength: [ALT_MAX, `O texto alternativo deve ter no máximo ${ALT_MAX} caracteres`],
+};
+
 async function generateUniqueSlug(title, excludeId) {
   const base = slugify(title, { lower: true, strict: true });
   let slug = base;
@@ -63,12 +72,22 @@ const BlogPostSchema = new mongoose.Schema(
     seasonOrder: { type: Number, default: null },
 
     coverImage: String,
+    coverImageAlt: altField,
 
     gallery: [
       {
         _id: false,
         url: String,
-        alt: String,
+        alt: altField,
+      },
+    ],
+
+    // Perguntas frequentes no fim do post: aparecem para o leitor e viram FAQPage (schema.org)
+    faq: [
+      {
+        _id: false,
+        question: { type: String, trim: true, required: [true, "Pergunta do FAQ vazia"], maxlength: 200 },
+        answer: { type: String, trim: true, required: [true, "Resposta do FAQ vazia"], maxlength: 1500 },
       },
     ],
 
@@ -133,7 +152,6 @@ const BlogPostSchema = new mongoose.Schema(
     seo: {
       title: String,
       description: String,
-      faqSchema: { type: Boolean, default: false },
     },
 
     deletedAt: { type: Date, default: null },

@@ -14,10 +14,10 @@ const limiter = require("../services/ratelimit.service");
 // Campos que as rotas públicas podem devolver. Lista de permitidos (não de
 // proibidos): campo novo de admin (email, LinkedIn, views…) nunca vaza por padrão.
 const PUBLIC_FIELDS =
-  "_id title slug excerpt content category coverImage gallery seo season seasonOrder publishedAt createdAt updatedAt commentsCount";
+  "_id title slug excerpt content category coverImage coverImageAlt gallery faq seo season seasonOrder publishedAt createdAt updatedAt commentsCount";
 
 // Cards da vitrine (fixados e destaques): sem o conteúdo inteiro
-const CARD_FIELDS = "_id title slug excerpt category coverImage season publishedAt createdAt commentsCount";
+const CARD_FIELDS = "_id title slug excerpt category coverImage coverImageAlt season publishedAt createdAt commentsCount";
 
 const MAX_PINNED = 3;
 
