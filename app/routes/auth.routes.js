@@ -114,6 +114,13 @@ function finishLogin(res, user) {
   setSessionCookie(res, user);
 }
 
+// Só para testes locais: pula a etapa 2. Exige as três condições, para que
+// nenhum erro de configuração desligue o 2FA em produção (na Vercel, VERCEL=1).
+const skip2fa = () =>
+  process.env.NODE_ENV === "development" && process.env.SKIP_2FA === "true" && !process.env.VERCEL;
+
+if (skip2fa()) console.warn("[AUTH] SKIP_2FA ativo: login sem 2º fator (apenas desenvolvimento)");
+
 /* ================= ETAPA 1: SENHA (RESERVA) ================= */
 
 router.post("/login", requireAllowedOrigin, async (req, res) => {
@@ -141,6 +148,11 @@ router.post("/login", requireAllowedOrigin, async (req, res) => {
     }
 
     await limiter.reset("login", req);
+
+    if (skip2fa()) {
+      finishLogin(res, user);
+      return res.json({ next: "done", user: publicUser(user) });
+    }
 
     // Senha certa ainda não entra: falta o 2º fator
     setPendingCookie(res, user, "password");
@@ -185,6 +197,11 @@ router.get("/google/callback", async (req, res) => {
     }
     if (!user.googleSub) {
       await User.updateOne({ _id: user._id }, { $set: { googleSub: profile.sub } });
+    }
+
+    if (skip2fa()) {
+      finishLogin(res, user);
+      return res.redirect(`${FRONTEND_URL}/admin`);
     }
 
     setPendingCookie(res, user, "google");
