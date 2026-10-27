@@ -22,6 +22,14 @@ const SeasonSchema = new mongoose.Schema(
     description: { type: String, trim: true, default: "", maxlength: 600 },
     // Ordem na página /seasons (menor primeiro)
     order: { type: Number, default: 0 },
+    // Perguntas frequentes da season: aparecem na página dela e viram FAQPage (schema.org)
+    faq: [
+      {
+        _id: false,
+        question: { type: String, trim: true, required: [true, "Pergunta do FAQ vazia"], maxlength: 200 },
+        answer: { type: String, trim: true, required: [true, "Resposta do FAQ vazia"], maxlength: 1500 },
+      },
+    ],
   },
   { timestamps: true }
 );

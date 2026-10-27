@@ -104,7 +104,7 @@ exports.publicOne = async (req, res, next) => {
     }
 
     res.json({
-      season: { slug: season.slug, title: season.title, description: season.description },
+      season: { slug: season.slug, title: season.title, description: season.description, faq: season.faq || [] },
       posts: posts.map(withReadingMinutes),
     });
   } catch (err) {
@@ -155,6 +155,12 @@ function pickSeason(body) {
     data.order = Number.isFinite(order) ? order : 0;
   }
   if (body.slug !== undefined) data.slug = slugify(str(body.slug), { lower: true, strict: true });
+  // Só pares completos, como strings (objetos viram operadores do MongoDB)
+  if (Array.isArray(body.faq)) {
+    data.faq = body.faq
+      .map((item) => ({ question: str(item?.question), answer: str(item?.answer) }))
+      .filter((item) => item.question && item.answer);
+  }
   return data;
 }
 
