@@ -35,6 +35,13 @@ router.get("/:id", auth, post.findOne);
 router.put("/:id", auth, post.update);
 
 /**
+ * ================= HISTÓRICO DE VERSÕES =================
+ */
+router.get("/:id/revisions", auth, post.listRevisions);
+router.get("/:id/revisions/:version", auth, post.getRevision);
+router.post("/:id/revisions/:version/restore", auth, post.restoreRevision);
+
+/**
  * ================= IMAGENS =================
  */
 router.delete("/:id/images", auth, post.removeImage);

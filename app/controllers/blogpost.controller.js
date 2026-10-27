@@ -11,6 +11,7 @@ const { withReadingMinutes } = require("../utils/readingTime");
 const { calendarRange } = require("../utils/calendarRange");
 const stats = require("../services/postStats.service");
 const limiter = require("../services/ratelimit.service");
+const revisions = require("../services/postRevision.service");
 
 // Campos que as rotas públicas podem devolver. Lista de permitidos (não de
 // proibidos): campo novo de admin (email, LinkedIn, views…) nunca vaza por padrão.
@@ -95,6 +96,9 @@ async function safeNotify(post) {
   }
 }
 
+// Quem fez a alteração, para o histórico de versões
+const revisionAuthor = (req) => ({ id: req.userId, name: req.user?.name || req.user?.email || "" });
+
 // Primeira publicação: email e LinkedIn em paralelo (cabem juntos no tempo
 // da função serverless). Nenhum dos dois desfaz a publicação se falhar.
 function announcePost(post) {
@@ -168,6 +172,7 @@ exports.create = async (req, res, next) => {
     }
 
     const post = await BlogPost.create(data);
+    await revisions.safeRecordRevision(post, { reason: "create", author: revisionAuthor(req) });
 
     if (post.status === "published") {
       await announcePost(post);
@@ -427,6 +432,9 @@ exports.update = async (req, res, next) => {
     syncPublished(data);
     pickLinkedIn(data);
 
+    // Post sem histórico: o estado de antes vira a v1 antes de ser alterado
+    await revisions.ensureBaseline(req.params.id);
+
     const post = await BlogPost.findByIdAndUpdate(req.params.id, data, {
       new: true,
       runValidators: true,
@@ -435,6 +443,8 @@ exports.update = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
     }
+
+    await revisions.safeRecordRevision(post, { author: revisionAuthor(req) });
 
     if (post.status === "published" && existing?.status !== "published") {
       await announcePost(post);
@@ -528,6 +538,8 @@ exports.deletePermanent = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
     }
+
+    await revisions.deleteRevisions(post._id);
 
     res.json({ message: "Post removido definitivamente" });
   } catch (err) {
@@ -627,6 +639,8 @@ exports.removeImage = async (req, res, next) => {
 
     const { imageUrl } = req.body;
 
+    await revisions.ensureBaseline(req.params.id);
+
     const post = await BlogPost.findByIdAndUpdate(
       req.params.id,
       { $pull: { gallery: { url: imageUrl } } },
@@ -636,6 +650,105 @@ exports.removeImage = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
     }
+
+    await revisions.safeRecordRevision(post, { reason: "image-removed", author: revisionAuthor(req) });
+
+    res.json(post);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ================= HISTÓRICO DE VERSÕES (ADMIN) ================= */
+
+const parseVersion = (value) => {
+  const version = Number(value);
+  return Number.isInteger(version) && version > 0 ? version : null;
+};
+
+/**
+ * HISTÓRICO — versões do post, mais nova primeiro (sem o conteúdo)
+ */
+exports.listRevisions = async (req, res, next) => {
+  try {
+    await connectDB();
+
+    if (!(await BlogPost.exists({ _id: req.params.id }))) {
+      return res.status(404).json({ error: "Post não encontrado" });
+    }
+
+    res.json(await revisions.listRevisions(req.params.id));
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * HISTÓRICO — uma versão completa
+ */
+exports.getRevision = async (req, res, next) => {
+  try {
+    await connectDB();
+
+    const version = parseVersion(req.params.version);
+    const revision = version && (await revisions.getRevision(req.params.id, version));
+    if (!revision) {
+      return res.status(404).json({ error: "Versão não encontrada" });
+    }
+
+    res.json(revision);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * HISTÓRICO — restaura uma versão. Não apaga nada: o conteúdo dela vira uma
+ * versão nova (o estado de antes continua no histórico). Status, datas, email
+ * e LinkedIn não mudam; o endereço (slug) atual é mantido para não quebrar links.
+ */
+exports.restoreRevision = async (req, res, next) => {
+  try {
+    await connectDB();
+
+    const version = parseVersion(req.params.version);
+    const revision = version && (await revisions.getRevision(req.params.id, version));
+    if (!revision) {
+      return res.status(404).json({ error: "Versão não encontrada" });
+    }
+
+    const existing = await BlogPost.findById(req.params.id).select("status plannedAt content slug season").lean();
+    if (!existing) {
+      return res.status(404).json({ error: "Post não encontrado" });
+    }
+
+    const fields = Object.fromEntries(
+      revisions.REVISION_FIELDS.filter((f) => f !== "slug").map((f) => [f, revision.snapshot[f]])
+    );
+    // Sem o slug no update, mudar o título geraria um endereço novo
+    fields.slug = existing.slug;
+    // Season apagada depois da versão: o post fica na season atual
+    if (fields.season && !(await seasonExists(fields.season))) {
+      fields.season = existing.season ?? null;
+    }
+
+    const validationError = validatePost(fields, false, existing);
+    if (validationError) {
+      return res.status(422).json({ error: validationError });
+    }
+
+    await revisions.ensureBaseline(req.params.id);
+
+    const post = await BlogPost.findByIdAndUpdate(req.params.id, fields, {
+      new: true,
+      runValidators: true,
+    });
+
+    await revisions.safeRecordRevision(post, {
+      reason: "restore",
+      restoredFrom: version,
+      author: revisionAuthor(req),
+    });
 
     res.json(post);
   } catch (err) {
