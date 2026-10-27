@@ -6,6 +6,7 @@ const CATEGORIES = require("../config/categories");
 const Subscriber = require("../models/subscriber.model");
 const campaignService = require("../services/campaign.service");
 const { SITE_URL } = require("../config/urls");
+const { calendarRange } = require("../utils/calendarRange");
 
 const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -153,10 +154,7 @@ exports.calendar = async (req, res, next) => {
   try {
     await connectDB();
 
-    const year = parseInt(req.query.year) || new Date().getFullYear();
-    const month = parseInt(req.query.month) || new Date().getMonth() + 1;
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 0, 23, 59, 59, 999);
+    const { start, end } = calendarRange(req.query);
 
     const campaigns = await Campaign.find({
       $or: [

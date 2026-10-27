@@ -8,6 +8,7 @@ const Season = require("../models/season.model");
 const { seasonExists } = require("../services/season.service");
 const { str, escapeRegex, isMeaningfulSearch } = require("../utils/sanitize");
 const { withReadingMinutes } = require("../utils/readingTime");
+const { calendarRange } = require("../utils/calendarRange");
 const stats = require("../services/postStats.service");
 const limiter = require("../services/ratelimit.service");
 
@@ -541,11 +542,7 @@ exports.calendar = async (req, res, next) => {
   try {
     await connectDB();
 
-    const year = parseInt(req.query.year) || new Date().getFullYear();
-    const month = parseInt(req.query.month) || new Date().getMonth() + 1;
-
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 0, 23, 59, 59, 999);
+    const { start, end } = calendarRange(req.query);
 
     const posts = await BlogPost.find({
       deletedAt: null,
