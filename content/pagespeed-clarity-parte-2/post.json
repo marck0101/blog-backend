@@ -11,8 +11,8 @@
       "answer": "Entregar os dados da página já dentro do HTML, em vez de esperar o JavaScript chamar a API. Isso zerou o deslocamento de layout (CLS) e quase reduziu à metade o tempo até o maior conteúdo aparecer (LCP)."
     },
     {
-      "question": "Por que o LCP no celular ainda está acima de 2,5 segundos?",
-      "answer": "As ferramentas de análise (GA4, Meta Pixel e Clarity) carregam cerca de 400 KB logo no início e disputam a rede com a página. Sem elas, o teste local ficou em 2,8 segundos."
+      "question": "Por que o LCP no celular ficou acima de 2,5 segundos no primeiro ajuste?",
+      "answer": "As ferramentas de análise (GA4, Meta Pixel e Clarity) carregavam cerca de 400 KB logo no início e disputavam a rede com a página. Adiadas para a primeira interação ou 3 segundos após o carregamento, o LCP caiu para 2,4 segundos no teste local."
     },
     {
       "question": "O que não deu certo?",
