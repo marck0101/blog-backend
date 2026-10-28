@@ -4,6 +4,12 @@ const Subscriber = require("../models/subscriber.model");
 const CATEGORIES = require("../config/categories");
 const { recordUnsubscribe } = require("../services/tracking.service");
 const { str, escapeRegex } = require("../utils/sanitize");
+const limiter = require("../services/ratelimit.service");
+
+// Rota pública sem login: 5 inscrições por IP a cada 30 min. Barra script
+// cadastrando emails de terceiros em massa (que depois receberiam os envios).
+const SUBSCRIBE_MAX = 5;
+const SUBSCRIBE_WINDOW_MIN = 30;
 
 const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -27,6 +33,10 @@ const SUBSCRIBED = { message: "Inscrição realizada com sucesso!" };
 exports.subscribe = async (req, res, next) => {
   try {
     await connectDB();
+
+    const wait = await limiter.blockedFor("subscribe", req, SUBSCRIBE_MAX);
+    if (wait) return limiter.tooMany(res, wait);
+    await limiter.hit("subscribe", req, SUBSCRIBE_WINDOW_MIN);
 
     // Só tipos esperados: objetos virariam operadores do MongoDB
     const email = typeof req.body?.email === "string" ? req.body.email.trim().slice(0, 254) : "";
