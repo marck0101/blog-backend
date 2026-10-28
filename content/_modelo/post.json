@@ -1,0 +1,22 @@
+{
+  "title": "Palavra-chave no começo: a promessa em até 60 caracteres",
+  "slug": "palavra-chave-e-promessa-sem-acento",
+  "excerpt": "A dor de quem lê e o resultado que o artigo entrega, em até 160 caracteres.",
+  "category": "tecnologia",
+  "file": "content.html",
+  "plannedAt": "2026-11-16T12:00:00-03:00",
+  "faq": [
+    {
+      "question": "Pergunta técnica, do jeito que a pessoa digita na busca?",
+      "answer": "Resposta direta em 2 a 4 frases, que faça sentido sozinha, fora do artigo."
+    },
+    {
+      "question": "Quanto custa não resolver esse problema?",
+      "answer": "Resposta de negócio: dinheiro, tempo, clientes ou reputação perdidos, com um número quando houver."
+    },
+    {
+      "question": "Por onde começo?",
+      "answer": "O primeiro passo prático, que a pessoa consegue fazer hoje."
+    }
+  ]
+}
