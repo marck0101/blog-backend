@@ -1,0 +1,22 @@
+{
+  "title": "Blog rápido e seguro: auditoria e roteiro de monitoramento",
+  "slug": "blog-rapido-e-seguro-auditoria-e-roteiro-de-monitoramento",
+  "excerpt": "Nota 94 no celular, auditoria de segurança da API e da newsletter, SEO conferido e um roteiro para nada disso regredir em silêncio.",
+  "category": "tecnologia",
+  "file": "content.html",
+  "plannedAt": "2026-11-09T12:00:00-03:00",
+  "faq": [
+    {
+      "question": "Nota alta no PageSpeed significa que o site é seguro?",
+      "answer": "Não. O blog tinha nota 100 em práticas recomendadas enquanto o servidor usava duas bibliotecas com vulnerabilidade crítica conhecida. O PageSpeed avalia o que chega ao navegador; as dependências do servidor precisam de outra verificação, como o npm audit."
+    },
+    {
+      "question": "Como proteger um formulário de newsletter?",
+      "answer": "Tratar as entradas só como texto, responder igual para e-mail novo e já inscrito, usar um código aleatório no link de cancelamento e limitar quantas inscrições um mesmo endereço de rede pode fazer em um intervalo de tempo."
+    },
+    {
+      "question": "Com que frequência monitorar desempenho, segurança e SEO?",
+      "answer": "Disponibilidade de forma contínua e automática; PageSpeed e Search Console toda semana; dependências, cabeçalhos de segurança e dados estruturados todo mês; e uma checagem rápida a cada post publicado."
+    }
+  ]
+}
