@@ -10,7 +10,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "cross-env PORT=3333 NODE_ENV=development nodemon server.js",
     "start": "cross-env NODE_ENV=production node server.js",
-    "prod": "cross-env PORT=3333 NODE_ENV=production nodemon server.js"
+    "prod": "cross-env PORT=3333 NODE_ENV=production nodemon server.js",
+    "backfill:covers": "node scripts/backfill-cover-variants.js",
+    "backfill:image-sizes": "cross-env NODE_ENV=production node scripts/backfill-content-image-sizes.js"
   },
   "keywords": [
     "nodejs",

@@ -309,7 +309,9 @@ exports.findAllPublished = async (req, res, next) => {
     }
 
     const order = PUBLIC_SORTS[str(req.query.sort)] || PUBLIC_SORTS.recent;
-    let query = BlogPost.find(filter).select(PUBLIC_FIELDS).sort(order.sort).skip(skip).limit(limit);
+    // fields=card: lista da home e prerender — só o que o card mostra, sem o conteúdo inteiro
+    const fields = req.query.fields === "card" ? CARD_FIELDS : PUBLIC_FIELDS;
+    let query = BlogPost.find(filter).select(fields).sort(order.sort).skip(skip).limit(limit);
     if (order.collation) query = query.collation(order.collation);
 
     const [posts, total] = await Promise.all([

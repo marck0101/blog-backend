@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const sharp = require("sharp");
+const { saveCover } = require("../services/coverImage.service");
 const auth = require("../middlewares/auth.middleware");
 const upload = require("../middlewares/upload.middleware");
 const admin = require("../config/firebase.admin");
@@ -17,25 +17,12 @@ router.post("/cover", auth, upload.single("cover"), async (req, res, next) => {
       });
     }
 
-    const webpBuffer = await sharp(req.file.buffer)
-      .resize({ width: 1200, withoutEnlargement: true })
-      .webp({ quality: 82 })
-      .toBuffer();
-
     const bucket = admin.storage().bucket();
-    const filename = `covers/${Date.now()}.webp`;
-
-    const fileRef = bucket.file(filename);
-
-    await fileRef.save(webpBuffer, {
-      metadata: { contentType: "image/webp" },
-    });
-
-    await fileRef.makePublic();
+    const { filename, width, height } = await saveCover(bucket, req.file.buffer);
 
     const url = `https://storage.googleapis.com/${bucket.name}/${filename}`;
 
-    res.status(201).json({ url });
+    res.status(201).json({ url, width, height });
   } catch (err) {
     console.error("Upload error:", err);
     next(err);

@@ -3,6 +3,7 @@ const router = express.Router();
 const connectDB = require("../config/db.config");
 const BlogPost = require("../models/blogpost.model");
 const Season = require("../models/season.model");
+const CATEGORIES = require("../config/categories");
 
 const SITE_URL = "https://blog.marck0101.com.br";
 
@@ -124,6 +125,56 @@ router.get("/rss.xml", async (req, res) => {
   } catch (err) {
     console.error("[RSS]", err);
     res.status(500).send("Erro ao gerar RSS");
+  }
+});
+
+// llms.txt (llmstxt.org): resumo do site em Markdown para agentes de IA —
+// título, descrição curta e os artigos agrupados por categoria, com link e resumo.
+router.get("/llms.txt", async (req, res) => {
+  try {
+    await connectDB();
+
+    const posts = await BlogPost.find(
+      { published: true, deletedAt: null },
+      { slug: 1, title: 1, excerpt: 1, seo: 1, category: 1 }
+    )
+      .sort({ publishedAt: -1 })
+      .lean();
+
+    // Markdown de uma linha: sem quebras que quebrariam a lista
+    const oneLine = (str = "") => String(str).replace(/\s+/g, " ").trim();
+
+    const sections = CATEGORIES.map(({ slug, label }) => {
+      const items = posts
+        .filter((p) => p.category === slug)
+        .map((p) => {
+          const summary = oneLine(p.seo?.description || p.excerpt);
+          return `- [${oneLine(p.title)}](${SITE_URL}/blog/${p.slug})${summary ? `: ${summary}` : ""}`;
+        });
+      return items.length ? `## ${label}\n\n${items.join("\n")}` : "";
+    }).filter(Boolean);
+
+    const txt = `# Blog do Marcos Henrique Corrêa
+
+> Artigos práticos em português sobre marketing digital, tráfego pago, growth e tecnologia, escritos por Marcos Henrique Corrêa, desenvolvedor full stack e gestor de tráfego.
+
+- Lista completa e datas: ${SITE_URL}/sitemap.xml
+- Últimos artigos: ${SITE_URL}/rss.xml
+- Séries de artigos em sequência: ${SITE_URL}/seasons
+
+${sections.join("\n\n")}
+
+## Optional
+
+- [Política de Privacidade](${SITE_URL}/privacidade)
+`;
+
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400");
+    res.send(txt);
+  } catch (err) {
+    console.error("[LLMS]", err);
+    res.status(500).send("Erro ao gerar llms.txt");
   }
 });
 
