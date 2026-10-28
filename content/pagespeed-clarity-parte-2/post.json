@@ -1,0 +1,22 @@
+{
+  "title": "PageSpeed e Clarity 2: o que deu certo e o que não deu",
+  "slug": "pagespeed-e-clarity-parte-2-o-que-deu-certo-e-o-que-nao-deu",
+  "excerpt": "Um mês depois do diagnóstico: o que foi feito no blog, como foi medido, o que melhorou e as hipóteses que não resistiram ao contato com o código.",
+  "category": "tecnologia",
+  "file": "content.html",
+  "plannedAt": "2026-11-02T12:00:00-03:00",
+  "faq": [
+    {
+      "question": "O que mais melhorou o desempenho do blog?",
+      "answer": "Entregar os dados da página já dentro do HTML, em vez de esperar o JavaScript chamar a API. Isso zerou o deslocamento de layout (CLS) e quase reduziu à metade o tempo até o maior conteúdo aparecer (LCP)."
+    },
+    {
+      "question": "Por que o LCP no celular ainda está acima de 2,5 segundos?",
+      "answer": "As ferramentas de análise (GA4, Meta Pixel e Clarity) carregam cerca de 400 KB logo no início e disputam a rede com a página. Sem elas, o teste local ficou em 2,8 segundos."
+    },
+    {
+      "question": "O que não deu certo?",
+      "answer": "O JavaScript não usado não era fácil de cortar, o filtro por IP não serviria para o celular, uma premissa do artigo anterior estava errada e uma medição isolada logo após a publicação mostrou um resultado enganoso."
+    }
+  ]
+}
