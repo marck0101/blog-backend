@@ -73,7 +73,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - Mantém R-SUB-06 (idempotente) e R-EMAIL-12 (atribuição ao envio).
   - **Pronto quando:** teste prova que GET não altera o assinante e POST altera.
 
-- [ ] **SEC-04 · Exclusão definitiva só da lixeira, sem órfãos** · `blog-backend` · P
+- [x] **SEC-04 · Exclusão definitiva só da lixeira, sem órfãos** · `blog-backend` · P — concluída em 02/11/2026 (branch `fix/sec-04-exclusao-definitiva`; testes em `tests/posts/trash.test.mjs`)
   - `DELETE /api/posts/:id/hard` não confere se o post está na lixeira (só o painel garante).
   - Exigir `deletedAt != null`; apagar junto comentários e `PostDailyStat` do post.
     Envios ligados ao post ficam (são histórico), com `post: null`.

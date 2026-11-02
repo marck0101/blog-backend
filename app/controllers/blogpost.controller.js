@@ -5,6 +5,9 @@ require("../models/subscriber.model"); // para o populate de emailAudience.subsc
 const { notifyNewPost } = require("../services/campaign.service");
 const { safeShareArticle } = require("../services/linkedin.service");
 const Season = require("../models/season.model");
+const Comment = require("../models/comment.model");
+const Campaign = require("../models/campaign.model");
+const PostDailyStat = require("../models/postDailyStat.model");
 const { seasonExists } = require("../services/season.service");
 const { str, escapeRegex, isMeaningfulSearch } = require("../utils/sanitize");
 const { withReadingMinutes } = require("../utils/readingTime");
@@ -535,13 +538,24 @@ exports.deletePermanent = async (req, res, next) => {
   try {
     await connectDB();
 
-    const post = await BlogPost.findByIdAndDelete(req.params.id);
+    // Só sai de vez o que já está na lixeira (o painel garante, a API também)
+    const post = await BlogPost.findOneAndDelete({ _id: req.params.id, deletedAt: { $ne: null } });
 
     if (!post) {
+      if (await BlogPost.exists({ _id: req.params.id })) {
+        return res.status(409).json({ error: "Mande o post para a lixeira antes de excluir de vez" });
+      }
       return res.status(404).json({ error: "Post não encontrado" });
     }
 
-    await revisions.deleteRevisions(post._id);
+    // Nada fica apontando para o post apagado. Envios ficam (são histórico de
+    // quem recebeu o quê), só sem o vínculo.
+    await Promise.all([
+      revisions.deleteRevisions(post._id),
+      Comment.deleteMany({ post: post._id }),
+      PostDailyStat.deleteMany({ post: post._id }),
+      Campaign.updateMany({ post: post._id }, { $set: { post: null } }, { timestamps: false }),
+    ]);
 
     res.json({ message: "Post removido definitivamente" });
   } catch (err) {

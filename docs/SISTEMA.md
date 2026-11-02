@@ -457,7 +457,9 @@ Arquivo: `app/routes/comment.routes.js`, `pages/Admin/Comments.jsx`, `components
 - **R-TRASH-02** Restaurar um agendado cuja data já passou o transforma em **rascunho** (senão
   ele iria ao ar sozinho no próximo cron).
 - **R-TRASH-03** Exclusão definitiva pede para digitar uma confirmação
-  (`TypedConfirmDialog`) e apaga o post e o histórico.
+  (`TypedConfirmDialog`) e só vale para post que **já está na lixeira** (a API responde 409
+  para os demais). Apaga o post, o histórico, os comentários e as estatísticas diárias dele.
+  Envios ligados ao post **ficam** (histórico de quem recebeu o quê), sem o vínculo.
 
 ---
 
@@ -664,9 +666,7 @@ Ordenadas por impacto. Nada aqui está corrigido ainda.
    heatmap, "agendados hoje" e filtros de data das listas usam UTC; estatísticas de leitura
    usam Brasília. Entre 21h e meia-noite os números podem cair no dia/mês errado.
    *Sugestão:* padronizar `America/Sao_Paulo` em todos.
-7. **Exclusão definitiva deixa órfãos**: comentários, estatísticas diárias e envios ligados
-   ao post continuam no banco. O backend também não exige que o post esteja na lixeira
-   (só o painel garante).
+7. ~~**Exclusão definitiva deixa órfãos**~~ — resolvido na SEC-04 (ver R-TRASH-03).
 8. **Limite do Gmail**: conta Gmail comum envia ~500 emails/dia (Workspace ~2000). Com a base
    crescendo, envios vão falhar no meio. *Sugestão:* migrar para um provedor transacional
    (Resend, SES, Brevo) antes de chegar perto disso.
