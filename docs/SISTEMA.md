@@ -498,6 +498,17 @@ Arquivo: `app/routes/comment.routes.js`, `pages/Admin/Comments.jsx`, `components
 1. Publica os **agendados** com `plannedAt <= agora` (mais antigos primeiro), disparando
    email e LinkedIn de cada um.
 2. Retoma os envios de email que ficaram em **"enviando"**.
+3. **Alertas** (`app/services/alerts.service.js`): se algo precisa de ação, manda **um**
+   email de resumo para `ADMIN_EMAIL` (ou `GMAIL_USER`). Sem pendência, nenhum email.
+   - **R-ALERT-01** Entram: erros da própria rotina; agendado com data passada que continua
+     fora do ar; envio terminado nas últimas 24 h com falha; envio ainda "enviando"; aviso de
+     post **publicado** que ficou em rascunho (R-EMAIL-03); LinkedIn de artigo publicado que
+     falhou; conexão do LinkedIn a 7 dias ou menos de expirar; LinkedIn desconectado/expirado
+     **com** post esperando para sair nele.
+   - **R-ALERT-02** Pendência não resolvida volta no email do dia seguinte (é um lembrete,
+     não um aviso único). Envio com falha só entra nas 24 h seguintes ao fim.
+   - **R-ALERT-03** Falha ao montar ou enviar o alerta nunca derruba a rotina. Títulos e
+     mensagens de erro vão escapados no email.
 
 O resumo sai no log da Vercel como `[CRON] {"published":[…],"linkedin":[…],"resumed":[…],"errors":[…]}`.
 
@@ -567,6 +578,9 @@ audiência, use o **GA4** (evento `post_view`).
 ## 13. Como identificar erros e acertos
 
 ### 13.1 Onde os erros aparecem
+
+**Primeiro lugar: o email "[Blog] N pendência(s)"** da rotina diária (~9h). Ele lista o que
+está abaixo, com link direto para o painel. Sem email = sem pendência conhecida.
 
 | Sinal | Onde ver | O que fazer |
 |---|---|---|

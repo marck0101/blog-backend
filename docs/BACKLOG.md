@@ -92,7 +92,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - Dependabot (semanal, agrupando atualizações menores) + `npm audit` no CI (CI-01).
   - **Pronto quando:** PRs do Dependabot chegando e CI barrando vulnerabilidade alta.
 
-- [ ] **SEC-07 · Alerta quando algo falha** · `blog-backend` · M
+- [x] **SEC-07 · Alerta quando algo falha** · `blog-backend` · M — concluída em 02/11/2026 (branch `feat/sec-07-alertas`; 14 testes em `tests/cron/daily.test.mjs`, incluindo a publicação de agendados, que não tinha teste). Em produção, conferir `ADMIN_EMAIL` na Vercel: é para onde o alerta vai
   - Hoje só se descobre falha abrindo o painel ou os logs da Vercel.
   - Email para o admin (mesmo mecanismo do aviso de comentário) quando: o cron tem
     `errors`, um agendado não publicou, um envio termina com falhas, o LinkedIn falha, a
@@ -230,7 +230,7 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
   - Afeta destaques, "Continue lendo" e conversão por post: anotar no SISTEMA.md a data da
     mudança (números antes e depois não são comparáveis).
 
-- [ ] **BIZ-03 · Dashboard: avisos de post não enviados** · os dois · P
+- [ ] **BIZ-03 · Dashboard: avisos de post não enviados** · os dois · P — o alerta diário da SEC-07 já avisa por email; falta mostrar no Dashboard
   - Listar `post-notification` em rascunho de posts publicados (R-EMAIL-03).
 
 - [ ] **BIZ-04 · Redirecionar slug antigo** · os dois · M
