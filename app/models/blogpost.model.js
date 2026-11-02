@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const { SLUGS: CATEGORY_SLUGS } = require("../config/categories");
 
 // Texto alternativo de imagem: leitores de tela e buscadores leem até ~125 caracteres
 const ALT_MAX = 125;
@@ -60,8 +61,8 @@ const BlogPostSchema = new mongoose.Schema(
     category: {
       type: String,
       enum: {
-        values: ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"],
-        message: "Categoria inválida. Valores permitidos: tecnologia, design, carreira, negocios, marketing, trafego, growth",
+        values: CATEGORY_SLUGS,
+        message: `Categoria inválida. Valores permitidos: ${CATEGORY_SLUGS.join(", ")}`,
       },
       required: [true, "A categoria é obrigatória"],
     },

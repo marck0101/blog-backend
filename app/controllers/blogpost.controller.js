@@ -39,7 +39,7 @@ const PUBLIC_SORTS = {
 const ENGAGE_MAX = 60;
 const ENGAGE_WINDOW_MIN = 10;
 
-const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
+const { SLUGS: ALLOWED_CATEGORIES } = require("../config/categories");
 
 // Preenchidos pelo sistema (métricas, lixeira, vitrine, datas): o editor não
 // grava direto. publishedAt é decidido aqui (R-POST-06), nunca pelo navegador.

@@ -9,7 +9,7 @@ const { SITE_URL } = require("../config/urls");
 const { calendarRange } = require("../utils/calendarRange");
 const { sanitizeHtml } = require("../utils/sanitizeHtml");
 
-const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
+const VALID_SLUGS = CATEGORIES.SLUGS;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validateAudience(audience) {

@@ -17,7 +17,7 @@ const { str } = require("../utils/sanitize");
 const router = express.Router();
 router.use(auth);
 
-const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
+const VALID_SLUGS = CATEGORIES.SLUGS;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // O painel manda a lista em partes; cada chamada cabe no tempo da função serverless
 const IMPORT_MAX_ROWS = 1000;

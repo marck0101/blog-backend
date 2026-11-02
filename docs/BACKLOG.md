@@ -122,7 +122,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
     não quebrar o painel durante o deploy) e um helper `fail(res, status, msg)`.
   - **Pronto quando:** teste percorre as rotas e todas as respostas 4xx têm `error`.
 
-- [ ] **DUP-02 · Categorias em um só lugar** · `blog-backend` · P
+- [x] **DUP-02 · Categorias em um só lugar** · `blog-backend` · P — concluída em 02/11/2026 (branch `refactor/dup-02-categorias`; teste em `tests/config/categories.test.mjs`)
   - Hoje em 3 lugares: `config/categories.js`, enum do `blogpost.model.js` e
     `ALLOWED_CATEGORIES` no controller (R-POST-02). Model e controller passam a ler do config.
   - **Pronto quando:** adicionar uma categoria exige mudar só `config/categories.js`

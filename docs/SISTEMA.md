@@ -77,8 +77,8 @@ públicas filtram por `published: true` e `deletedAt: null`.
 - **R-POST-01** Título obrigatório, mínimo 3 caracteres.
 - **R-POST-02** Categoria obrigatória e de uma lista fechada: `tecnologia, design, carreira,
   negocios, marketing, trafego, growth`. Um post tem **uma** categoria.
-  ⚠️ A lista existe em 3 lugares no backend: `config/categories.js`, enum do model e
-  `ALLOWED_CATEGORIES` no controller. Mudar em um exige mudar nos três.
+  A lista fica só em `app/config/categories.js`: model, validações e `/api/categories`
+  leem dali (o front busca de `/api/categories`). Categoria nova = uma linha nesse arquivo.
 - **R-POST-03** Rascunho pode ter conteúdo vazio. Agendar ou publicar exige conteúdo com
   pelo menos 10 caracteres.
 - **R-POST-04** Agendado exige `plannedAt` válido. O editor não deixa escolher data passada
@@ -753,7 +753,7 @@ Ordenadas por impacto. Nada aqui está corrigido ainda.
     "melhorar performance sem perder regra". *Sugestão:* testes de caracterização das
     regras deste documento antes de qualquer refatoração grande (começar por R-POST,
     R-EMAIL, R-LI e cron).
-16. **Categorias em 3 lugares** no backend (R-POST-02) e regras repetidas entre front e back
+16. ~~**Categorias em 3 lugares**~~ (resolvido na DUP-02) e regras repetidas entre front e back
     (cálculo de slug, URL do LinkedIn, status do envio). *Sugestão:* fonte única.
 17. `blogpost.controller.js` tem ~950 linhas misturando público, admin, vitrine e histórico.
 18. READMEs dos dois repositórios ainda são os do template original.

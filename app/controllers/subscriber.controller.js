@@ -12,7 +12,7 @@ const { FRONTEND_URL } = require("../config/urls");
 const SUBSCRIBE_MAX = 5;
 const SUBSCRIBE_WINDOW_MIN = 30;
 
-const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
+const VALID_SLUGS = CATEGORIES.SLUGS;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TIERS = ["free", "member"];
 
