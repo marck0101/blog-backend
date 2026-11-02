@@ -2,49 +2,41 @@ const mongoose = require("mongoose");
 const connectDB = require("../config/db.config");
 const Campaign = require("../models/campaign.model");
 const User = require("../models/user.model");
-const CATEGORIES = require("../config/categories");
 const Subscriber = require("../models/subscriber.model");
 const campaignService = require("../services/campaign.service");
 const { SITE_URL } = require("../config/urls");
 const { calendarRange } = require("../utils/calendarRange");
 const { sanitizeHtml } = require("../utils/sanitizeHtml");
+const { categoriesError, isEmail, isIdList } = require("../utils/validators");
 
-const VALID_SLUGS = CATEGORIES.SLUGS;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+/**
+ * Público de um envio: vindo do painel (ids em texto) ou já salvo (ids como
+ * ObjectId, na hora de enviar). Devolve a mensagem de erro ou null.
+ */
 function validateAudience(audience) {
   if (!audience) return null;
-
   if (typeof audience !== "object" || !Campaign.AUDIENCE_TYPES.includes(audience.type)) {
     return "Público inválido";
   }
-  // Listas de texto (ids/slugs), se vieram: objeto aqui viraria operador do MongoDB
-  for (const key of ["categories", "subscribers", "lists"]) {
-    const value = audience[key];
-    if (value !== undefined && (!Array.isArray(value) || !value.every((v) => typeof v === "string"))) {
-      return "Público inválido";
-    }
-  }
 
-  if (audience.type === "categories") {
-    if (!audience.categories?.length) return "Selecione pelo menos 1 categoria";
-    const invalid = audience.categories.filter((c) => !VALID_SLUGS.includes(c));
-    if (invalid.length) return `Categorias inválidas: ${invalid.join(", ")}`;
-  }
+  // As três listas são sempre conferidas, mesmo fora do tipo escolhido:
+  // objeto no lugar de lista viraria operador do MongoDB
+  const { type, categories = [], subscribers = [], lists = [] } = audience;
+  if (!isIdList(subscribers)) return "Assinante inválido";
+  if (!isIdList(lists)) return "Público inválido";
+  const categoryError = categoriesError(categories);
+  if (categoryError) return categoryError;
 
-  if (audience.type === "selected") {
-    if (!audience.subscribers?.length) return "Selecione pelo menos 1 assinante";
-    if (!audience.subscribers.every((id) => mongoose.isValidObjectId(id))) {
-      return "Assinante inválido";
-    }
-  }
-
-  if (audience.type === "lists") {
-    if (!audience.lists?.length) return "Selecione pelo menos 1 público";
-    if (!audience.lists.every((id) => mongoose.isValidObjectId(id))) return "Público inválido";
-  }
-
+  if (type === "categories" && !categories.length) return "Selecione pelo menos 1 categoria";
+  if (type === "selected" && !subscribers.length) return "Selecione pelo menos 1 assinante";
+  if (type === "lists" && !lists.length) return "Selecione pelo menos 1 público";
   return null;
+}
+
+// Email de teste: o informado ou, sem ele, o do admin logado. null se inválido.
+async function testRecipient(req, informed) {
+  const email = informed || (await User.findById(req.userId, "email").lean())?.email;
+  return isEmail(email) ? email : null;
 }
 
 // Sem credenciais o nodemailer falha com "Missing credentials for PLAIN" em
@@ -270,14 +262,8 @@ exports.sendTest = async (req, res, next) => {
     const campaign = await Campaign.findById(req.params.id);
     if (!campaign) return res.status(404).json({ error: "Envio não encontrado" });
 
-    let email = req.body.email;
-    if (!email) {
-      const admin = await User.findById(req.userId, "email");
-      email = admin?.email;
-    }
-    if (!email || !EMAIL_RE.test(email)) {
-      return res.status(422).json({ error: "Email de teste inválido" });
-    }
+    const email = await testRecipient(req, req.body.email);
+    if (!email) return res.status(422).json({ error: "Email de teste inválido" });
 
     await campaignService.sendTest(campaign, email);
     res.json({ message: `Teste enviado para ${email}` });
@@ -300,14 +286,8 @@ exports.sendPostTest = async (req, res, next) => {
       return res.status(422).json({ error: "Preencha o título do post antes de testar" });
     }
 
-    let email = rawEmail;
-    if (!email) {
-      const admin = await User.findById(req.userId, "email");
-      email = admin?.email;
-    }
-    if (!email || !EMAIL_RE.test(email)) {
-      return res.status(422).json({ error: "Email de teste inválido" });
-    }
+    const email = await testRecipient(req, rawEmail);
+    if (!email) return res.status(422).json({ error: "Email de teste inválido" });
 
     const campaign = campaignService.campaignFromPost({
       ...post,

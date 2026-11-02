@@ -128,7 +128,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - **Pronto quando:** adicionar uma categoria exige mudar só `config/categories.js`
     (teste confere).
 
-- [ ] **DUP-03 · Validadores compartilhados** · `blog-backend` · P
+- [x] **DUP-03 · Validadores compartilhados** · `blog-backend` · P — concluída em 02/11/2026 (branch `refactor/dup-03-validadores`; `app/utils/validators.js`; email, categorias e ids em um lugar só. **Achado:** a SEC-05 tinha quebrado o envio de rascunhos com público "assinantes específicos" ou "públicos" — o público salvo tem ids como ObjectId, não texto. Nunca foi para produção; corrigido e coberto por `tests/campaigns/send.test.mjs`)
   - `EMAIL_RE`, checagem de categorias e de ObjectId repetidos em
     `subscriber.controller`, `campaign.controller`, `audience.routes`.
   - Mover para `app/utils/validators.js`. Base para a VAL-01.

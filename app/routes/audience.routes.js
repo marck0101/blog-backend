@@ -7,8 +7,8 @@ const AudienceList = require("../models/audienceList.model");
 const Subscriber = require("../models/subscriber.model");
 const Campaign = require("../models/campaign.model");
 const BlogPost = require("../models/blogpost.model");
-const CATEGORIES = require("../config/categories");
 const { str } = require("../utils/sanitize");
+const { categoriesError, isEmail } = require("../utils/validators");
 
 /**
  * Públicos nomeados (listas) do painel: criar, renomear, excluir e importar
@@ -17,8 +17,6 @@ const { str } = require("../utils/sanitize");
 const router = express.Router();
 router.use(auth);
 
-const VALID_SLUGS = CATEGORIES.SLUGS;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // O painel manda a lista em partes; cada chamada cabe no tempo da função serverless
 const IMPORT_MAX_ROWS = 1000;
 
@@ -217,8 +215,8 @@ router.post("/:id/import", async (req, res, next) => {
     if (rows.length > IMPORT_MAX_ROWS) return res.status(422).json({ error: `Envie no máximo ${IMPORT_MAX_ROWS} linhas por vez` });
 
     const categories = Array.isArray(req.body?.categories) ? req.body.categories.map(String) : [];
-    const invalidCats = categories.filter((c) => !VALID_SLUGS.includes(c));
-    if (invalidCats.length) return res.status(422).json({ error: `Categorias inválidas: ${invalidCats.join(", ")}` });
+    const categoryError = categoriesError(categories);
+    if (categoryError) return res.status(422).json({ error: categoryError });
 
     await connectDB();
     const list = await AudienceList.findOne({ _id: req.params.id, deletedAt: null }).lean();
@@ -230,7 +228,7 @@ router.post("/:id/import", async (req, res, next) => {
     rows.forEach((row, i) => {
       const email = str(row?.email).toLowerCase();
       const name = str(row?.name).slice(0, 120);
-      if (!EMAIL_RE.test(email) || email.length > 254) {
+      if (!isEmail(email)) {
         invalid.push({ line: row?.line ?? i + 1, email: email || "(vazio)" });
         return;
       }

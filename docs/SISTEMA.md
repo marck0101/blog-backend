@@ -809,6 +809,7 @@ precisar mudar a regra, mude ali (e o teste correspondente).
 | Aviso de resultado (toast) | — | `src/hooks/useToast.js` |
 | Confirmação | — | `src/components/ConfirmDialog` |
 | Entrada vinda de fora | `app/utils/sanitize.js` (`str`, `escapeRegex`) | — |
+| Email, categorias, ids (validação) | `app/utils/validators.js` (`isEmail`, `categoriesError`, `isIdList`) | — |
 | Limite de tentativas | `app/services/ratelimit.service.js` | — |
 | Alertas para o admin | `app/services/alerts.service.js` | — |
 | Status do post | `blogpost.controller.js` (`validatePost`, `syncPublished`) | `src/utils/postStatus.js` |
