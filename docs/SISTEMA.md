@@ -153,6 +153,21 @@ Pasta `content/` + scripts (ver `content/_modelo/GUIA.md`):
   alterado.
 - **R-IMPORT-02** `import-season` recusa conteúdo com trechos proibidos (ex.: prefixo
   interno `GH_`).
+- **R-IMPORT-03** O HTML importado passa pela mesma limpeza do painel (R-HTML-01).
+
+### 2.5 HTML do conteúdo
+
+- **R-HTML-01** O HTML de posts e envios é **limpo ao salvar** (`app/utils/sanitizeHtml.js`):
+  ficam só as tags e atributos que o editor produz (títulos, parágrafos, listas, citação,
+  código, links, imagens com tamanho, alinhamento, tabela). Script, eventos (`onerror=`…),
+  iframe, formulário, `<style>` e `javascript:` somem. Vale para criar, editar, restaurar
+  versão e importar.
+- **R-HTML-02** Link com `target="_blank"` ganha `rel="noopener noreferrer"`.
+- **R-HTML-03** O front limpa de novo ao exibir (`src/utils/safeHtml.js`, DOMPurify), sem
+  campos de formulário. É a segunda camada, para conteúdo antigo e versões do histórico.
+- **R-HTML-04** Recurso novo no editor (vídeo, embed…) exige incluir a tag na lista de
+  permitidos, com teste em `tests/security/sanitize-html.test.mjs` — senão ela some ao salvar.
+- Conteúdo já gravado: `scripts/sanitize-content.js` (relatório; `--apply` limpa o que tem risco).
 
 ---
 
@@ -602,6 +617,8 @@ Olhe nesta ordem, 7 e 30 dias depois da publicação:
 - "Esqueci a senha" responde igual para email existente ou não; token vale 1 h.
 
 ### Entrada de dados
+- HTML de posts e envios limpo ao salvar e de novo ao exibir (seção 2.5).
+- Editor de post só grava campos editáveis; tipos errados respondem 422 (R-POST-15).
 - Query string em modo "simple" e parâmetros convertidos para texto (`str()`): bloqueia
   injeção de operadores do MongoDB (`?search[$ne]=x`).
 - Busca escapada (`escapeRegex`): texto do leitor nunca vira expressão regular (ReDoS).
@@ -681,7 +698,9 @@ Ordenadas por impacto. Nada aqui está corrigido ainda.
 
 ### Segurança (defesa em profundidade)
 
-10. **HTML do post é renderizado sem sanitização** (`dangerouslySetInnerHTML` em
+10. ~~**HTML do post é renderizado sem sanitização**~~ — resolvido na SEC-01 (seção 2.5);
+    falta a CSP com `script-src` (SEC-02). Texto original:
+    (`dangerouslySetInnerHTML` em
     `pages/Blog/Post.jsx` e nas prévias). Hoje só o admin escreve, então o risco depende de
     a conta admin ou um arquivo importado estar comprometido. *Sugestão:* sanitizar com
     DOMPurify no salvamento (backend) e/ou na renderização, e endurecer a CSP com

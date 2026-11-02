@@ -33,19 +33,21 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - **Pronto quando:** `npm test` roda um teste de fumaça (`GET /api/health` = 200) e um de
     rota protegida (`GET /api/posts` sem sessão = 401).
 
-- [ ] **TEST-01 · Estrutura de testes no front** · `blog-front` · P
+- [x] **TEST-01 · Estrutura de testes no front** · `blog-front` · P — concluída em 02/11/2026 (branch `test/test-01-estrutura` no blog-front; Testing Library entra com a TEST-07, quando houver teste de componente)
   - Vitest + Testing Library (jsdom). Já usa Vite: configuração mínima.
   - **Pronto quando:** `npm test` roda um teste de `utils/postStatus.js`.
 
 - [ ] **CI-01 · Testes em todo push/PR** · os dois · P
   - GitHub Actions: `npm ci`, `npm run lint` (front), `npm test`, `npm audit --audit-level=high`.
+  - ⚠️ O front tem **19 erros de lint antigos** (ex.: `setState` dentro de `useEffect` em
+    `pages/Blog/Post.jsx`). Ou corrigir antes, ou o lint entra só como aviso até zerar.
   - **Pronto quando:** PR com teste falhando aparece vermelho no GitHub.
 
 ---
 
 ## Fase 1 — Segurança
 
-- [ ] **SEC-01 · Sanitizar o HTML dos posts e envios** · os dois · M
+- [x] **SEC-01 · Sanitizar o HTML dos posts e envios** · os dois · M — concluída em 02/11/2026 (branches `fix/sec-01-sanitizar-html` nos dois repositórios; banco DEV: 133 posts, 0 com risco, 17 com diferença só de formatação e nenhuma tag perdida. **Falta rodar em produção:** `node scripts/sanitize-content.js --prod` e, se listar risco, `--prod --apply`)
   - Hoje o conteúdo é exibido com `dangerouslySetInnerHTML` sem filtro (`pages/Blog/Post.jsx`,
     prévias, histórico, lixeira, `CampaignEditor`). Só o admin escreve, mas uma conta
     comprometida ou um HTML importado com `<script>` vira ataque a todos os leitores.

@@ -18,6 +18,7 @@ const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
 const BlogPost = require("../app/models/blogpost.model");
+const { sanitizeHtml } = require("../app/utils/sanitizeHtml");
 
 const args = process.argv.slice(2);
 const dir = args.find((a) => !a.startsWith("--"));
@@ -43,7 +44,8 @@ function loadPost(postDir) {
     excerpt: meta.excerpt,
     category: meta.category,
     faq: meta.faq || [],
-    content: fs.readFileSync(path.join(postDir, meta.file || "content.html"), "utf8"),
+    // Mesma limpeza do painel (SEC-01)
+    content: sanitizeHtml(fs.readFileSync(path.join(postDir, meta.file || "content.html"), "utf8")),
     plannedAt,
   };
 }

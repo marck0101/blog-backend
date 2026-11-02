@@ -7,6 +7,7 @@ const Subscriber = require("../models/subscriber.model");
 const campaignService = require("../services/campaign.service");
 const { SITE_URL } = require("../config/urls");
 const { calendarRange } = require("../utils/calendarRange");
+const { sanitizeHtml } = require("../utils/sanitizeHtml");
 
 const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -66,6 +67,8 @@ function pickEditable(body) {
   for (const key of ["subject", "preheader", "content", "audience", "post"]) {
     if (body[key] !== undefined) data[key] = body[key];
   }
+  // HTML do envio: só o que o editor produz (SEC-01)
+  if (data.content !== undefined) data.content = sanitizeHtml(data.content);
   return data;
 }
 

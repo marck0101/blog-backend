@@ -10,6 +10,7 @@ const Campaign = require("../models/campaign.model");
 const PostDailyStat = require("../models/postDailyStat.model");
 const { seasonExists } = require("../services/season.service");
 const { str, escapeRegex, isMeaningfulSearch } = require("../utils/sanitize");
+const { sanitizeHtml } = require("../utils/sanitizeHtml");
 const { withReadingMinutes } = require("../utils/readingTime");
 const { calendarRange } = require("../utils/calendarRange");
 const stats = require("../services/postStats.service");
@@ -62,6 +63,8 @@ function postInput(body) {
   }
   const wrong = TEXT_FIELDS.find((f) => data[f] != null && typeof data[f] !== "string");
   if (wrong) return { error: `Valor inválido no campo ${wrong}` };
+  // HTML do post: só o que o editor produz (SEC-01)
+  if (data.content != null) data.content = sanitizeHtml(data.content);
   return { data };
 }
 
@@ -772,6 +775,8 @@ exports.restoreRevision = async (req, res, next) => {
     );
     // Sem o slug no update, mudar o título geraria um endereço novo
     fields.slug = existing.slug;
+    // Versão gravada antes da limpeza de HTML (SEC-01) volta já limpa
+    fields.content = sanitizeHtml(fields.content);
     // Season apagada depois da versão: o post fica na season atual
     if (fields.season && !(await seasonExists(fields.season))) {
       fields.season = existing.season ?? null;
