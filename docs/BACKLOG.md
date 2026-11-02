@@ -162,7 +162,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
     (`validatePost`, `syncPublished`, `normalizePlannedAt`) num `post.rules.js`.
   - Só mover código: **nenhuma regra muda**. Os testes da TEST-02 têm que passar antes e depois.
 
-- [ ] **DUP-08 · Limpeza de arquivos mortos** · `blog-front` · P
+- [x] **DUP-08 · Limpeza de arquivos mortos** · `blog-front` · P — concluída em 02/11/2026 (branch `refactor/dup-08-arquivos-mortos` no blog-front; 6 arquivos, incluindo uma foto de 7,8 MB)
   - Sem nenhuma referência no código: `services/api.bkp.js`, `services/post.user.bk.js`,
     `services/posts.mock.js`, `components/Header/index2.jsx`, `assets/react.svg`,
     `assets/IMG_20250122_130343.jpg`.
