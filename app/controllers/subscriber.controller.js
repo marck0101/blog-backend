@@ -5,6 +5,7 @@ const CATEGORIES = require("../config/categories");
 const { recordUnsubscribe } = require("../services/tracking.service");
 const { str, escapeRegex } = require("../utils/sanitize");
 const limiter = require("../services/ratelimit.service");
+const { FRONTEND_URL } = require("../config/urls");
 
 // Rota pública sem login: 5 inscrições por IP a cada 30 min. Barra script
 // cadastrando emails de terceiros em massa (que depois receberiam os envios).
@@ -131,11 +132,34 @@ exports.createManual = async (req, res, next) => {
   }
 };
 
+const campaignParam = (value) => (typeof value === "string" && /^[a-f0-9]{24}$/.test(value) ? value : null);
+
+/**
+ * GET do link de cancelar (rodapé do email e cabeçalho List-Unsubscribe).
+ * Não altera nada: antivírus de email abrem todos os links ao receber, e
+ * cancelariam a inscrição de quem nem viu o email. Leva à página de
+ * confirmação no blog, com o token depois do # (o navegador não envia essa
+ * parte a nenhum servidor; a página tira da barra de endereço ao abrir).
+ */
+exports.unsubscribePage = (req, res) => {
+  const params = new URLSearchParams({ t: str(req.params.token) });
+  const campaign = campaignParam(req.query.c);
+  if (campaign) params.set("c", campaign);
+  res.set("Cache-Control", "no-store");
+  res.redirect(302, `${FRONTEND_URL}/cancelar-inscricao#${params}`);
+};
+
+/**
+ * POST: cancela. Vem do botão da página de confirmação ou do "cancelar
+ * inscrição" do próprio Gmail/Yahoo (RFC 8058, corpo List-Unsubscribe=One-Click).
+ * O token secreto (64 hex) é a autorização.
+ */
 exports.unsubscribe = async (req, res, next) => {
   try {
     await connectDB();
 
-    const subscriber = await Subscriber.findOne({ token: req.params.token });
+    const token = str(req.params.token);
+    const subscriber = /^[a-f0-9]{64}$/.test(token) ? await Subscriber.findOne({ token }) : null;
 
     if (!subscriber) {
       return res.status(404).json({ error: "Token inválido ou não encontrado" });
@@ -145,9 +169,10 @@ exports.unsubscribe = async (req, res, next) => {
     if (subscriber.status !== "unsubscribed") {
       subscriber.status = "unsubscribed";
       subscriber.unsubscribedAt = new Date();
-      if (req.query.c && /^[a-f0-9]{24}$/.test(req.query.c)) {
-        subscriber.unsubscribeCampaign = req.query.c;
-        await recordUnsubscribe(req.query.c, subscriber._id).catch((err) =>
+      const campaign = campaignParam(req.query.c) || campaignParam(req.body?.c);
+      if (campaign) {
+        subscriber.unsubscribeCampaign = campaign;
+        await recordUnsubscribe(campaign, subscriber._id).catch((err) =>
           console.error("[TRACK] unsubscribe:", err.message)
         );
       }

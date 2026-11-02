@@ -5,7 +5,9 @@ const sub = require("../controllers/subscriber.controller");
 
 // Públicas
 router.post("/", sub.subscribe);
-router.get("/unsubscribe/:token", sub.unsubscribe);
+// GET só leva à página de confirmação; quem cancela é o POST (SEC-03)
+router.get("/unsubscribe/:token", sub.unsubscribePage);
+router.post("/unsubscribe/:token", sub.unsubscribe);
 
 // Admin
 router.get("/", auth, sub.findAll);

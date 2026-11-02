@@ -146,7 +146,8 @@ function buildMail(campaign, subscriber, postUrl) {
     from: `"marck0101" <${process.env.GMAIL_USER}>`,
     to: subscriber.email,
     subject: campaign.subject,
-    headers: { "List-Unsubscribe": `<${unsub}>` },
+    // Botão "cancelar inscrição" do Gmail/Yahoo: POST direto na API (RFC 8058)
+    headers: { "List-Unsubscribe": `<${unsub}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
     html: campaignEmail({
       subscriberName: subscriber.name,
       subject: campaign.subject,

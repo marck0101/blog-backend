@@ -66,7 +66,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
     aplicar.
   - **Pronto quando:** site, painel, login Google e análises funcionam com a CSP ativa.
 
-- [ ] **SEC-03 · Cancelamento de inscrição seguro** · os dois · M
+- [x] **SEC-03 · Cancelamento de inscrição seguro** · os dois · M — concluída em 02/11/2026 (branches `fix/sec-03-cancelamento-inscricao` nos dois repositórios; de quebra, o leitor deixa de ver o JSON cru da API ao cancelar). ⚠️ **Deploy: front antes do backend** — o backend novo redireciona para `/cancelar-inscricao`, que só existe no front novo
   - Hoje um GET cancela direto: antivírus de email que abrem links descadastram pessoas.
   - GET → página no blog "Confirmar cancelamento" (botão). Cancelamento só por POST.
   - Cabeçalhos `List-Unsubscribe` + `List-Unsubscribe-Post: List-Unsubscribe=One-Click`

@@ -317,8 +317,9 @@ Na seção "Email" do editor:
   estão. Link que já tem UTM não é alterado.
 - **R-EMAIL-11** Rastreio (pixel de abertura + clique) só em envios reais; email de teste
   nunca é rastreado.
-- **R-EMAIL-12** Todo email tem link de cancelamento e cabeçalho `List-Unsubscribe`.
-  Cancelar pelo link de um envio atribui a saída àquele envio.
+- **R-EMAIL-12** Todo email tem link de cancelamento e os cabeçalhos `List-Unsubscribe` +
+  `List-Unsubscribe-Post: List-Unsubscribe=One-Click` (botão "cancelar inscrição" do
+  Gmail/Yahoo, RFC 8058). Cancelar pelo link de um envio atribui a saída àquele envio.
 - **R-EMAIL-13** Conteúdo para membros (`audience.type = members`) ganha selo de conteúdo
   exclusivo no template.
 
@@ -350,6 +351,11 @@ Arquivos: `app/models/subscriber.model.js`, `app/controllers/subscriber.controll
 - **R-SUB-05** Plano: `free` (recebe avisos de posts) ou `member` (recebe também envios
   exclusivos). Mudar o plano reinicia o "membro desde".
 - **R-SUB-06** Cancelar pelo link do email é idempotente: clicar de novo não muda a data.
+- **R-SUB-09** **Abrir o link não cancela.** O GET só leva à página `/cancelar-inscricao`
+  do blog, que pede confirmação; quem cancela é o POST (botão da página ou o cancelamento em
+  um clique do provedor de email). Motivo: antivírus de email abrem todos os links ao receber.
+  O token chega à página depois do `#` (não vai a servidor), sai da barra de endereço ao
+  abrir, e a página fica fora do GA4/Clarity/Pixel.
 - **R-SUB-07** Excluir assinante no painel é **definitivo** (não vai para lixeira).
 - **R-SUB-08** Exportação CSV com os mesmos filtros da lista (separador `;`, BOM UTF-8, e
   células que começam com `= + - @` viram texto — não executam fórmula no Excel).
@@ -676,7 +682,8 @@ Ordenadas por impacto. Nada aqui está corrigido ainda.
    "Continue lendo" e a conversão de assinantes por post. *Sugestão:* registrar a leitura
    por uma chamada do navegador (como o evento de engajamento), ignorando robôs e o
    navegador do autor.
-3. **Cancelamento de inscrição por GET com um clique.** Antivírus de email que "visitam" os
+3. ~~**Cancelamento de inscrição por GET com um clique.**~~ — resolvido na SEC-03 (R-SUB-09,
+   R-EMAIL-12). Texto original: Antivírus de email que "visitam" os
    links podem descadastrar pessoas sem elas saberem. Falta também `List-Unsubscribe-Post`
    (cancelamento em um clique exigido por Gmail/Yahoo para remetentes em volume).
    *Sugestão:* página de confirmação + POST.

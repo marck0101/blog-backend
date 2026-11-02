@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import { afterAll, afterEach, beforeEach, inject, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, inject, vi } from "vitest";
 
 // Roda antes de cada arquivo de teste, antes de qualquer require da app.
 const uri = inject("mongoUri");
@@ -34,6 +34,10 @@ delete process.env.VERCEL;
 const require = createRequire(import.meta.url);
 const mongoose = require("mongoose");
 const transporter = require("../../app/config/mailer");
+const connectDB = require("../../app/config/db.config");
+
+// Conectado desde o início: o teste pode usar os models antes de chamar uma rota
+beforeAll(() => connectDB());
 
 // Nenhum teste envia email de verdade. Quem precisar confere as chamadas:
 // expect(transporter.sendMail).toHaveBeenCalled...
