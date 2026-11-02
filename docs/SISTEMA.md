@@ -602,6 +602,10 @@ encontrado · 409 conflito (duplicado, envio já iniciado, LinkedIn já publicad
 inválido (a mensagem é mostrada ao usuário) · 429 muitas tentativas · 502 erro do LinkedIn ·
 503 serviço não configurado (Gmail, Firebase, LinkedIn, cron).
 
+**Formato do erro (R-API-01):** todo erro vem como `{ "error": "texto para a pessoa" }`. O
+front lê sempre com `errorText(err)` (`src/utils/apiError.js`). Rotas de login, sessão e
+limite de tentativas repetem o texto em `message` só durante a transição (DUP-01).
+
 ### 13.2 Como saber se um post acertou
 
 Olhe nesta ordem, 7 e 30 dias depois da publicação:

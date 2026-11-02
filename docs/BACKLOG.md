@@ -115,7 +115,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
 
 ## Fase 2 — Duplicatas
 
-- [ ] **DUP-01 · Formato único de erro da API** · os dois · M
+- [x] **DUP-01 · Formato único de erro da API** · os dois · M — concluída em 02/11/2026 (branches `refactor/dup-01-formato-erro`; helper `errorBody` no backend, `errorText` no front, 25 leituras repetidas viraram uma; `auth.controller.js`, que não era usado, removido). **Limpeza pendente:** depois que o front novo estiver no ar, tirar o `message` de `app/utils/http.js` e o fallback de `src/utils/apiError.js`
   - A API responde erro de dois jeitos: `{ error }` (103 lugares) e `{ message }` (34, na
     autenticação e no rate limit). O front precisa testar os dois.
   - Padronizar em `{ error }` (com `message` mantido por um tempo nas rotas de auth, para
