@@ -37,7 +37,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - Vitest + Testing Library (jsdom). Já usa Vite: configuração mínima.
   - **Pronto quando:** `npm test` roda um teste de `utils/postStatus.js`.
 
-- [ ] **CI-01 · Testes em todo push/PR** · os dois · P
+- [x] **CI-01 · Testes em todo push/PR** · os dois · P — concluída em 02/11/2026 (branches `ci/ci-01-testes`; `.github/workflows/ci.yml`. Backend: testes + audit de produção nível alto. Front: testes + build + audit nível crítico; lint roda sem bloquear até zerar os 19 erros antigos). **Só passa a rodar depois do push para o GitHub.**
   - GitHub Actions: `npm ci`, `npm run lint` (front), `npm test`, `npm audit --audit-level=high`.
   - ⚠️ O front tem **19 erros de lint antigos** (ex.: `setState` dentro de `useEffect` em
     `pages/Blog/Post.jsx`). Ou corrigir antes, ou o lint entra só como aviso até zerar.
@@ -88,7 +88,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - Corrigir pontualmente aqui; a padronização completa é a VAL-01.
   - **Pronto quando:** teste com objeto/array/número no lugar de texto devolve 422, nunca 500.
 
-- [ ] **SEC-06 · Dependências vigiadas** · os dois · P
+- [x] **SEC-06 · Dependências vigiadas** · os dois · P — concluída em 02/11/2026 (branches `fix/sec-06-dependencias`). Front em produção: 39 → 4 alertas (2 críticas e 7 altas resolvidas; TipTap estava com versões misturadas). Vitest 3 → 5 nos dois (crítica em desenvolvimento). Riscos aceitos, com motivo: gRPC do Firestore no front (não entra no build) e uuid do firebase-admin 13 no backend (moderado; a v14 vem pelo Dependabot e pede teste manual do upload de capa)
   - Dependabot (semanal, agrupando atualizações menores) + `npm audit` no CI (CI-01).
   - **Pronto quando:** PRs do Dependabot chegando e CI barrando vulnerabilidade alta.
 
