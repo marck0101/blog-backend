@@ -689,15 +689,24 @@ Olhe nesta ordem, 7 e 30 dias depois da publicação:
 | Excluir (posts, envios, seasons, públicos, comentários, assinantes) | `ConfirmDialog` |
 | Excluir definitivamente da lixeira | Confirmação digitada (`TypedConfirmDialog`) |
 | Erros da API | Mensagem do servidor (422/409) mostrada no aviso vermelho |
+| Ações em Assinantes (cadastrar, editar, remover, cancelar, reativar, mudar plano, tirar do público, exportar) | Aviso de sucesso citando o email; erro com o motivo da API |
+| LinkedIn (conectar, desconectar, publicar de novo) | `ConfirmDialog` para desconectar e para repetir tentativa interrompida; aviso de sucesso/erro |
 | Carregamento | Skeletons nas listas e no editor |
 
-Pontos fracos de feedback estão na seção 16.
+**Padrões (DUP-04):**
+- **R-UX-01 Aviso de resultado:** sempre pelo `useToast()` (`src/hooks/useToast.js`), nunca
+  estado próprio da tela nem `alert()`. Um aviso por vez; o novo substitui e reinicia o
+  tempo. Sucesso 3,5 s, erro 6 s, com ação ("Desfazer") 7 s; pausa com mouse/foco em cima;
+  botão de fechar. Leitor de tela: sucesso é `status`, erro é `alert`.
+- **R-UX-02 Confirmação:** sempre pelo `ConfirmDialog`, nunca `window.confirm()`. Esc e
+  clique fora cancelam, o foco começa em "Cancelar" e volta ao botão de origem ao fechar.
+- **R-UX-03** Toda ação que grava dá retorno: sucesso visível ou erro com o motivo.
 
 ---
 
 ## 16. Brechas e oportunidades de melhoria
 
-Ordenadas por impacto. Nada aqui está corrigido ainda.
+Ordenadas por impacto. Itens riscados já foram resolvidos (código da tarefa no BACKLOG.md).
 
 ### Regras de negócio / comportamento
 
@@ -743,13 +752,10 @@ Ordenadas por impacto. Nada aqui está corrigido ainda.
 
 ### Feedback / UX
 
-12. **Aviso (toast) duplicado em cada tela**, com tempos e estilos diferentes.
-    *Sugestão:* um componente/contexto único de avisos.
-13. **`alert()` e `window.confirm()` nativos** ainda em Assinantes, seção LinkedIn e
-    comentários do leitor — fogem do padrão `ConfirmDialog` e não são acessíveis da mesma
-    forma.
-14. O aviso de sucesso some em 3 s e não tem `role="status"` em todas as telas (leitor de
-    tela não anuncia).
+12. ~~Aviso (toast) duplicado em cada tela~~ — resolvido na DUP-04 (R-UX-01). Havia um bug:
+    o timer de um aviso fechava o aviso seguinte antes da hora.
+13. ~~`alert()` e `window.confirm()` nativos~~ — resolvido na DUP-04 (R-UX-02).
+14. ~~Aviso sem `role="status"`~~ — resolvido na DUP-04.
 
 ### Engenharia
 

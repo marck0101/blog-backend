@@ -133,7 +133,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
     `subscriber.controller`, `campaign.controller`, `audience.routes`.
   - Mover para `app/utils/validators.js`. Base para a VAL-01.
 
-- [ ] **DUP-04 · Aviso (toast) único no painel** · `blog-front` · M
+- [x] **DUP-04 · Aviso (toast) único no painel** · `blog-front` · M — concluída em 02/11/2026 (branch `refactor/dup-04-avisos`; 10 telas migradas, ~150 linhas a menos; corrigido o bug do timer que fechava o aviso seguinte; `ConfirmDialog` acessível; Assinantes passou a confirmar sucesso; 13 testes de componente)
   - Cada tela tem o próprio estado de aviso, com tempo e estilo diferentes (PostEditor,
     Calendar, PostsList, Seasons, Showcase, Trash, Comments, Audiences, ImageManager).
   - Um `ToastProvider` + `useToast()` com sucesso/erro/ação ("Desfazer"), `role="status"`.
