@@ -7,12 +7,13 @@
     "node": "22.x"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "dev": "cross-env PORT=3333 NODE_ENV=development nodemon server.js",
     "start": "cross-env NODE_ENV=production node server.js",
     "prod": "cross-env PORT=3333 NODE_ENV=production nodemon server.js",
     "backfill:covers": "node scripts/backfill-cover-variants.js",
-    "backfill:image-sizes": "cross-env NODE_ENV=production node scripts/backfill-content-image-sizes.js"
+    "backfill:image-sizes": "cross-env NODE_ENV=production node scripts/backfill-content-image-sizes.js",
+    "test:watch": "vitest"
   },
   "keywords": [
     "nodejs",
@@ -39,7 +40,10 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
+    "mongodb-memory-server": "^10.4.3",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "supertest": "^7.3.1",
+    "vitest": "^3.2.7"
   }
 }

@@ -24,7 +24,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
 
 ## Fase 0 — Fundação de testes (pré-requisito)
 
-- [ ] **TEST-00 · Estrutura de testes no backend** · `blog-backend` · P
+- [x] **TEST-00 · Estrutura de testes no backend** · `blog-backend` · P — concluída em 02/11/2026 (branch `test/test-00-estrutura`)
   - Vitest + Supertest + `mongodb-memory-server` (banco em memória, nunca toca DEV/PROD).
   - `app/app.js` já exporta o Express sem `listen`: dá para testar as rotas direto.
   - Helpers: criar admin com sessão válida (cookie + 2FA), criar post/assinante, e mocks de

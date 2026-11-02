@@ -63,7 +63,7 @@ app.use(
  * LOGS EM DEV
  * ===============================
  */
-if (process.env.NODE_ENV !== "production") {
+if (!["production", "test"].includes(process.env.NODE_ENV)) {
   const morgan = require("morgan");
   app.use(morgan("dev"));
 }
