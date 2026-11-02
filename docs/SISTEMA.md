@@ -659,6 +659,14 @@ Olhe nesta ordem, 7 e 30 dias depois da publicação:
   `X-Powered-By`, CORS restrito.
 - Front: os mesmos + `Permissions-Policy` e CSP `frame-ancestors 'none'; object-src 'none';
   base-uri 'self'`. `/admin` com `noindex`.
+- **CSP completa em observação** (`Content-Security-Policy-Report-Only` no `vercel.json` do
+  front): scripts só do próprio site, GA4, Clarity e Meta Pixel; **nenhum script inline**.
+  Por enquanto só relata, não bloqueia. Violações aparecem nos logs do backend como
+  `[CSP] <diretiva> bloquearia <endereço> em <página>` (rota `/api/csp-report`).
+  - **R-CSP-01** Dados do prerender vão em blocos `<script type="application/json">`
+    (não executáveis), nunca em `<script>window.x = …</script>`.
+  - **R-CSP-02** Ferramenta nova de terceiro (chat, vídeo, outro pixel) exige incluir o
+    domínio na política, senão ela é bloqueada quando a CSP passar a valer.
 
 ---
 

@@ -59,7 +59,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - **Pronto quando:** teste prova que `<script>`, `onerror=`, `javascript:` e `<iframe>`
     são removidos e que a formatação normal (negrito, link, imagem, tabela) continua.
 
-- [ ] **SEC-02 · CSP com `script-src` no site** · `blog-front` · M · depende de SEC-01
+- [ ] **SEC-02 · CSP com `script-src` no site** · `blog-front` · M · depende de SEC-01 — 🔎 **em observação desde 02/11/2026** (branches `fix/sec-02-csp`): política completa em modo só-relatório, dados do prerender viraram blocos JSON (sem script inline) e relatórios chegam aos logs do backend como `[CSP]`. **Passo que falta:** depois de 1 semana em produção, ler os `[CSP]` da Vercel, ajustar domínios se preciso e trocar `Content-Security-Policy-Report-Only` por `Content-Security-Policy`, mantendo o `report-uri`
   - Hoje a CSP só tem `frame-ancestors`, `object-src` e `base-uri`. Liberar só os domínios
     usados: próprio site, GA4, Clarity, Meta Pixel, Firebase.
   - Começar com `Content-Security-Policy-Report-Only` por 1 semana, ler o console, depois
