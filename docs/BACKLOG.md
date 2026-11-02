@@ -98,7 +98,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - Rodar o resumo na rotina diária (sem serviço novo).
   - **Pronto quando:** teste do scheduler prova que, com erro, o email de alerta é montado.
 
-- [ ] **SEC-08 · Revisão do login de reserva e do SKIP_2FA** · `blog-backend` · P
+- [x] **SEC-08 · Revisão do login de reserva e do SKIP_2FA** · `blog-backend` · P — concluída em 02/11/2026 (branch `fix/sec-08-testes-auth`; 20 testes em `tests/security/auth.test.mjs`, nenhuma brecha encontrada; de quebra, o tratador de erros passou a mostrar o motivo dos 4xx em produção e a não logar stack de recusa esperada)
   - Teste garantindo que `SKIP_2FA` **nunca** vale com `NODE_ENV=production` ou `VERCEL=1`.
   - Teste garantindo que sessão sem `mfa: true`, de usuário inativo, não-admin ou de versão
     antiga é recusada (o que o `auth.middleware` faz hoje).

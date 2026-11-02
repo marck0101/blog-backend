@@ -549,7 +549,7 @@ audiência, use o **GA4** (evento `post_view`).
 | LinkedIn perto de expirar | Seção LinkedIn do editor (dias restantes) | Reconectar. |
 | Comentários pendentes | Menu Comentários (contador) | Aprovar/recusar. |
 | Rascunhos parados | Dashboard | Decidir o destino. |
-| "Erro interno do servidor" | Painel | Em produção o detalhe não aparece na tela: ver **Logs da Vercel** do backend. |
+| "Erro interno do servidor" | Painel | Falha do servidor (5xx): em produção o detalhe não aparece na tela, ver **Logs da Vercel** do backend (stack completa). Recusas (4xx) mostram o motivo na tela e aparecem no log numa linha `[HTTP 4xx]`, sem stack. |
 
 **Prefixos nos logs da Vercel** (backend): `[CRON]`, `[EMAIL]`, `[CAMPAIGN]`, `[LINKEDIN]`,
 `[HISTÓRICO]`, `[TRACK]`, `[STATS]`, `[COMMENTS]`.
