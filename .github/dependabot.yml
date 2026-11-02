@@ -1,0 +1,23 @@
+# Atualizações de dependências (SEC-06). Um PR por semana com as menores
+# agrupadas; atualização de versão major vem em PR separado, para revisar com calma.
+# Alerta de segurança abre PR na hora, fora deste calendário.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    groups:
+      menores:
+        update-types: [minor, patch]
+    labels: [dependencias]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels: [dependencias]
