@@ -26,6 +26,16 @@ function pickSource(raw) {
   return source;
 }
 
+// Painel: nome e anotação são texto; categorias, lista de texto (se vieram)
+function fieldTypeError({ name, notes, categories }) {
+  if (name != null && typeof name !== "string") return "Nome inválido";
+  if (notes != null && typeof notes !== "string") return "Anotação inválida";
+  if (categories !== undefined && (!Array.isArray(categories) || !categories.every((c) => typeof c === "string"))) {
+    return "Categorias inválidas";
+  }
+  return null;
+}
+
 // Mesma resposta para email novo e já inscrito: a rota pública não pode
 // revelar quem é assinante (um pentester testaria emails um a um).
 const SUBSCRIBED = { message: "Inscrição realizada com sucesso!" };
@@ -89,9 +99,11 @@ exports.createManual = async (req, res, next) => {
 
     const { email, name, categories = [], tier = "free", notes } = req.body;
 
-    if (!email || !EMAIL_RE.test(email)) {
+    if (typeof email !== "string" || !EMAIL_RE.test(email)) {
       return res.status(422).json({ error: "Email inválido" });
     }
+    const typeError = fieldTypeError({ name, notes, categories });
+    if (typeError) return res.status(422).json({ error: typeError });
     if (!TIERS.includes(tier)) {
       return res.status(422).json({ error: "Plano inválido" });
     }
@@ -280,6 +292,8 @@ exports.update = async (req, res, next) => {
     await connectDB();
 
     const { status, categories, tier, notes, name } = req.body;
+    const typeError = fieldTypeError({ name, notes, categories });
+    if (typeError) return res.status(422).json({ error: typeError });
     const patch = {};
 
     if (name !== undefined) patch.name = String(name).trim();

@@ -86,7 +86,13 @@ públicas filtram por `published: true` e `deletedAt: null`.
 - **R-POST-05** Data vinda do formulário (`YYYY-MM-DD`) é gravada às **12:00 UTC** (9h em
   Brasília): cai no mesmo dia em todos os fusos do Brasil e fica antes da rotina diária.
 - **R-POST-06** Ao publicar, `publishedAt` = agora — **exceto** se o post já tinha
-  `publishedAt` (republicação mantém a data original).
+  `publishedAt` (republicação mantém a data original). Quem decide é o servidor: o
+  `publishedAt` enviado pelo painel é ignorado.
+- **R-POST-15** O editor só grava campos editáveis. Métricas (`views`, `favorites`,
+  `shares`, `commentsCount`), lixeira (`deletedAt`), vitrine (`pinnedOrder`, `highlight`),
+  datas do sistema, operadores do MongoDB (`$inc`…) e caminhos com ponto
+  (`linkedin.status`) vindos do navegador são descartados. Campos de texto com outro tipo
+  respondem 422.
 - **R-POST-07** Slug (endereço) é gerado do título no primeiro salvamento (`slugify`,
   minúsculas, sem acento). Se já existir, ganha sufixo `-1`, `-2`…
 - **R-POST-08** Mudar o título **não** muda o slug se o slug foi enviado (o editor sempre

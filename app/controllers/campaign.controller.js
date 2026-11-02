@@ -14,8 +14,15 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function validateAudience(audience) {
   if (!audience) return null;
 
-  if (!Campaign.AUDIENCE_TYPES.includes(audience.type)) {
+  if (typeof audience !== "object" || !Campaign.AUDIENCE_TYPES.includes(audience.type)) {
     return "Público inválido";
+  }
+  // Listas de texto (ids/slugs), se vieram: objeto aqui viraria operador do MongoDB
+  for (const key of ["categories", "subscribers", "lists"]) {
+    const value = audience[key];
+    if (value !== undefined && (!Array.isArray(value) || !value.every((v) => typeof v === "string"))) {
+      return "Público inválido";
+    }
   }
 
   if (audience.type === "categories") {

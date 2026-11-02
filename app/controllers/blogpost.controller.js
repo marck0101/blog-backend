@@ -40,6 +40,31 @@ const ENGAGE_WINDOW_MIN = 10;
 
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
 
+// Preenchidos pelo sistema (métricas, lixeira, vitrine, datas): o editor não
+// grava direto. publishedAt é decidido aqui (R-POST-06), nunca pelo navegador.
+const SYSTEM_FIELDS = [
+  "_id", "__v", "views", "favorites", "shares", "commentsCount", "deletedAt",
+  "pinnedOrder", "highlight", "publishedAt", "createdAt", "updatedAt",
+];
+// Texto ou vazio; objeto aqui viraria operador do MongoDB
+const TEXT_FIELDS = [
+  "title", "slug", "excerpt", "content", "category", "season", "coverImage", "coverImageAlt",
+  "emailTeaser", "emailSubject", "emailPreheader", "status",
+];
+
+/** Corpo do editor → dados do post: sem operadores ($inc…), caminhos com ponto e campos do sistema */
+function postInput(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return { error: "Dados inválidos" };
+  const data = {};
+  for (const [key, value] of Object.entries(body)) {
+    if (key.startsWith("$") || key.includes(".") || SYSTEM_FIELDS.includes(key)) continue;
+    data[key] = value;
+  }
+  const wrong = TEXT_FIELDS.find((f) => data[f] != null && typeof data[f] !== "string");
+  if (wrong) return { error: `Valor inválido no campo ${wrong}` };
+  return { data };
+}
+
 /** Season vazia vira null (post sem season); ordem vazia também */
 function normalizeSeason(data) {
   if (data.season !== undefined && !data.season) data.season = null;
@@ -155,7 +180,8 @@ exports.create = async (req, res, next) => {
   try {
     await connectDB();
 
-    const data = req.body;
+    const { data, error } = postInput(req.body);
+    if (error) return res.status(422).json({ error });
     normalizeSeason(data);
 
     const validationError = validatePost(data, true);
@@ -413,7 +439,8 @@ exports.update = async (req, res, next) => {
   try {
     await connectDB();
 
-    const data = req.body;
+    const { data, error } = postInput(req.body);
+    if (error) return res.status(422).json({ error });
     normalizeSeason(data);
 
     const existing = await BlogPost.findById(req.params.id)
@@ -653,7 +680,9 @@ exports.removeImage = async (req, res, next) => {
   try {
     await connectDB();
 
-    const { imageUrl } = req.body;
+    // Só texto: { "$ne": null } tiraria todas as imagens da galeria
+    const imageUrl = str(req.body?.imageUrl);
+    if (!imageUrl) return res.status(422).json({ error: "Informe a imagem a remover" });
 
     await revisions.ensureBaseline(req.params.id);
 

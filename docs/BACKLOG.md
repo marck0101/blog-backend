@@ -79,7 +79,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
     Envios ligados ao post ficam (são histórico), com `post: null`.
   - **Pronto quando:** teste prova 409 para post fora da lixeira e ausência de órfãos.
 
-- [ ] **SEC-05 · Tipos de entrada nas rotas do painel** · `blog-backend` · P
+- [x] **SEC-05 · Tipos de entrada nas rotas do painel** · `blog-backend` · P — concluída em 02/11/2026 (branch `fix/sec-05-tipos-entrada`; 11 problemas reproduzidos e corrigidos, testes em `tests/security/input-types.test.mjs`; o mais grave: objeto no lugar da URL ao remover imagem apagava a galeria inteira)
   - Exemplos que hoje dão erro 500 ou aceitam lixo: `categories` que não é lista em
     `PATCH /subscribers/:id` e `POST /subscribers/manual`; `email` que não é texto no
     cadastro manual; `imageUrl` livre em `DELETE /posts/:id/images`.
