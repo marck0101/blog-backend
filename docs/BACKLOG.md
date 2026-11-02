@@ -149,7 +149,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
     `statusKey`, `readingMinutes`, `linkedinArticleUrl`). Onde o front precisa calcular antes
     de salvar (prévia do slug), um teste de contrato compara as duas implementações.
 
-- [ ] **DUP-06 · Datas e fuso em um só helper** · `blog-backend` · M
+- [x] **DUP-06 · Datas e fuso em um só helper** · `blog-backend` · M — concluída em 02/11/2026 (branch `refactor/dup-06-fuso`; `app/utils/dates.js`; 7 pontos corrigidos; testes passaram a rodar em UTC como a Vercel — o bug não aparecia localmente porque a máquina de desenvolvimento está no fuso do Brasil; o código antigo falha em 8 dos 10 testes novos)
   - `postStats.service` usa `America/Sao_Paulo`; Dashboard ("este mês"), heatmap,
     `todayPlanned` e filtros de data usam o fuso do servidor (UTC). Entre 21h e meia-noite
     os números caem no dia/mês errado.

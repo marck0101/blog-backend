@@ -10,6 +10,8 @@ if (!/^mongodb:\/\/127\.0\.0\.1:\d+\//.test(uri)) {
 }
 
 Object.assign(process.env, {
+  // Mesmo fuso da Vercel: teste que só passa no fuso do Brasil esconderia bug de produção
+  TZ: "UTC",
   NODE_ENV: "test",
   MONGO_URI_DEV: uri,
   MONGO_URI_PROD: "",

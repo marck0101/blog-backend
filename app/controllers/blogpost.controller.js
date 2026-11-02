@@ -13,6 +13,7 @@ const { str, escapeRegex, isMeaningfulSearch } = require("../utils/sanitize");
 const { sanitizeHtml } = require("../utils/sanitizeHtml");
 const { withReadingMinutes } = require("../utils/readingTime");
 const { calendarRange } = require("../utils/calendarRange");
+const { dayKey, startOfDay, endOfDay, yearRange, dayRangeFilter } = require("../utils/dates");
 const stats = require("../services/postStats.service");
 const limiter = require("../services/ratelimit.service");
 const revisions = require("../services/postRevision.service");
@@ -267,15 +268,8 @@ exports.findAll = async (req, res, next) => {
       filter.title = { $regex: escapeRegex(str(req.query.search)), $options: "i" };
     }
 
-    if (req.query.dateFrom || req.query.dateTo) {
-      filter.createdAt = {};
-      if (req.query.dateFrom) filter.createdAt.$gte = new Date(req.query.dateFrom);
-      if (req.query.dateTo) {
-        const to = new Date(req.query.dateTo);
-        to.setHours(23, 59, 59, 999);
-        filter.createdAt.$lte = to;
-      }
-    }
+    const createdAt = dayRangeFilter(req.query.dateFrom, req.query.dateTo);
+    if (createdAt) filter.createdAt = createdAt;
 
     const [posts, total] = await Promise.all([
       BlogPost.find(filter)
@@ -307,8 +301,6 @@ exports.findAllPublished = async (req, res, next) => {
       season: str(req.query.season),
       categories: str(req.query.categories),
       search: str(req.query.search).slice(0, 100),
-      dateFrom: str(req.query.dateFrom),
-      dateTo: str(req.query.dateTo),
     };
 
     const filter = { published: true, deletedAt: null };
@@ -330,15 +322,8 @@ exports.findAllPublished = async (req, res, next) => {
       }
     }
 
-    if (q.dateFrom || q.dateTo) {
-      filter.publishedAt = {};
-      if (q.dateFrom) filter.publishedAt.$gte = new Date(q.dateFrom);
-      if (q.dateTo) {
-        const to = new Date(q.dateTo);
-        to.setHours(23, 59, 59, 999);
-        filter.publishedAt.$lte = to;
-      }
-    }
+    const publishedAt = dayRangeFilter(req.query.dateFrom, req.query.dateTo);
+    if (publishedAt) filter.publishedAt = publishedAt;
 
     const order = PUBLIC_SORTS[str(req.query.sort)] || PUBLIC_SORTS.recent;
     // fields=card: lista da home e prerender — só o que o card mostra, sem o conteúdo inteiro
@@ -626,9 +611,8 @@ exports.heatmap = async (req, res, next) => {
   try {
     await connectDB();
 
-    const year = parseInt(req.query.year) || new Date().getFullYear();
-    const start = new Date(year, 0, 1);
-    const end = new Date(year, 11, 31, 23, 59, 59, 999);
+    const year = parseInt(req.query.year) || Number(dayKey().slice(0, 4));
+    const { start, end } = yearRange(year);
 
     const posts = await BlogPost.find({
       published: true,
@@ -638,12 +622,12 @@ exports.heatmap = async (req, res, next) => {
       .select("publishedAt")
       .lean();
 
+    // { "YYYY-MM-DD": publicações naquele dia, em Brasília }
     const result = {};
-    posts.forEach((p) => {
-      const d = new Date(p.publishedAt);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      result[key] = (result[key] || 0) + 1;
-    });
+    for (const p of posts) {
+      const day = dayKey(p.publishedAt);
+      result[day] = (result[day] || 0) + 1;
+    }
 
     res.json(result);
   } catch (err) {
@@ -658,14 +642,11 @@ exports.todayPlanned = async (req, res, next) => {
   try {
     await connectDB();
 
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-
+    const today = dayKey();
     const posts = await BlogPost.find({
       status: "planned",
       deletedAt: null,
-      plannedAt: { $gte: start, $lte: end },
+      plannedAt: { $gte: startOfDay(today), $lte: endOfDay(today) },
     })
       .select("_id title slug plannedAt")
       .lean();

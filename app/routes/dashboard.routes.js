@@ -6,6 +6,7 @@ const BlogPost = require("../models/blogpost.model");
 const Subscriber = require("../models/subscriber.model");
 const SearchQuery = require("../models/searchquery.model");
 const { isMeaningfulSearch } = require("../utils/sanitize");
+const { monthRange } = require("../utils/dates");
 
 const DAY = 24 * 60 * 60 * 1000;
 // Rascunho sem mexer há mais que isso aparece como "parado" no dashboard
@@ -15,10 +16,9 @@ router.get("/stats", auth, async (req, res, next) => {
   try {
     await connectDB();
 
-    // Comparação com o mês anterior (mês do calendário, horário do servidor)
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    // Comparação com o mês anterior (meses do calendário, em Brasília)
+    const { start: monthStart } = monthRange();
+    const { start: prevMonthStart } = monthRange(new Date(), -1);
     const staleBefore = new Date(Date.now() - STALE_DRAFT_DAYS * DAY);
 
     const [

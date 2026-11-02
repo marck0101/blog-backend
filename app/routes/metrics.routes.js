@@ -12,7 +12,7 @@ const { engagementSummary } = require("../services/postStats.service");
 
 router.use(auth);
 
-const TZ = "America/Sao_Paulo";
+const { TZ } = require("../utils/dates");
 const ratio = (a, b) => (b > 0 ? a / b : null);
 
 // Canal da visita em que a pessoa assinou: UTM manda; sem UTM, o site de origem

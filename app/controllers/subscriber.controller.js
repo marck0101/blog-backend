@@ -6,6 +6,7 @@ const { recordUnsubscribe } = require("../services/tracking.service");
 const { str, escapeRegex } = require("../utils/sanitize");
 const limiter = require("../services/ratelimit.service");
 const { FRONTEND_URL } = require("../config/urls");
+const { dayRangeFilter } = require("../utils/dates");
 
 // Rota pública sem login: 5 inscrições por IP a cada 30 min. Barra script
 // cadastrando emails de terceiros em massa (que depois receberiam os envios).
@@ -210,17 +211,8 @@ function listFilter(query) {
     filter.$or = [{ name: regex }, { email: regex }];
   }
 
-  const dateFrom = str(query.dateFrom);
-  const dateTo = str(query.dateTo);
-  if (dateFrom || dateTo) {
-    filter.createdAt = {};
-    if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
-    if (dateTo) {
-      const to = new Date(dateTo);
-      to.setHours(23, 59, 59, 999);
-      filter.createdAt.$lte = to;
-    }
-  }
+  const createdAt = dayRangeFilter(query.dateFrom, query.dateTo);
+  if (createdAt) filter.createdAt = createdAt;
   return filter;
 }
 

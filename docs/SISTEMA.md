@@ -26,6 +26,7 @@
 15. [Feedback ao usuário no painel](#15-feedback-ao-usuário-no-painel)
 16. [Brechas e oportunidades de melhoria](#16-brechas-e-oportunidades-de-melhoria)
 17. [Checklist para refatorar sem perder regra](#17-checklist-para-refatorar-sem-perder-regra)
+18. [Convenções do código (manutenção e suporte)](#18-convenções-do-código-manutenção-e-suporte)
 
 ---
 
@@ -727,7 +728,9 @@ Ordenadas por impacto. Itens riscados já foram resolvidos (código da tarefa no
 5. **Slug editado à mão não é normalizado no backend** ao atualizar (pode gravar espaço ou
    maiúscula) e **não há redirecionamento** do slug antigo. *Sugestão:* aplicar `slugify` no
    update e guardar slugs anteriores para redirecionar (301).
-6. **Datas no fuso do servidor (UTC) em parte dos cálculos**: "este mês" do Dashboard,
+6. ~~**Datas no fuso do servidor (UTC)**~~ — resolvido na DUP-06 (R-DATE-01). O bug só
+   aparecia em produção: a máquina de desenvolvimento está no fuso do Brasil. Texto original:
+   "este mês" do Dashboard,
    heatmap, "agendados hoje" e filtros de data das listas usam UTC; estatísticas de leitura
    usam Brasília. Entre 21h e meia-noite os números podem cair no dia/mês errado.
    *Sugestão:* padronizar `America/Sao_Paulo` em todos.
@@ -786,3 +789,58 @@ Antes de abrir o PR de refatoração/performance:
 - [ ] Season sem episódio publicado continua invisível para o leitor.
 - [ ] Rate limits e checagem de origem (CSRF) continuam nas mesmas rotas.
 - [ ] Atualizei este documento.
+- [ ] Rodei `npm test` nos dois repositórios (a CI também roda no PR).
+
+---
+
+## 18. Convenções do código (manutenção e suporte)
+
+Cada regra abaixo existe em **um lugar só**. Ao mexer no assunto, use o que já existe; se
+precisar mudar a regra, mude ali (e o teste correspondente).
+
+### Onde fica cada coisa
+
+| Assunto | Backend (`blog-backend`) | Front (`blog-front`) |
+|---|---|---|
+| Datas, "hoje", "este mês", filtros de período | `app/utils/dates.js` | — (o navegador já está no fuso de quem usa) |
+| Categorias | `app/config/categories.js` | busca em `/api/categories` |
+| Formato de erro | `app/utils/http.js` (`errorBody`) e tratador global em `app/app.js` | `src/utils/apiError.js` (`errorText`) |
+| HTML de post/envio | `app/utils/sanitizeHtml.js` | `src/utils/safeHtml.js` |
+| Aviso de resultado (toast) | — | `src/hooks/useToast.js` |
+| Confirmação | — | `src/components/ConfirmDialog` |
+| Entrada vinda de fora | `app/utils/sanitize.js` (`str`, `escapeRegex`) | — |
+| Limite de tentativas | `app/services/ratelimit.service.js` | — |
+| Alertas para o admin | `app/services/alerts.service.js` | — |
+| Status do post | `blogpost.controller.js` (`validatePost`, `syncPublished`) | `src/utils/postStatus.js` |
+
+### Regras de escrita
+
+- **R-DATE-01 Datas:** toda conta de dia, mês ou ano usa `app/utils/dates.js` (fuso de
+  Brasília). Nunca `getDate()`, `getMonth()`, `setHours()` ou `new Date(ano, mês, dia)` no
+  backend: o servidor roda em UTC e o resultado cai no dia errado entre 21h e meia-noite.
+  Os testes rodam em UTC (como a Vercel) justamente para pegar isso.
+- **Erro para a pessoa:** `res.status(4xx).json({ error: "frase que explica o que fazer" })`.
+  Em português, sem detalhe técnico. Erro inesperado: `next(err)` (o tratador global
+  responde e registra).
+- **Entrada:** nada do `req.body`/`req.query` vai direto para o MongoDB. Texto com `str()`;
+  listas e objetos conferidos (ver R-POST-15 e os testes de `tests/security`).
+- **Comentários:** explicam o **porquê** (regra de negócio, limite de serviço, ataque que se
+  evita), não o que a linha faz. Regra de negócio importante ganha código `R-…` neste
+  documento.
+- **Nomes:** em inglês no código (`dayKey`, `errorText`), textos para a pessoa em português.
+
+### Testes
+
+- Backend: `npm test` (Vitest + MongoDB em memória; nada toca DEV/PROD, nenhum email sai,
+  nenhuma chamada externa). Helpers em `tests/helpers.mjs` (`asAdmin()`, `createPost()`).
+- Front: `npm test` (Vitest + jsdom + Testing Library).
+- **Correção de bug começa por um teste que reproduz o bug** (ele falha antes e passa depois).
+- Pastas: `tests/security` (acesso e entrada), `tests/posts`, `tests/subscribers`,
+  `tests/cron`, `tests/utils`, `tests/config`.
+
+### Suporte: por onde começar
+
+1. Email "[Blog] N pendência(s)" (seção 11) e logs da Vercel (prefixos na seção 13).
+2. A regra envolvida neste documento (busque pelo assunto ou pelo código `R-…`).
+3. O teste da regra: mostra o comportamento esperado com exemplo.
+4. O arquivo indicado na tabela acima.

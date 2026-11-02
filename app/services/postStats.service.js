@@ -1,20 +1,15 @@
 const mongoose = require("mongoose");
 const BlogPost = require("../models/blogpost.model");
 const PostDailyStat = require("../models/postDailyStat.model");
+const { dayKey, addDays } = require("../utils/dates");
 
-const TZ = "America/Sao_Paulo";
 const SHARE_CHANNELS = ["whatsapp", "linkedin", "x", "facebook", "telegram", "email", "copy", "native"];
 const HIGHLIGHT_DAYS = 7;
 const HIGHLIGHT_LIMIT = 4;
 
-// "YYYY-MM-DD" no fuso de Brasília (en-CA já formata assim)
-function dayKey(date = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(date);
-}
-
-// Dia de hoje menos (days - 1): "últimos 7 dias" inclui hoje
+// Primeiro dia de "últimos N dias" (inclui hoje): últimos 7 dias = hoje e os 6 anteriores
 function sinceKey(days) {
-  return dayKey(new Date(Date.now() - (days - 1) * 24 * 60 * 60 * 1000));
+  return addDays(dayKey(), -(days - 1));
 }
 
 function bump(postId, inc) {
@@ -181,7 +176,6 @@ async function engagementSummary(days) {
 module.exports = {
   SHARE_CHANNELS,
   HIGHLIGHT_DAYS,
-  dayKey,
   recordView,
   recordEvent,
   viewsSince,
