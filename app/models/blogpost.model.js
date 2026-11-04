@@ -61,7 +61,8 @@ const BlogPostSchema = new mongoose.Schema(
       default: "",
     },
     // Minutos de leitura do content, recalculados ao salvar (cards não carregam o texto)
-    readingMinutes: { type: Number, default: 1 },
+    // Sem default: post ainda sem cálculo fica sem o reloginho (em vez de "1 min")
+    readingMinutes: { type: Number },
 
     // draft = rascunho | planned = agendado (publica sozinho em plannedAt) | published
     status: {
