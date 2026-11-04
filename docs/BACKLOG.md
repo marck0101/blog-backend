@@ -39,8 +39,9 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
 
 - [x] **CI-01 · Testes em todo push/PR** · os dois · P — concluída em 02/11/2026 (branches `ci/ci-01-testes`; `.github/workflows/ci.yml`. Backend: testes + audit de produção nível alto. Front: testes + build + audit nível crítico; lint roda sem bloquear até zerar os 19 erros antigos). **Só passa a rodar depois do push para o GitHub.**
   - GitHub Actions: `npm ci`, `npm run lint` (front), `npm test`, `npm audit --audit-level=high`.
-  - ⚠️ O front tem **19 erros de lint antigos** (ex.: `setState` dentro de `useEffect` em
-    `pages/Blog/Post.jsx`). Ou corrigir antes, ou o lint entra só como aviso até zerar.
+  - ✅ Lint do front **zerado em 03/11/2026** (branch `chore/lint-zero` no blog-front: 19 → 0
+    erros e avisos, 7 componentes mortos e 3 dependências removidos). A CI roda
+    `npm run lint -- --max-warnings 0` e barra o PR.
   - **Pronto quando:** PR com teste falhando aparece vermelho no GitHub.
 
 ---
