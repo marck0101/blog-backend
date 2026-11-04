@@ -28,6 +28,7 @@ router.get("/calendar", auth, post.calendar);
 router.get("/heatmap", auth, post.heatmap);
 router.get("/today-planned", auth, post.todayPlanned);
 router.get("/showcase", auth, post.showcase);
+router.get("/tags", auth, post.tags);
 router.put("/showcase/pinned", auth, post.setPinned);
 router.patch("/:id/highlight", auth, post.setHighlight);
 

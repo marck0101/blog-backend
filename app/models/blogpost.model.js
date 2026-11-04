@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const { readingMinutes } = require("../utils/readingTime");
+const { normalizeTags } = require("../utils/tags");
+
+// Leituras sugeridas escolhidas à mão (ex.: post-pilar → posts que aprofundam)
+const MAX_RELATED_PICKS = 3;
 
 // Texto alternativo de imagem: leitores de tela e buscadores leem até ~125 caracteres
 const ALT_MAX = 125;
@@ -40,12 +45,23 @@ const BlogPostSchema = new mongoose.Schema(
       index: true,
     },
     excerpt: String,
+    // Resposta direta (BLUF): 1–3 frases logo abaixo do título com a conclusão do
+    // artigo. É o trecho que buscadores e assistentes de IA citam; vira o
+    // "abstract" do BlogPosting.
+    directAnswer: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [400, "A resposta direta deve ter no máximo 400 caracteres"],
+    },
     // Chamada curta usada nos emails (aviso de post novo e Envios). Se vazia, usa o excerpt.
     emailTeaser: { type: String, default: "" },
     content: {
       type: String,
       default: "",
     },
+    // Minutos de leitura do content, recalculados ao salvar (cards não carregam o texto)
+    readingMinutes: { type: Number, default: 1 },
 
     // draft = rascunho | planned = agendado (publica sozinho em plannedAt) | published
     status: {
@@ -64,6 +80,18 @@ const BlogPostSchema = new mongoose.Schema(
         message: "Categoria inválida. Valores permitidos: tecnologia, design, carreira, negocios, marketing, trafego, growth",
       },
       required: [true, "A categoria é obrigatória"],
+    },
+
+    // Assuntos do post (slugs, até 8): alimentam as próximas leituras e o schema
+    tags: { type: [String], default: [], index: true, set: normalizeTags },
+    // Próximas leituras fixadas pelo autor, em ordem; o resto vem do algoritmo
+    relatedPosts: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "BlogPost" }],
+      default: [],
+      validate: {
+        validator: (list) => list.length <= MAX_RELATED_PICKS,
+        message: `Escolha no máximo ${MAX_RELATED_PICKS} leituras sugeridas`,
+      },
     },
 
     // Season (série) opcional: slug de uma Season (gerenciadas no admin)
@@ -164,6 +192,21 @@ BlogPostSchema.pre("validate", async function (next) {
   if (this.slug) return next();
   if (!this.title) return next();
   this.slug = await generateUniqueSlug(this.title, this._id);
+  next();
+});
+
+// Tempo de leitura acompanha o conteúdo, em qualquer forma de salvar
+BlogPostSchema.pre("validate", function (next) {
+  if (this.isModified("content") || this.isNew) this.readingMinutes = readingMinutes(this.content);
+  next();
+});
+
+BlogPostSchema.pre("findOneAndUpdate", function (next) {
+  const update = this.getUpdate();
+  const content = update?.content ?? update?.$set?.content;
+  if (typeof content !== "string") return next();
+  if (update.$set) update.$set.readingMinutes = readingMinutes(content);
+  else update.readingMinutes = readingMinutes(content);
   next();
 });
 

@@ -4,6 +4,7 @@ const connectDB = require("../config/db.config");
 const BlogPost = require("../models/blogpost.model");
 const Season = require("../models/season.model");
 const CATEGORIES = require("../config/categories");
+const { indexNowKey } = require("../services/indexnow.service");
 
 const SITE_URL = "https://blog.marck0101.com.br";
 
@@ -126,6 +127,15 @@ router.get("/rss.xml", async (req, res) => {
     console.error("[RSS]", err);
     res.status(500).send("Erro ao gerar RSS");
   }
+});
+
+// Chave do IndexNow: os buscadores conferem que o aviso veio do dono do domínio
+// (blog.marck0101.com.br/indexnow-key.txt é reescrito para cá pelo front)
+router.get("/indexnow-key.txt", (req, res) => {
+  const key = indexNowKey();
+  if (!key) return res.status(404).type("text/plain").send("Not found");
+  res.set("Cache-Control", "public, max-age=86400");
+  res.type("text/plain").send(key);
 });
 
 // llms.txt (llmstxt.org): resumo do site em Markdown para agentes de IA —

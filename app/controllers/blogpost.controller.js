@@ -8,20 +8,25 @@ const Season = require("../models/season.model");
 const { seasonExists } = require("../services/season.service");
 const { str, escapeRegex, isMeaningfulSearch } = require("../utils/sanitize");
 const { withReadingMinutes } = require("../utils/readingTime");
+const { normalizeTags } = require("../utils/tags");
+const mongoose = require("mongoose");
 const { calendarRange } = require("../utils/calendarRange");
 const stats = require("../services/postStats.service");
 const limiter = require("../services/ratelimit.service");
 const revisions = require("../services/postRevision.service");
+const { pingPost } = require("../services/indexnow.service");
 
 // Campos que as rotas públicas podem devolver. Lista de permitidos (não de
 // proibidos): campo novo de admin (email, LinkedIn, views…) nunca vaza por padrão.
 const PUBLIC_FIELDS =
-  "_id title slug excerpt content category coverImage coverImageAlt gallery faq seo season seasonOrder publishedAt createdAt updatedAt commentsCount";
+  "_id title slug excerpt directAnswer content category tags coverImage coverImageAlt gallery faq seo season seasonOrder publishedAt createdAt updatedAt commentsCount readingMinutes";
 
 // Cards da vitrine (fixados e destaques): sem o conteúdo inteiro
-const CARD_FIELDS = "_id title slug excerpt category coverImage coverImageAlt season publishedAt createdAt commentsCount";
+const CARD_FIELDS = "_id title slug excerpt category coverImage coverImageAlt season publishedAt createdAt commentsCount readingMinutes";
 
 const MAX_PINNED = 3;
+// Leituras sugeridas no fim do post (manuais + automáticas)
+const RELATED_LIMIT = 3;
 
 // Ordem da lista pública (?sort=): o leitor escolhe. _id desempata e evita que
 // um post apareça em duas páginas.
@@ -38,6 +43,17 @@ const ENGAGE_WINDOW_MIN = 10;
 const ALLOWED_CATEGORIES = ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"];
 
 /** Season vazia vira null (post sem season); ordem vazia também */
+// Tags em slug; leituras sugeridas: ids válidos, sem repetir e sem o próprio post
+function normalizeLinks(data, selfId = null) {
+  if (data.tags !== undefined) data.tags = normalizeTags(data.tags);
+  if (data.relatedPosts !== undefined) {
+    const ids = Array.isArray(data.relatedPosts) ? data.relatedPosts : [];
+    data.relatedPosts = [...new Set(ids.map((id) => String(id?._id ?? id)))]
+      .filter((id) => mongoose.isValidObjectId(id) && id !== String(selfId))
+      .slice(0, RELATED_LIMIT);
+  }
+}
+
 function normalizeSeason(data) {
   if (data.season !== undefined && !data.season) data.season = null;
   if (data.seasonOrder !== undefined) {
@@ -96,13 +112,18 @@ async function safeNotify(post) {
   }
 }
 
+// Editor mostra título e status das leituras sugeridas, não só o id.
+// Chamar só na resposta: revisões e avisos usam os ids.
+const RELATED_EDITOR_FIELDS = "_id title slug status";
+const withRelatedForEditor = (post) => post.populate("relatedPosts", RELATED_EDITOR_FIELDS);
+
 // Quem fez a alteração, para o histórico de versões
 const revisionAuthor = (req) => ({ id: req.userId, name: req.user?.name || req.user?.email || "" });
 
-// Primeira publicação: email e LinkedIn em paralelo (cabem juntos no tempo
-// da função serverless). Nenhum dos dois desfaz a publicação se falhar.
+// Primeira publicação: email, LinkedIn e IndexNow em paralelo (cabem juntos no
+// tempo da função serverless). Nenhum deles desfaz a publicação se falhar.
 function announcePost(post) {
-  return Promise.all([safeNotify(post), safeShareArticle(post)]);
+  return Promise.all([safeNotify(post), safeShareArticle(post), pingPost(post)]);
 }
 
 // Do LinkedIn, o painel só edita o conteúdo; status, URNs e erros são do sistema
@@ -154,6 +175,7 @@ exports.create = async (req, res, next) => {
 
     const data = req.body;
     normalizeSeason(data);
+    normalizeLinks(data);
 
     const validationError = validatePost(data, true);
     if (validationError) {
@@ -178,7 +200,7 @@ exports.create = async (req, res, next) => {
       await announcePost(post);
     }
 
-    res.status(201).json(post);
+    res.status(201).json(await withRelatedForEditor(post));
   } catch (err) {
     next(err);
   }
@@ -388,10 +410,9 @@ exports.findOne = async (req, res, next) => {
   try {
     await connectDB();
 
-    const post = await BlogPost.findById(req.params.id).populate(
-      "emailAudience.subscribers",
-      "name email tier"
-    );
+    const post = await BlogPost.findById(req.params.id)
+      .populate("emailAudience.subscribers", "name email tier")
+      .populate("relatedPosts", RELATED_EDITOR_FIELDS);
 
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
@@ -412,6 +433,7 @@ exports.update = async (req, res, next) => {
 
     const data = req.body;
     normalizeSeason(data);
+    normalizeLinks(data, req.params.id);
 
     const existing = await BlogPost.findById(req.params.id)
       .select("status publishedAt plannedAt content")
@@ -450,9 +472,12 @@ exports.update = async (req, res, next) => {
 
     if (post.status === "published" && existing?.status !== "published") {
       await announcePost(post);
+    } else if (post.status === "published" || existing?.status === "published") {
+      // Post no ar foi editado ou saiu do ar: buscadores revisitam a URL
+      await pingPost(post);
     }
 
-    res.json(post);
+    res.json(await withRelatedForEditor(post));
   } catch (err) {
     next(err);
   }
@@ -475,6 +500,9 @@ exports.softDelete = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
     }
+
+    // A URL passa a dar 404: avisa para sair do índice mais rápido
+    if (post.published) await pingPost(post);
 
     res.json(post);
   } catch (err) {
@@ -727,6 +755,10 @@ exports.restoreRevision = async (req, res, next) => {
     const fields = Object.fromEntries(
       revisions.REVISION_FIELDS.filter((f) => f !== "slug").map((f) => [f, revision.snapshot[f]])
     );
+    // Versões de antes da resposta direta não têm o campo: restaurar limpa
+    fields.directAnswer = fields.directAnswer ?? "";
+    fields.tags = fields.tags ?? [];
+    fields.relatedPosts = fields.relatedPosts ?? [];
     // Sem o slug no update, mudar o título geraria um endereço novo
     fields.slug = existing.slug;
     // Season apagada depois da versão: o post fica na season atual
@@ -752,7 +784,9 @@ exports.restoreRevision = async (req, res, next) => {
       author: revisionAuthor(req),
     });
 
-    res.json(post);
+    if (post.published) await pingPost(post);
+
+    res.json(await withRelatedForEditor(post));
   } catch (err) {
     next(err);
   }
@@ -919,39 +953,79 @@ exports.setHighlight = async (req, res, next) => {
 
 /**
  * BLOG PÚBLICO - LEITURAS SUGERIDAS ("Continue lendo", fim do post)
- * Mesma categoria, mais lidos primeiro; se faltar, completa com os mais lidos
- * das outras categorias. Nunca o próprio post.
+ * 1. as escolhidas à mão no editor (relatedPosts), na ordem do autor
+ * 2. o resto por afinidade: cada tag em comum vale 3, mesma categoria 1,
+ *    mesma season 1; empate (e zero afinidade) vai pelos mais lidos
+ * Só publicados, nunca o próprio post. Também entra no HTML pré-renderizado:
+ * são os links internos que os buscadores seguem a partir do artigo.
  */
-const RELATED_LIMIT = 3;
+const CARD_PROJECTION = Object.fromEntries(CARD_FIELDS.split(" ").map((f) => [f, 1]));
+
+async function relatedFor(current) {
+  const base = { published: true, deletedAt: null };
+
+  const pickIds = (current.relatedPosts || []).filter((id) => String(id) !== String(current._id));
+  const picked = pickIds.length
+    ? await BlogPost.find({ ...base, _id: { $in: pickIds } }).select(CARD_FIELDS).lean()
+    : [];
+  const byId = new Map(picked.map((p) => [String(p._id), p]));
+  const manual = pickIds.map((id) => byId.get(String(id))).filter(Boolean).slice(0, RELATED_LIMIT);
+
+  const missing = RELATED_LIMIT - manual.length;
+  if (missing <= 0) return manual;
+
+  const exclude = [current._id, ...manual.map((p) => p._id)];
+  const tags = current.tags || [];
+  const auto = await BlogPost.aggregate([
+    { $match: { ...base, _id: { $nin: exclude } } },
+    {
+      $addFields: {
+        _score: {
+          $add: [
+            { $multiply: [3, { $size: { $setIntersection: [{ $ifNull: ["$tags", []] }, tags] } }] },
+            { $cond: [{ $eq: ["$category", current.category] }, 1, 0] },
+            current.season ? { $cond: [{ $eq: ["$season", current.season] }, 1, 0] } : 0,
+          ],
+        },
+      },
+    },
+    { $sort: { _score: -1, views: -1, publishedAt: -1, _id: -1 } },
+    { $limit: missing },
+    { $project: CARD_PROJECTION },
+  ]);
+
+  return [...manual, ...auto];
+}
 
 exports.findRelated = async (req, res, next) => {
   try {
     await connectDB();
     const current = await BlogPost.findOne({ _id: req.params.id, published: true, deletedAt: null })
-      .select("_id category")
+      .select("_id category season tags relatedPosts")
       .lean();
     if (!current) return res.status(404).json({ error: "Post não encontrado" });
 
-    const base = { published: true, deletedAt: null, _id: { $ne: current._id } };
-    const order = { views: -1, publishedAt: -1, _id: -1 };
-
-    const sameCategory = await BlogPost.find({ ...base, category: current.category })
-      .select(CARD_FIELDS)
-      .sort(order)
-      .limit(RELATED_LIMIT)
-      .lean();
-
-    let others = [];
-    if (sameCategory.length < RELATED_LIMIT) {
-      others = await BlogPost.find({ ...base, category: { $ne: current.category } })
-        .select(CARD_FIELDS)
-        .sort(order)
-        .limit(RELATED_LIMIT - sameCategory.length)
-        .lean();
-    }
-
     res.set("Cache-Control", "public, max-age=300, s-maxage=600, stale-while-revalidate=3600");
-    res.json([...sameCategory, ...others]);
+    res.json(await relatedFor(current));
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ADMIN - TAGS EM USO (sugestões no editor, mais usadas primeiro)
+ */
+exports.tags = async (req, res, next) => {
+  try {
+    await connectDB();
+    const list = await BlogPost.aggregate([
+      { $match: { deletedAt: null } },
+      { $unwind: "$tags" },
+      { $group: { _id: "$tags", count: { $sum: 1 } } },
+      { $sort: { count: -1, _id: 1 } },
+      { $limit: 200 },
+    ]);
+    res.json(list.map((t) => ({ tag: t._id, count: t.count })));
   } catch (err) {
     next(err);
   }
