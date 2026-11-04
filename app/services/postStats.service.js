@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const BlogPost = require("../models/blogpost.model");
 const PostDailyStat = require("../models/postDailyStat.model");
+const { escapeRegex } = require("../utils/sanitize");
 
 const TZ = "America/Sao_Paulo";
 const SHARE_CHANNELS = ["whatsapp", "linkedin", "x", "facebook", "telegram", "email", "copy", "native"];
@@ -178,8 +179,103 @@ async function engagementSummary(days) {
   };
 }
 
+/* ================= DESEMPENHO POR CONTEÚDO (sparklines do painel) ================= */
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const CONTENT_METRICS = ["views", "favorites", "shares", "shareVisits"];
+
+// Dias "YYYY-MM-DD" (fuso de Brasília) do período, do mais antigo para hoje;
+// offset = quantos períodos voltar (1 = período anterior, para comparar)
+function periodDays(days, offset = 0) {
+  const end = Date.now() - offset * days * DAY_MS;
+  return Array.from({ length: days }, (_, i) => dayKey(new Date(end - (days - 1 - i) * DAY_MS)));
+}
+
+const sumMap = (map = {}) => Object.values(map).reduce((n, v) => n + (v || 0), 0);
+
+// Valor de uma métrica num PostDailyStat (favoritos = adições, sem descontar remoções)
+function metricOf(stat, metric) {
+  if (metric === "shares") return sumMap(stat.shares);
+  if (metric === "shareVisits") return sumMap(stat.shareVisits);
+  return stat[metric] || 0;
+}
+
+/**
+ * Uma série diária por post publicado nos últimos `days` dias, para cada métrica,
+ * mais o total do período anterior (mesmo tamanho) para a variação.
+ * Dias antes da publicação vêm como null (sem dado, não zero): o post não existia.
+ * filters: { category, season, search }
+ */
+async function contentPerformance(days, { category, season, search } = {}) {
+  const current = periodDays(days);
+  const previous = periodDays(days, 1);
+  const first = previous[0];
+  const index = new Map(current.map((d, i) => [d, i]));
+
+  const match = { published: true, deletedAt: null };
+  if (category) match.category = category;
+  if (season) match.season = season;
+  if (search) match.title = { $regex: escapeRegex(search), $options: "i" };
+
+  const posts = await BlogPost.find(match)
+    .select("_id title slug category season publishedAt createdAt")
+    .sort({ publishedAt: -1 })
+    .lean();
+  if (!posts.length) return { days, dayKeys: current, posts: [] };
+
+  const stats = await PostDailyStat.find({ post: { $in: posts.map((p) => p._id) }, day: { $gte: first } }).lean();
+  const byPost = new Map();
+  for (const st of stats) {
+    const list = byPost.get(String(st.post)) || [];
+    list.push(st);
+    byPost.set(String(st.post), list);
+  }
+
+  const rows = posts.map((p) => {
+    const publishedDay = dayKey(new Date(p.publishedAt || p.createdAt));
+    const metrics = {};
+    for (const metric of CONTENT_METRICS) {
+      metrics[metric] = {
+        series: current.map((d) => (d < publishedDay ? null : 0)),
+        total: 0,
+        previous: 0,
+      };
+    }
+    for (const st of byPost.get(String(p._id)) || []) {
+      const i = index.get(st.day);
+      for (const metric of CONTENT_METRICS) {
+        const value = metricOf(st, metric);
+        if (!value) continue;
+        const m = metrics[metric];
+        if (i !== undefined) {
+          // Leitura registrada antes do publishedAt (ex.: data de publicação editada): conta mesmo assim
+          m.series[i] = (m.series[i] || 0) + value;
+          m.total += value;
+        } else if (st.day >= first && st.day < current[0]) {
+          m.previous += value;
+        }
+      }
+    }
+    return {
+      id: p._id,
+      title: p.title,
+      slug: p.slug,
+      category: p.category,
+      season: p.season || null,
+      publishedAt: p.publishedAt || p.createdAt,
+      // Publicado depois do início do período anterior: a comparação não é justa
+      newInPeriod: publishedDay > first,
+      metrics,
+    };
+  });
+
+  return { days, dayKeys: current, posts: rows };
+}
+
 module.exports = {
   SHARE_CHANNELS,
+  CONTENT_METRICS,
+  contentPerformance,
   HIGHLIGHT_DAYS,
   dayKey,
   recordView,
