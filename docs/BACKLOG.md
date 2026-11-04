@@ -246,7 +246,7 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
     e o `from` em `services/campaign.service.js` / `services/alerts.service.js`.
   - Ganha também relatório de entrega e bounce.
 
-- [ ] **BIZ-06 · Excluir assinante = anonimizar** · `blog-backend` · P
+- [x] **BIZ-06 · Excluir assinante = anonimizar** · `blog-backend` · P — concluída em 03/11/2026 (branches `feat/biz-06-excluir-dados`; achado: excluir apagava o cadastro mas o email continuava no histórico de cada envio; agora sai de tudo e os números dos envios ficam iguais; R-SUB-07)
   - Avaliar (LGPD/histórico): apagar dados pessoais e manter os números dos envios.
 
 ---

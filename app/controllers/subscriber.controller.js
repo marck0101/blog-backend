@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const connectDB = require("../config/db.config");
 const Subscriber = require("../models/subscriber.model");
+const Campaign = require("../models/campaign.model");
+
+// O que fica no lugar do email de quem foi excluído, no histórico dos envios
+const REMOVED_EMAIL = "(removido)";
 const { recordUnsubscribe } = require("../services/tracking.service");
 const { str, escapeRegex } = require("../utils/sanitize");
 const limiter = require("../services/ratelimit.service");
@@ -282,6 +286,14 @@ exports.remove = async (req, res, next) => {
     if (!subscriber) {
       return res.status(404).json({ error: "Assinante não encontrado" });
     }
+
+    // R-SUB-07 (LGPD): o email também sai do histórico dos envios que a pessoa
+    // recebeu. A linha continua lá, então entregas, aberturas e cliques não mudam.
+    await Campaign.updateMany(
+      { "recipients.subscriber": subscriber._id },
+      { $set: { "recipients.$[person].email": REMOVED_EMAIL } },
+      { arrayFilters: [{ "person.subscriber": subscriber._id }], timestamps: false }
+    );
 
     res.json({ message: "Assinante removido com sucesso" });
   } catch (err) {

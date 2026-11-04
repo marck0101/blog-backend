@@ -373,7 +373,11 @@ Arquivos: `app/models/subscriber.model.js`, `app/controllers/subscriber.controll
   um clique do provedor de email). Motivo: antivírus de email abrem todos os links ao receber.
   O token chega à página depois do `#` (não vai a servidor), sai da barra de endereço ao
   abrir, e a página fica fora do GA4/Clarity/Pixel.
-- **R-SUB-07** Excluir assinante no painel é **definitivo** (não vai para lixeira).
+- **R-SUB-07** Excluir assinante no painel é **definitivo** (não vai para lixeira) e atende o
+  pedido de exclusão da LGPD: apaga o cadastro (email, nome, categorias, anotações, origem) e
+  troca o email por "(removido)" no histórico de todos os envios que a pessoa recebeu. Os
+  números dos envios (entregues, aberturas, cliques) não mudam. Para só parar de enviar,
+  existe "Cancelar inscrição", que mantém o cadastro.
 - **R-SUB-08** Exportação CSV com os mesmos filtros da lista (separador `;`, BOM UTF-8, e
   células que começam com `= + - @` viram texto — não executam fórmula no Excel).
 
@@ -755,8 +759,7 @@ Ordenadas por impacto. Itens riscados já foram resolvidos (código da tarefa no
 8. **Limite do Gmail**: conta Gmail comum envia ~500 emails/dia (Workspace ~2000). Com a base
    crescendo, envios vão falhar no meio. **Decisão (03/11/2026):** manter o Gmail até a base
    crescer; a troca será para o email do próprio domínio (marcos@marck0101.com.br). Ver BIZ-05.
-9. **Excluir assinante é definitivo**; para histórico/LGPD, avaliar "anonimizar" em vez de
-   apagar.
+9. ~~**Excluir assinante deixava o email no histórico dos envios**~~ — resolvido na BIZ-06 (R-SUB-07).
 
 ### Segurança (defesa em profundidade)
 
