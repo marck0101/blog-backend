@@ -450,6 +450,10 @@ Arquivos: `app/services/postStats.service.js`, `pages/Admin/Showcase.jsx`.
   compartilhado" são **anônimos**: só somam contadores do post. Limite de 60 eventos por IP
   a cada 10 min.
 - **R-ENG-02** Favoritos do leitor ficam no navegador dele (não há conta de leitor para isso).
+- **R-ENG-03** Leitura de post = evento `view` enviado pelo navegador ao abrir o post
+  (`src/utils/postViews.js`), uma vez por post por sessão, nunca do navegador do autor. A API
+  ignora user-agent de robô (`app/utils/userAgent.js`). Abrir o post pela API (`GET /slug`)
+  **não** conta nem grava nada: é só leitura (também deixa a página mais leve para o banco).
 
 ---
 
@@ -571,16 +575,20 @@ O resumo sai no log da Vercel como `[CRON] {"published":[…],"linkedin":[…],"
 Ranking dos mais lidos em 7 dias, com favoritos, compartilhamentos e comentários totais, e o
 que está nos destaques agora (e por quê: forçado ou automático).
 
-### 12.4 Ressalva sobre "leituras" (views)
+### 12.4 O que conta como "leitura" (views)
 
-O contador `views` do post **não é o número de leitores**:
-- a primeira visita a `/blog/<slug>` passa pelo prerender, que fica em cache na CDN por 10
-  min: visitas servidas do cache **não contam**;
-- robôs/crawlers que pegam o prerender **contam**;
-- o seu próprio navegador **conta** (o opt-out do autor vale só para GA4/Clarity/Pixel).
+Desde a **BIZ-02** (deploy previsto a partir de 03/11/2026), uma leitura é: **o navegador de
+uma pessoa abriu o post**, contado **uma vez por post por sessão** (recarregar não soma).
+Não contam robôs (pelo user-agent), o prerender e o seu navegador de autor (o mesmo critério
+do GA4: `?notrack=1` ou ter entrado no painel).
 
-Use `views` para **comparar posts entre si** e para os destaques. Para números absolutos de
-audiência, use o **GA4** (evento `post_view`).
+**Antes da BIZ-02** o número somava robôs e o prerender, contava o autor e perdia as visitas
+servidas pelo cache da CDN. **Não compare números de antes e depois da data do deploy**: o
+total histórico de cada post (`views`) mistura os dois critérios; os "últimos 7 dias" ficam
+limpos uma semana depois do deploy.
+
+Para audiência absoluta, o **GA4** continua a referência (evento `post_view`); ele também
+perde quem recusa cookies analíticos, então os dois números não vão bater exatamente.
 
 ---
 
@@ -720,10 +728,7 @@ Ordenadas por impacto. Itens riscados já foram resolvidos (código da tarefa no
 ### Regras de negócio / comportamento
 
 1. ~~**Agendar para hoje depois das 9h só publica amanhã.**~~ — resolvido na BIZ-01 (R-POST-16).
-2. **Contador de leituras impreciso** (ver 12.4). Afeta "mais lidos", destaques da semana,
-   "Continue lendo" e a conversão de assinantes por post. *Sugestão:* registrar a leitura
-   por uma chamada do navegador (como o evento de engajamento), ignorando robôs e o
-   navegador do autor.
+2. ~~**Contador de leituras impreciso**~~ — resolvido na BIZ-02 (R-ENG-03, seção 12.4).
 3. ~~**Cancelamento de inscrição por GET com um clique.**~~ — resolvido na SEC-03 (R-SUB-09,
    R-EMAIL-12). Texto original: Antivírus de email que "visitam" os
    links podem descadastrar pessoas sem elas saberem. Falta também `List-Unsubscribe-Post`

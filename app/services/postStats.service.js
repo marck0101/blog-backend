@@ -16,25 +16,21 @@ function bump(postId, inc) {
   return PostDailyStat.updateOne({ post: postId, day: dayKey() }, { $inc: inc }, { upsert: true });
 }
 
-// Leitura do post (best-effort: estatística nunca derruba a página)
-async function recordView(postId) {
-  try {
-    await bump(postId, { views: 1 });
-  } catch (err) {
-    if (err.code === 11000) return bump(postId, { views: 1 }).catch(() => {});
-    console.error("[STATS] view:", err.message);
-  }
-}
-
 /**
- * Evento do leitor: favorite | unfavorite | share | share_visit.
+ * Evento do leitor: view | favorite | unfavorite | share | share_visit.
  * Devolve false quando o evento não é válido.
+ *
+ * view (BIZ-02): a leitura é contada pelo navegador de quem abriu o post, uma
+ * vez por sessão. Abrir a página (prerender, robô, cache da CDN) não conta.
  */
 async function recordEvent(postId, type, channel) {
   if ((type === "share" || type === "share_visit") && !SHARE_CHANNELS.includes(channel)) return false;
 
   let daily;
-  if (type === "favorite") {
+  if (type === "view") {
+    daily = { views: 1 };
+    await BlogPost.updateOne({ _id: postId }, { $inc: { views: 1 } }, { timestamps: false });
+  } else if (type === "favorite") {
     daily = { favorites: 1 };
     await BlogPost.updateOne({ _id: postId }, { $inc: { favorites: 1 } }, { timestamps: false });
   } else if (type === "unfavorite") {
@@ -176,7 +172,6 @@ async function engagementSummary(days) {
 module.exports = {
   SHARE_CHANNELS,
   HIGHLIGHT_DAYS,
-  recordView,
   recordEvent,
   viewsSince,
   weeklyHighlights,

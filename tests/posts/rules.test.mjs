@@ -173,12 +173,12 @@ describe("leitura pública (R-POST-12)", () => {
     expect((await api().get("/api/posts/slug/na-lixeira")).status).toBe(404);
   });
 
-  it("ler conta uma leitura e não muda o updatedAt (o sitemap não acusa edição)", async () => {
+  it("abrir o post só lê: não conta leitura nem muda o updatedAt (BIZ-02)", async () => {
     const post = await createPost({ status: "published", published: true, publishedAt: new Date() });
     const before = (await BlogPost.findById(post._id).lean()).updatedAt;
     await api().get(`/api/posts/slug/${post.slug}`);
     const after = await BlogPost.findById(post._id).lean();
-    expect(after.views).toBe(1);
+    expect(after.views).toBe(0);
     expect(after.updatedAt).toEqual(before);
   });
 });

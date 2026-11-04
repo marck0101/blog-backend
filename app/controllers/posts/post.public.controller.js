@@ -6,6 +6,7 @@ const stats = require("../../services/postStats.service");
 const limiter = require("../../services/ratelimit.service");
 const { str, escapeRegex, isMeaningfulSearch } = require("../../utils/sanitize");
 const { withReadingMinutes } = require("../../utils/readingTime");
+const { isBot } = require("../../utils/userAgent");
 const { dayRangeFilter } = require("../../utils/dates");
 const { PUBLIC_FIELDS, CARD_FIELDS } = require("./post.rules");
 
@@ -95,15 +96,11 @@ exports.findBySlug = async (req, res, next) => {
   try {
     await connectDB();
 
-    const post = await BlogPost.findOneAndUpdate(
-      { slug: req.params.slug, published: true, deletedAt: null },
-      { $inc: { views: 1 } },
-      // Visualização não é edição: sem isso o updatedAt mudava a cada leitura e
-      // o sitemap/dados estruturados diziam que todo post foi alterado hoje
-      { new: true, timestamps: false, projection: PUBLIC_FIELDS }
-    );
-
-    if (post) await stats.recordView(post._id);
+    // Só leitura: a leitura do post é contada pelo navegador (engage "view",
+    // BIZ-02). Contar aqui somava prerender e robôs e perdia o que a CDN servia.
+    const post = await BlogPost.findOne({ slug: req.params.slug, published: true, deletedAt: null })
+      .select(PUBLIC_FIELDS)
+      .lean();
 
     if (!post) {
       // ?soft=1 (front): "não encontrado" é resposta normal, sem erro de rede no
@@ -242,13 +239,16 @@ exports.findHighlights = async (req, res, next) => {
 
 /**
  * BLOG PÚBLICO - EVENTO DO LEITOR
- * body: { type: "favorite" | "unfavorite" | "share" | "share_visit", channel? }
+ * body: { type: "view" | "favorite" | "unfavorite" | "share" | "share_visit", channel? }
  * Anônimo: só soma contadores do post, sem identificar quem fez.
  */
 exports.engage = async (req, res, next) => {
   try {
     const type = str(req.body?.type);
     const channel = str(req.body?.channel).toLowerCase();
+
+    // Robô que roda JavaScript (pré-visualização, auditoria) não conta como leitor
+    if (type === "view" && isBot(req.get("user-agent"))) return res.status(204).end();
 
     await connectDB();
     const wait = await limiter.blockedFor("engage", req, ENGAGE_MAX);
