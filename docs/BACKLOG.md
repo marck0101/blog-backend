@@ -168,7 +168,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
     `assets/IMG_20250122_130343.jpg`.
   - **Pronto quando:** removidos e `npm run build` passa.
 
-- [ ] **DUP-09 · READMEs reais** · os dois · P
+- [x] **DUP-09 · READMEs reais** · os dois · P — concluída em 03/11/2026 (branches `docs/dup-09-readmes`; READMEs em UTF-8 com como rodar, testar, variáveis, scripts e estrutura; o `.env.example` do backend ganhou as 10 variáveis que faltavam)
   - Trocar os READMEs do template (bezkoder / Vite) por: o que é, como rodar, variáveis de
     ambiente, scripts, link para `docs/SISTEMA.md` e este backlog.
 
