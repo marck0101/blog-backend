@@ -230,7 +230,7 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
   - Afeta destaques, "Continue lendo" e conversão por post: anotar no SISTEMA.md a data da
     mudança (números antes e depois não são comparáveis).
 
-- [ ] **BIZ-03 · Dashboard: avisos de post não enviados** · os dois · P — o alerta diário da SEC-07 já avisa por email; falta mostrar no Dashboard
+- [x] **BIZ-03 · Dashboard: avisos de post não enviados** · os dois · P — concluída em 03/11/2026 (branches `feat/biz-03-avisos-dashboard`; a consulta virou `campaign.service.unsentPostNotices`, usada pelo alerta diário e pelo Dashboard — uma regra, dois lugares de exibição)
   - Listar `post-notification` em rascunho de posts publicados (R-EMAIL-03).
 
 - [x] **BIZ-04 · Redirecionar slug antigo** · os dois · M — concluída em 03/11/2026 (branches `feat/biz-04-slug-redirect`; R-POST-17; 301 no prerender preservando UTMs, troca de URL no app; slug digitado normalizado; endereço antigo nunca é reusado por outro post; sitemap já lista só o atual. Deploy em qualquer ordem. De quebra: removidos 2 imports sem uso deixados pela DUP-07)

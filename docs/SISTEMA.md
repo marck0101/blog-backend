@@ -314,7 +314,9 @@ Na seção "Email" do editor:
   categoria atual do post.
 - **R-EMAIL-03** Se o público tem 0 pessoas ativas, ou o Gmail não está configurado, o aviso
   é criado como **rascunho** em Envios e **não sai sozinho depois**: precisa ser enviado
-  pelo painel.
+  pelo painel. Para não ser esquecido, aparece em vermelho no topo do **Dashboard** (com
+  link para o envio) e no email diário de alertas, até ser enviado
+  (`campaign.service.unsentPostNotices`).
 - **R-EMAIL-04** A lista de destinatários é **congelada** no primeiro envio (snapshot em
   `recipients`). Quem assinar depois não entra; quem cancelar no meio é marcado como falha
   ("inscrição cancelada") e não recebe.
@@ -740,8 +742,8 @@ Ordenadas por impacto. Itens riscados já foram resolvidos (código da tarefa no
    links podem descadastrar pessoas sem elas saberem. Falta também `List-Unsubscribe-Post`
    (cancelamento em um clique exigido por Gmail/Yahoo para remetentes em volume).
    *Sugestão:* página de confirmação + POST.
-4. **Aviso de post que nasceu como rascunho nunca sai sozinho** (R-EMAIL-03). É regra, mas é
-   fácil esquecer. *Sugestão:* destacar no Dashboard "avisos de post não enviados".
+4. ~~**Aviso de post esquecido em rascunho**~~ — resolvido: alerta diário (SEC-07) e
+   destaque no Dashboard (BIZ-03).
 5. ~~**Slug sem normalização e sem redirecionamento**~~ — resolvido na BIZ-04 (R-POST-08 e 17).
 6. ~~**Datas no fuso do servidor (UTC)**~~ — resolvido na DUP-06 (R-DATE-01). O bug só
    aparecia em produção: a máquina de desenvolvimento está no fuso do Brasil. Texto original:

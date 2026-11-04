@@ -3,6 +3,7 @@ const Campaign = require("../models/campaign.model");
 const transporter = require("../config/mailer");
 const alertsEmail = require("../templates/alerts.email");
 const { getStatus: linkedinStatus } = require("./linkedin.service");
+const { unsentPostNotices } = require("./campaign.service");
 const { FRONTEND_URL } = require("../config/urls");
 
 /**
@@ -35,7 +36,7 @@ async function collectAlerts(summary = {}, now = new Date()) {
     // 4. Envio que continua "enviando" depois da retomada
     Campaign.find({ status: "sending" }).select("_id subject").lean(),
     // 5. Aviso de post publicado que ficou como rascunho (R-EMAIL-03: não sai sozinho)
-    Campaign.find({ kind: "post-notification", status: "draft" }).select("_id subject post").lean(),
+    unsentPostNotices(),
     // 6. LinkedIn de artigo publicado que falhou
     BlogPost.find({ published: true, deletedAt: null, "linkedin.enabled": true, "linkedin.status": "failed" })
       .select("_id title linkedin.error")
@@ -53,15 +54,7 @@ async function collectAlerts(summary = {}, now = new Date()) {
     add("atenção", "Envio parado", `"${c.subject}" continua enviando. Abra e continue o envio.`, panel(`/admin/campaigns/${c._id}`));
   }
 
-  const noticePosts = await BlogPost.find({
-    _id: { $in: unsentNotices.map((c) => c.post).filter(Boolean) },
-    published: true,
-    deletedAt: null,
-  })
-    .select("_id")
-    .lean();
-  const published = new Set(noticePosts.map((p) => String(p._id)));
-  for (const c of unsentNotices.filter((c) => published.has(String(c.post)))) {
+  for (const c of unsentNotices) {
     add("atenção", "Aviso de post não enviado", `"${c.subject}" está em rascunho (público vazio ou email sem configuração na publicação).`, panel(`/admin/campaigns/${c._id}`));
   }
 

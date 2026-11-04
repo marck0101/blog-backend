@@ -144,3 +144,18 @@ describe("alertas (SEC-07)", () => {
     expect(to).not.toContain("leitor@x.dev");
   });
 });
+
+describe("Dashboard: avisos de post não enviados (BIZ-03)", () => {
+  it("lista só os de posts publicados, com o título do post", async () => {
+    const { asAdmin } = await import("../helpers.mjs");
+    const admin = await asAdmin();
+    const live = await createPost({ title: "Publicado", status: "published", published: true });
+    const draft = await createPost({ title: "Rascunho" });
+    const notice = await Campaign.create({ subject: "Novo artigo: Publicado", kind: "post-notification", post: live._id, status: "draft" });
+    await Campaign.create({ subject: "Novo artigo: Rascunho", kind: "post-notification", post: draft._id, status: "draft" });
+    await Campaign.create({ subject: "Já enviado", kind: "post-notification", post: live._id, status: "sent" });
+
+    const res = await admin.get("/api/dashboard/stats");
+    expect(res.body.unsentNotices).toEqual([{ _id: String(notice._id), postTitle: "Publicado" }]);
+  });
+});
