@@ -10,33 +10,15 @@ const { str, escapeRegex } = require("../utils/sanitize");
 const limiter = require("../services/ratelimit.service");
 const { FRONTEND_URL } = require("../config/urls");
 const { dayRangeFilter } = require("../utils/dates");
-const { categoriesError, isEmail } = require("../utils/validators");
+const { categoriesError } = require("../utils/validators");
 
 // Rota pública sem login: 5 inscrições por IP a cada 30 min. Barra script
 // cadastrando emails de terceiros em massa (que depois receberiam os envios).
 const SUBSCRIBE_MAX = 5;
 const SUBSCRIBE_WINDOW_MIN = 30;
 
-const TIERS = ["free", "member"];
-
-// Origem enviada pelo formulário do blog: só texto curto, campos conhecidos
-const SOURCE_FIELDS = ["location", "path", "post", "landingPath", "referrer", "utmSource", "utmMedium", "utmCampaign"];
-function pickSource(raw) {
-  if (!raw || typeof raw !== "object") return undefined;
-  const source = {};
-  for (const field of SOURCE_FIELDS) {
-    if (typeof raw[field] === "string") source[field] = raw[field].trim().slice(0, 200);
-  }
-  return source;
-}
-
-// Campos do painel: nome e anotação em texto; categorias existentes (se vieram)
-function adminFieldsError({ name, notes, categories }) {
-  if (name != null && typeof name !== "string") return "Nome inválido";
-  if (notes != null && typeof notes !== "string") return "Anotação inválida";
-  if (categories !== undefined) return categoriesError(categories);
-  return null;
-}
+// O formato de cada rota (tipos, tamanhos, campos permitidos) é conferido antes,
+// pelo esquema: app/validation/subscribers.schemas.js. Aqui ficam as regras.
 
 // Mesma resposta para email novo e já inscrito: a rota pública não pode
 // revelar quem é assinante (um pentester testaria emails um a um).
@@ -50,15 +32,7 @@ exports.subscribe = async (req, res, next) => {
     if (wait) return limiter.tooMany(res, wait);
     await limiter.hit("subscribe", req, SUBSCRIBE_WINDOW_MIN);
 
-    // Só tipos esperados: objetos virariam operadores do MongoDB
-    const email = typeof req.body?.email === "string" ? req.body.email.trim() : "";
-    const name = typeof req.body?.name === "string" ? req.body.name.trim().slice(0, 100) : undefined;
-    const categories = Array.isArray(req.body?.categories) ? req.body.categories : [];
-    const source = pickSource(req.body?.source);
-
-    if (!isEmail(email)) {
-      return res.status(422).json({ error: "Email inválido" });
-    }
+    const { email, name, categories, source } = req.body;
     const categoryError = categoriesError(categories);
     if (categoryError) return res.status(422).json({ error: categoryError });
 
@@ -94,16 +68,9 @@ exports.createManual = async (req, res, next) => {
   try {
     await connectDB();
 
-    const { email, name, categories = [], tier = "free", notes } = req.body;
-
-    if (!isEmail(email)) {
-      return res.status(422).json({ error: "Email inválido" });
-    }
-    const typeError = adminFieldsError({ name, notes, categories });
-    if (typeError) return res.status(422).json({ error: typeError });
-    if (!TIERS.includes(tier)) {
-      return res.status(422).json({ error: "Plano inválido" });
-    }
+    const { email, name, categories, tier, notes } = req.body;
+    const categoryError = categoriesError(categories);
+    if (categoryError) return res.status(422).json({ error: categoryError });
 
     const subscriber = await Subscriber.create({
       email,
@@ -159,7 +126,7 @@ exports.unsubscribe = async (req, res, next) => {
     if (subscriber.status !== "unsubscribed") {
       subscriber.status = "unsubscribed";
       subscriber.unsubscribedAt = new Date();
-      const campaign = campaignParam(req.query.c) || campaignParam(req.body?.c);
+      const campaign = campaignParam(req.query.c) || campaignParam(req.body.c);
       if (campaign) {
         subscriber.unsubscribeCampaign = campaign;
         await recordUnsubscribe(campaign, subscriber._id).catch((err) =>
@@ -305,31 +272,19 @@ exports.update = async (req, res, next) => {
   try {
     await connectDB();
 
-    const { status, categories, tier, notes, name } = req.body;
-    const typeError = adminFieldsError({ name, notes, categories });
-    if (typeError) return res.status(422).json({ error: typeError });
-    const patch = {};
+    const { categories, tier, ...rest } = req.body;
+    if (categories !== undefined) {
+      const categoryError = categoriesError(categories);
+      if (categoryError) return res.status(422).json({ error: categoryError });
+    }
 
-    if (name !== undefined) patch.name = String(name).trim();
-
+    // name, notes, status como vieram; plano novo reinicia o "membro desde" (R-SUB-05)
+    const patch = { ...rest };
+    if (categories !== undefined) patch.categories = categories;
     if (tier !== undefined) {
-      if (!TIERS.includes(tier)) {
-        return res.status(422).json({ error: "Plano inválido" });
-      }
       patch.tier = tier;
       patch.memberSince = tier === "member" ? new Date() : null;
     }
-
-    if (notes !== undefined) patch.notes = String(notes).trim();
-
-    if (status !== undefined) {
-      if (!["active", "unsubscribed"].includes(status)) {
-        return res.status(422).json({ error: "Status inválido" });
-      }
-      patch.status = status;
-    }
-
-    if (categories !== undefined) patch.categories = categories;
 
     const subscriber = await Subscriber.findByIdAndUpdate(
       req.params.id,
