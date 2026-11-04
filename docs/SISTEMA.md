@@ -58,8 +58,11 @@ ou é feito em lotes que o painel/cron chamam de novo.
 
 ## 2. Post: ciclo de vida
 
-Arquivos: `app/models/blogpost.model.js`, `app/controllers/blogpost.controller.js`,
-`blog-front/src/components/PostEditor`, `blog-front/src/utils/postStatus.js`.
+Arquivos: `app/models/blogpost.model.js`, `app/controllers/posts/` (regras em
+`post.rules.js`; rotas do leitor em `post.public.controller.js`, do painel em
+`post.admin.controller.js`, histórico em `post.revisions.controller.js`, vitrine em
+`post.showcase.controller.js`), `blog-front/src/components/PostEditor`,
+`blog-front/src/utils/postStatus.js`.
 
 ### 2.1 Status
 
@@ -768,7 +771,7 @@ Ordenadas por impacto. Itens riscados já foram resolvidos (código da tarefa no
     R-EMAIL, R-LI e cron).
 16. ~~**Categorias em 3 lugares**~~ (resolvido na DUP-02) e regras repetidas entre front e back
     (cálculo de slug, URL do LinkedIn, status do envio). *Sugestão:* fonte única.
-17. `blogpost.controller.js` tem ~950 linhas misturando público, admin, vitrine e histórico.
+17. ~~`blogpost.controller.js` com ~950 linhas~~ — dividido na DUP-07 (`app/controllers/posts/`).
 18. READMEs dos dois repositórios ainda são os do template original.
 
 ---
@@ -812,7 +815,7 @@ precisar mudar a regra, mude ali (e o teste correspondente).
 | Email, categorias, ids (validação) | `app/utils/validators.js` (`isEmail`, `categoriesError`, `isIdList`) | — |
 | Limite de tentativas | `app/services/ratelimit.service.js` | — |
 | Alertas para o admin | `app/services/alerts.service.js` | — |
-| Status do post | `blogpost.controller.js` (`validatePost`, `syncPublished`) | `src/utils/postStatus.js` |
+| Regras do post (o que o editor grava, validação, status, publicação) | `app/controllers/posts/post.rules.js` | `src/utils/postStatus.js` |
 
 ### Regras de escrita
 

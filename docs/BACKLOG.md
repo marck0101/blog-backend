@@ -156,7 +156,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - `app/utils/dates.js` com `dayKey`, `startOfDayBR`, `monthRangeBR`; todos passam a usar.
   - **Pronto quando:** teste com relógio às 22h de Brasília no último dia do mês dá o mês certo.
 
-- [ ] **DUP-07 · Dividir `blogpost.controller.js`** · `blog-backend` · M · depende de TEST-02
+- [x] **DUP-07 · Dividir `blogpost.controller.js`** · `blog-backend` · M · depende de TEST-02 — concluída em 03/11/2026 (branch `refactor/dup-07-controller-posts`; 987 linhas → `app/controllers/posts/` com 5 arquivos de 100–390 linhas; código movido sem mudar regra; os 19 testes da TEST-02 passam antes e depois; teste novo chama as 26 rotas e exige zero erro 500)
   - ~950 linhas misturando público, admin, vitrine e histórico. Separar em
     `post.public`, `post.admin`, `post.showcase`, `post.revisions`, com as regras de status
     (`validatePost`, `syncPublished`, `normalizePlannedAt`) num `post.rules.js`.
