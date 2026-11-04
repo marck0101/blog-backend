@@ -220,7 +220,7 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
 
 ## Fase 4 — Regras de negócio (melhorias)
 
-- [ ] **BIZ-01 · Agendar para hoje depois das 9h** · os dois · P
+- [x] **BIZ-01 · Agendar para hoje depois das 9h** · os dois · P — concluída em 03/11/2026 (branches `feat/biz-01-agendar-hoje`; R-POST-16; o editor oferece a data mais cedo possível com botão "Agendar para…", e a API recusa data passada ou hoje depois das 9h; testes com relógio simulado e um que confere o horário com o `vercel.json`)
   - Hoje só publica amanhã (cron 1×/dia). Editor: bloquear "hoje" após 9h com explicação,
     e backend recusar com 422. (Alternativa: cron de hora em hora — avaliar o plano da Vercel.)
 

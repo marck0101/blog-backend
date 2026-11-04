@@ -20,6 +20,11 @@ export const models = {
   User: require("../app/models/user.model"),
 };
 
+const { addDays, dayKey } = require("../app/utils/dates");
+
+/** "YYYY-MM-DD" daqui a n dias (Brasília). Use em vez de data fixa: data fixa vence. */
+export const daysFromToday = (n) => addDays(dayKey(), n);
+
 // Origem do painel aceita pelo CORS e pela checagem de CSRF
 export const PANEL_ORIGIN = "http://localhost:5173";
 

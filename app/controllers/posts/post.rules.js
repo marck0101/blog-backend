@@ -2,6 +2,8 @@ const { notifyNewPost } = require("../../services/campaign.service");
 const { safeShareArticle } = require("../../services/linkedin.service");
 const { sanitizeHtml } = require("../../utils/sanitizeHtml");
 const { SLUGS: ALLOWED_CATEGORIES } = require("../../config/categories");
+const { DAILY_JOB_UTC_HOUR } = require("../../config/schedule");
+const { addDays, dayKey, parseDayKey } = require("../../utils/dates");
 
 /**
  * Regras do post usadas por mais de um controller (SISTEMA.md, seção 2):
@@ -99,8 +101,34 @@ function effectiveStatus(data, existing) {
   return existing?.status ?? "draft";
 }
 
-/** R-POST-01 a 04. Devolve a mensagem de erro para a pessoa, ou null. */
-function validatePost(data, isCreate, existing = null) {
+/** Primeiro dia que ainda dá para agendar: hoje, se a rotina das 9h não rodou; senão amanhã */
+function firstSchedulableDay(now = new Date()) {
+  const today = dayKey(now);
+  const todaysJob = new Date(`${today}T${String(DAILY_JOB_UTC_HOUR).padStart(2, "0")}:00:00.000Z`);
+  return now < todaysJob ? today : addDays(today, 1);
+}
+
+/**
+ * R-POST-16: agendado vai ao ar na rotina diária (~9h). Agendar para um dia que
+ * a rotina já passou deixaria o post parado até o dia seguinte, como "atrasado".
+ * Só vale quando a data é definida ou mudada: editar um agendado sem mexer na
+ * data (inclusive um atrasado) continua permitido.
+ */
+function scheduleDateError(plannedAt, existing, now) {
+  // "YYYY-MM-DD" do formulário já é o dia; new Date() dele seria meia-noite UTC (dia anterior no Brasil)
+  const day = parseDayKey(plannedAt) || dayKey(new Date(plannedAt));
+  const unchanged = existing?.status === "planned" && existing.plannedAt && dayKey(new Date(existing.plannedAt)) === day;
+  if (unchanged) return null;
+
+  const first = firstSchedulableDay(now);
+  if (day >= first) return null;
+  return day === dayKey(now)
+    ? "A publicação automática de hoje já rodou (9h). Agende para amanhã ou use “Publicar agora”."
+    : "Essa data já passou. Escolha uma data a partir de hoje.";
+}
+
+/** R-POST-01 a 04 e 16. Devolve a mensagem de erro para a pessoa, ou null. */
+function validatePost(data, isCreate, existing = null, now = new Date()) {
   if (isCreate || data.title !== undefined) {
     const title = (data.title || "").trim();
     if (title.length < 3)
@@ -120,6 +148,8 @@ function validatePost(data, isCreate, existing = null) {
     const plannedAt = data.plannedAt !== undefined ? data.plannedAt : existing?.plannedAt;
     if (!plannedAt || Number.isNaN(new Date(plannedAt).getTime()))
       return "Informe a data de publicação do post agendado";
+    const scheduleError = scheduleDateError(plannedAt, existing, now);
+    if (scheduleError) return scheduleError;
   }
   if (isCreate && data.category === undefined) {
     return "A categoria é obrigatória";
@@ -177,6 +207,7 @@ module.exports = {
   normalizeSeason,
   normalizePlannedAt,
   validatePost,
+  firstSchedulableDay,
   syncPublished,
   announcePost,
   revisionAuthor,

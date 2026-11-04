@@ -85,8 +85,13 @@ públicas filtram por `published: true` e `deletedAt: null`.
   leem dali (o front busca de `/api/categories`). Categoria nova = uma linha nesse arquivo.
 - **R-POST-03** Rascunho pode ter conteúdo vazio. Agendar ou publicar exige conteúdo com
   pelo menos 10 caracteres.
-- **R-POST-04** Agendado exige `plannedAt` válido. O editor não deixa escolher data passada
-  para agendado (o backend não bloqueia).
+- **R-POST-04** Agendado exige `plannedAt` válido.
+- **R-POST-16** Ao agendar (ou mudar a data de um agendado), a data precisa ser **amanhã ou
+  depois — ou hoje, se ainda não for 9h** (a rotina diária, que publica os agendados, roda às
+  9h; depois disso o post ficaria parado até o dia seguinte). O editor só oferece datas
+  válidas e explica; a API recusa (422) o resto. Editar um agendado sem mudar a data continua
+  livre, mesmo atrasado. Rascunho com data no calendário não segue esta regra. O horário fica
+  em `app/config/schedule.js` e um teste confere que bate com o `vercel.json`.
 - **R-POST-05** Data vinda do formulário (`YYYY-MM-DD`) é gravada às **12:00 UTC** (9h em
   Brasília): cai no mesmo dia em todos os fusos do Brasil e fica antes da rotina diária.
 - **R-POST-06** Ao publicar, `publishedAt` = agora — **exceto** se o post já tinha
@@ -714,9 +719,7 @@ Ordenadas por impacto. Itens riscados já foram resolvidos (código da tarefa no
 
 ### Regras de negócio / comportamento
 
-1. **Agendar para hoje depois das 9h só publica amanhã.** O cron roda uma vez por dia às
-   9h; o editor permite escolher a data de hoje para agendado. *Sugestão:* bloquear "hoje"
-   após 9h (ou avisar), ou rodar o cron mais vezes.
+1. ~~**Agendar para hoje depois das 9h só publica amanhã.**~~ — resolvido na BIZ-01 (R-POST-16).
 2. **Contador de leituras impreciso** (ver 12.4). Afeta "mais lidos", destaques da semana,
    "Continue lendo" e a conversão de assinantes por post. *Sugestão:* registrar a leitura
    por uma chamada do navegador (como o evento de engajamento), ignorando robôs e o

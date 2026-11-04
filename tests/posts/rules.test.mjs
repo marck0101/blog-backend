@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { api, asAdmin, createPost, models, transporter } from "../helpers.mjs";
+import { api, asAdmin, createPost, daysFromToday, models, transporter } from "../helpers.mjs";
 
 const { BlogPost, Campaign, PostRevision, Season, Subscriber } = models;
 
@@ -48,8 +48,9 @@ describe("validação (R-POST-01 a 04)", () => {
 describe("datas e endereço (R-POST-05 a 08)", () => {
   it("R-POST-05 data do formulário é gravada ao meio-dia UTC", async () => {
     const admin = await asAdmin();
-    const res = await admin.post("/api/posts").send(newPost({ status: "planned", plannedAt: "2026-12-01", content: CONTENT }));
-    expect(new Date(res.body.plannedAt).toISOString()).toBe("2026-12-01T12:00:00.000Z");
+    const day = daysFromToday(30);
+    const res = await admin.post("/api/posts").send(newPost({ status: "planned", plannedAt: day, content: CONTENT }));
+    expect(new Date(res.body.plannedAt).toISOString()).toBe(`${day}T12:00:00.000Z`);
   });
 
   it("R-POST-06 primeira publicação ganha publishedAt; despublicar mantém", async () => {
