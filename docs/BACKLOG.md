@@ -236,9 +236,15 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
 - [ ] **BIZ-04 · Redirecionar slug antigo** · os dois · M
   - Guardar slugs anteriores do post; `/blog/<antigo>` responde 301 para o atual (prerender e sitemap).
 
-- [ ] **BIZ-05 · Provedor de email transacional** · `blog-backend` · M
-  - Gmail comum envia ~500/dia. Migrar para Resend/SES/Brevo antes de a base chegar perto.
-    Ganha também relatório de entrega e bounce.
+- [ ] **BIZ-05 · Provedor de email transacional** · `blog-backend` · M — ⏸️ **adiada por decisão (03/11/2026)**
+  - **Decisão:** continuar no Gmail enquanto a base de assinantes for pequena; não vale o
+    investimento agora. **Gatilho para retomar:** a base se aproximar do limite diário do
+    Gmail (~500 emails/dia), ou falhas de entrega aparecerem no alerta diário (SEC-07).
+  - **Quando trocar:** o remetente passa a ser o email do próprio domínio,
+    **marcos@marck0101.com.br**. Isso exige configurar SPF, DKIM e DMARC no DNS de
+    `marck0101.com.br` (sem eles os emails caem no spam), e trocar `config/mailer.js`
+    e o `from` em `services/campaign.service.js` / `services/alerts.service.js`.
+  - Ganha também relatório de entrega e bounce.
 
 - [ ] **BIZ-06 · Excluir assinante = anonimizar** · `blog-backend` · P
   - Avaliar (LGPD/histórico): apagar dados pessoais e manter os números dos envios.

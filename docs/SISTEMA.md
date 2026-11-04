@@ -747,8 +747,8 @@ Ordenadas por impacto. Itens riscados já foram resolvidos (código da tarefa no
    *Sugestão:* padronizar `America/Sao_Paulo` em todos.
 7. ~~**Exclusão definitiva deixa órfãos**~~ — resolvido na SEC-04 (ver R-TRASH-03).
 8. **Limite do Gmail**: conta Gmail comum envia ~500 emails/dia (Workspace ~2000). Com a base
-   crescendo, envios vão falhar no meio. *Sugestão:* migrar para um provedor transacional
-   (Resend, SES, Brevo) antes de chegar perto disso.
+   crescendo, envios vão falhar no meio. **Decisão (03/11/2026):** manter o Gmail até a base
+   crescer; a troca será para o email do próprio domínio (marcos@marck0101.com.br). Ver BIZ-05.
 9. **Excluir assinante é definitivo**; para histórico/LGPD, avaliar "anonimizar" em vez de
    apagar.
 
