@@ -187,7 +187,7 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
   - Migrar por área: posts → envios → assinantes → públicos → seasons → comentários → auth.
   - **Pronto quando:** toda rota que recebe dados passa por um esquema.
 
-- [ ] **TEST-02 · Regras de post** · `blog-backend` · M
+- [x] **TEST-02 · Regras de post** · `blog-backend` · M — concluída em 03/11/2026 (branch `test/test-02-regras-post`; 19 testes em `tests/posts/rules.test.mjs`, mais os já existentes de lixeira, tipos de entrada, HTML e fuso; todas as regras passaram sem mudança no código)
   - R-POST-01 a R-POST-14: validações, status, `publishedAt` preservado, slug único,
     data ao meio-dia UTC, campos públicos, 1ª publicação dispara email + LinkedIn e
     republicação não.
