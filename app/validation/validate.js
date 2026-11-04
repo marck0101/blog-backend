@@ -38,12 +38,16 @@ z.setErrorMap((issue, ctx) => {
   }
 });
 
-function validate(schemas) {
+/**
+ * status: código da resposta quando o formato não serve. Padrão 422; as rotas
+ * de login usam 400 "Dados inválidos" (contrato coberto por tests/security).
+ */
+function validate(schemas, { status = 422 } = {}) {
   return (req, res, next) => {
     for (const part of PARTS) {
       if (!schemas[part]) continue;
       const result = schemas[part].safeParse(req[part] ?? {});
-      if (!result.success) return res.status(422).json({ error: result.error.issues[0].message });
+      if (!result.success) return res.status(status).json({ error: result.error.issues[0].message });
       req[part] = result.data;
     }
     next();

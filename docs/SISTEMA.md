@@ -101,7 +101,7 @@ públicas filtram por `published: true` e `deletedAt: null`.
   `shares`, `commentsCount`), lixeira (`deletedAt`), vitrine (`pinnedOrder`, `highlight`),
   datas do sistema, operadores do MongoDB (`$inc`…) e caminhos com ponto
   (`linkedin.status`) vindos do navegador são descartados. Campos de texto com outro tipo
-  respondem 422.
+  respondem 422. Quem garante é o esquema da rota (`app/validation/posts.schemas.js`, VAL-01).
 - **R-POST-07** Slug (endereço) é gerado do título no primeiro salvamento (`slugify`,
   minúsculas, sem acento). Se já existir, ganha sufixo `-1`, `-2`…
 - **R-POST-08** Mudar o título **não** muda o slug se o slug foi enviado (o editor sempre
@@ -829,7 +829,8 @@ precisar mudar a regra, mude ali (e o teste correspondente).
 | Aviso de resultado (toast) | — | `src/hooks/useToast.js` |
 | Confirmação | — | `src/components/ConfirmDialog` |
 | Entrada vinda de fora | `app/utils/sanitize.js` (`str`, `escapeRegex`) | — |
-| Email, categorias, ids (validação) | `app/utils/validators.js` (`isEmail`, `categoriesError`, `isIdList`) | — |
+| Formato do que cada rota recebe (esquemas) | `app/validation/` (`validate`, `<área>.schemas.js`) | — |
+| Email, categorias, ids (regras de validação) | `app/utils/validators.js` (`isEmail`, `categoriesError`, `isIdList`) | — |
 | Limite de tentativas | `app/services/ratelimit.service.js` | — |
 | Alertas para o admin | `app/services/alerts.service.js` | — |
 | Regras do post (o que o editor grava, validação, status, publicação) | `app/controllers/posts/post.rules.js` | `src/utils/postStatus.js` |
@@ -843,8 +844,14 @@ precisar mudar a regra, mude ali (e o teste correspondente).
 - **Erro para a pessoa:** `res.status(4xx).json({ error: "frase que explica o que fazer" })`.
   Em português, sem detalhe técnico. Erro inesperado: `next(err)` (o tratador global
   responde e registra).
-- **Entrada:** nada do `req.body`/`req.query` vai direto para o MongoDB. Texto com `str()`;
-  listas e objetos conferidos (ver R-POST-15 e os testes de `tests/security`).
+- **R-API-02 Entrada:** toda rota que recebe dados declara o formato num esquema Zod
+  (`app/validation/<área>.schemas.js`) e passa por `validate({ body, query })` antes do
+  controller. Formato inválido = 422 `{ error }` em português (login: 400 "Dados
+  inválidos"); campo fora do esquema é descartado. O esquema cuida do **formato** (tipo,
+  tamanho, valores permitidos); o controller cuida da **regra** (agendado precisa de data,
+  categoria existe, endereço livre). Rota nova sem esquema não passa na revisão.
+  Peças comuns em `app/validation/fields.js` (`text`, `id`, `idList`, `categoryList`,
+  `dateInput`) e o público de email em `audience.schema.js`.
 - **Comentários:** explicam o **porquê** (regra de negócio, limite de serviço, ataque que se
   evita), não o que a linha faz. Regra de negócio importante ganha código `R-…` neste
   documento.

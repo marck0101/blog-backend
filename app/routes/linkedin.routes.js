@@ -3,6 +3,11 @@ const router = express.Router();
 const connectDB = require("../config/db.config");
 const auth = require("../middlewares/auth.middleware");
 const linkedin = require("../services/linkedin.service");
+const { z } = require("zod");
+const { validate } = require("../validation/validate");
+
+// force: a pessoa conferiu no perfil que a tentativa interrompida não saiu (R-LI-03)
+const shareBody = z.object({ force: z.boolean().optional() });
 const { SITE_URL } = require("../config/urls");
 
 // Painel para onde o callback volta
@@ -56,10 +61,10 @@ router.delete("/", auth, async (req, res, next) => {
 
 // Publica agora (nova tentativa) o post de um artigo já publicado.
 // body.force: o usuário conferiu que a tentativa interrompida não saiu.
-router.post("/posts/:id/share", auth, async (req, res, next) => {
+router.post("/posts/:id/share", auth, validate({ body: shareBody }), async (req, res, next) => {
   try {
     await connectDB();
-    const result = await linkedin.retryShare(req.params.id, { force: req.body?.force === true });
+    const result = await linkedin.retryShare(req.params.id, { force: req.body.force === true });
     res.json(result);
   } catch (err) {
     if (err.status) {

@@ -2,14 +2,16 @@ const express = require("express");
 const router = express.Router();
 const season = require("../controllers/season.controller");
 const auth = require("../middlewares/auth.middleware");
+const { validate } = require("../validation/validate");
+const { seasonBody } = require("../validation/seasons.schemas");
 
 /**
  * ================= ADMIN (PROTEGIDO) =================
  * Antes de /:slug para "admin" não ser lido como slug
  */
 router.get("/admin", auth, season.adminList);
-router.post("/", auth, season.create);
-router.patch("/:id", auth, season.update);
+router.post("/", auth, validate({ body: seasonBody }), season.create);
+router.patch("/:id", auth, validate({ body: seasonBody }), season.update);
 router.delete("/:id", auth, season.remove);
 
 /**

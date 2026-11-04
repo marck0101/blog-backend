@@ -9,6 +9,8 @@ const Campaign = require("../models/campaign.model");
 const BlogPost = require("../models/blogpost.model");
 const { str } = require("../utils/sanitize");
 const { categoriesError, isEmail } = require("../utils/validators");
+const { validate } = require("../validation/validate");
+const { createBody, updateBody, importBody } = require("../validation/audiences.schemas");
 
 /**
  * Públicos nomeados (listas) do painel: criar, renomear, excluir e importar
@@ -16,9 +18,6 @@ const { categoriesError, isEmail } = require("../utils/validators");
  */
 const router = express.Router();
 router.use(auth);
-
-// O painel manda a lista em partes; cada chamada cabe no tempo da função serverless
-const IMPORT_MAX_ROWS = 1000;
 
 function validId(req, res) {
   if (mongoose.isValidObjectId(req.params.id)) return true;
@@ -97,32 +96,29 @@ router.get("/trash", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", validate({ body: createBody }), async (req, res, next) => {
   try {
     await connectDB();
-    const list = await AudienceList.create({ name: str(req.body?.name), description: str(req.body?.description) });
+    const list = await AudienceList.create(req.body);
     res.status(201).json({ ...list.toObject(), total: 0, active: 0 });
   } catch (err) {
-    if (err.code === 11000) return res.status(409).json({ error: await nameTakenMessage(str(req.body?.name)) });
+    if (err.code === 11000) return res.status(409).json({ error: await nameTakenMessage(req.body.name) });
     next(err);
   }
 });
 
-router.patch("/:id", async (req, res, next) => {
+router.patch("/:id", validate({ body: updateBody }), async (req, res, next) => {
   try {
     if (!validId(req, res)) return;
     await connectDB();
-    const update = {};
-    if (req.body?.name !== undefined) update.name = str(req.body.name);
-    if (req.body?.description !== undefined) update.description = str(req.body.description);
-    const list = await AudienceList.findOneAndUpdate({ _id: req.params.id, deletedAt: null }, update, {
+    const list = await AudienceList.findOneAndUpdate({ _id: req.params.id, deletedAt: null }, req.body, {
       new: true,
       runValidators: true,
     });
     if (!list) return res.status(404).json({ error: "Público não encontrado" });
     res.json(list);
   } catch (err) {
-    if (err.code === 11000) return res.status(409).json({ error: await nameTakenMessage(str(req.body?.name)) });
+    if (err.code === 11000) return res.status(409).json({ error: await nameTakenMessage(req.body.name) });
     next(err);
   }
 });
@@ -204,17 +200,11 @@ router.delete("/:id/members/:subscriberId", async (req, res, next) => {
  *     quem cancelou continua cancelado e não recebe nada
  * Devolve o resumo do que aconteceu com cada linha.
  */
-router.post("/:id/import", async (req, res, next) => {
+router.post("/:id/import", validate({ body: importBody }), async (req, res, next) => {
   try {
     if (!validId(req, res)) return;
-    if (req.body?.consent !== true) {
-      return res.status(422).json({ error: "Confirme que as pessoas da lista autorizaram receber seus emails" });
-    }
-    const rows = Array.isArray(req.body?.rows) ? req.body.rows : null;
-    if (!rows?.length) return res.status(422).json({ error: "A lista está vazia" });
-    if (rows.length > IMPORT_MAX_ROWS) return res.status(422).json({ error: `Envie no máximo ${IMPORT_MAX_ROWS} linhas por vez` });
-
-    const categories = Array.isArray(req.body?.categories) ? req.body.categories.map(String) : [];
+    // Consentimento, quantidade de linhas e formato: esquema (importBody)
+    const { rows, categories } = req.body;
     const categoryError = categoriesError(categories);
     if (categoryError) return res.status(422).json({ error: categoryError });
 

@@ -179,7 +179,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
 
 Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 1 e 2.
 
-- [ ] **VAL-01 · Validação por esquema em todas as rotas** · `blog-backend` · G
+- [x] **VAL-01 · Validação por esquema em todas as rotas** · `blog-backend` · G — concluída em 04/11/2026 (branch `feat/val-01-esquemas`; Zod em `app/validation/`, 8 áreas: posts, envios, assinantes, públicos, seasons, comentários, login, LinkedIn; as listas manuais de campos permitidos saíram; R-API-02; 39 testes de esquema. Fora de propósito: `/audience-count` (responde 0 para público incompleto) e rotas sem corpo. Achado no caminho: `MAX_PINNED` e `IMPORT_MAX_ROWS` estavam duplicados)
   - Hoje cada rota valida do seu jeito (`str()`, `typeof`, `validatePost`, `pickSeason`…).
   - Adotar `zod`: um esquema por rota (body, params, query), middleware `validate(schema)`
     que responde **422 `{ error }`** padronizado. Campos não previstos são descartados
