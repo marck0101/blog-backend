@@ -6,6 +6,8 @@ const revisions = require("../controllers/posts/post.revisions.controller");
 const showcase = require("../controllers/posts/post.showcase.controller");
 const auth = require("../middlewares/auth.middleware");
 const { requireAllowedOrigin } = require("../middlewares/auth.middleware");
+const { validate } = require("../validation/validate");
+const { postBody, pinnedBody, highlightBody, removeImageBody, engageBody } = require("../validation/posts.schemas");
 
 /**
  * ================= BLOG PÚBLICO =================
@@ -17,12 +19,12 @@ router.get("/slug/:slug", publicPosts.findBySlug);
 router.get("/season/:season", publicPosts.findSeasonEpisodes);
 router.get("/pinned", publicPosts.findPinned);
 router.get("/highlights", publicPosts.findHighlights);
-router.post("/public/:id/engage", requireAllowedOrigin, publicPosts.engage);
+router.post("/public/:id/engage", requireAllowedOrigin, validate({ body: engageBody }), publicPosts.engage);
 
 /**
  * ================= ADMIN (PROTEGIDO) =================
  */
-router.post("/", auth, adminPosts.create);
+router.post("/", auth, validate({ body: postBody }), adminPosts.create);
 router.get("/", auth, adminPosts.findAll);
 router.get("/deleted/all", auth, adminPosts.findAllDeleted);
 
@@ -31,11 +33,11 @@ router.get("/calendar", auth, adminPosts.calendar);
 router.get("/heatmap", auth, adminPosts.heatmap);
 router.get("/today-planned", auth, adminPosts.todayPlanned);
 router.get("/showcase", auth, showcase.showcase);
-router.put("/showcase/pinned", auth, showcase.setPinned);
-router.patch("/:id/highlight", auth, showcase.setHighlight);
+router.put("/showcase/pinned", auth, validate({ body: pinnedBody }), showcase.setPinned);
+router.patch("/:id/highlight", auth, validate({ body: highlightBody }), showcase.setHighlight);
 
 router.get("/:id", auth, adminPosts.findOne);
-router.put("/:id", auth, adminPosts.update);
+router.put("/:id", auth, validate({ body: postBody }), adminPosts.update);
 
 /**
  * ================= HISTÓRICO DE VERSÕES =================
@@ -47,7 +49,7 @@ router.post("/:id/revisions/:version/restore", auth, revisions.restoreRevision);
 /**
  * ================= IMAGENS =================
  */
-router.delete("/:id/images", auth, adminPosts.removeImage);
+router.delete("/:id/images", auth, validate({ body: removeImageBody }), adminPosts.removeImage);
 
 /**
  * ================= LIXEIRA =================

@@ -9,7 +9,7 @@ const { str, escapeRegex } = require("../../utils/sanitize");
 const { calendarRange } = require("../../utils/calendarRange");
 const { dayKey, startOfDay, endOfDay, yearRange, dayRangeFilter } = require("../../utils/dates");
 const {
-  postInput, pickLinkedIn, newLinkedIn, normalizeSlug, normalizeSeason, normalizePlannedAt,
+  sanitizeContent, pickLinkedIn, normalizeSlug, normalizeSeason, normalizePlannedAt,
   validatePost, syncPublished, announcePost, revisionAuthor,
 } = require("./post.rules");
 require("../../models/subscriber.model"); // para o populate de emailAudience.subscribers
@@ -42,8 +42,9 @@ exports.create = async (req, res, next) => {
   try {
     await connectDB();
 
-    const { data, error } = postInput(req.body);
-    if (error) return res.status(422).json({ error });
+    // Formato já validado pelo esquema da rota (validation/posts.schemas.js)
+    const data = req.body;
+    sanitizeContent(data);
     normalizeSlug(data);
     normalizeSeason(data);
 
@@ -59,7 +60,6 @@ exports.create = async (req, res, next) => {
 
     normalizePlannedAt(data);
     syncPublished(data);
-    if (data.linkedin) data.linkedin = newLinkedIn(data.linkedin);
 
     const post = await BlogPost.create(data);
     await revisions.safeRecordRevision(post, { reason: "create", author: revisionAuthor(req) });
@@ -148,8 +148,9 @@ exports.update = async (req, res, next) => {
   try {
     await connectDB();
 
-    const { data, error } = postInput(req.body);
-    if (error) return res.status(422).json({ error });
+    // Formato já validado pelo esquema da rota (validation/posts.schemas.js)
+    const data = req.body;
+    sanitizeContent(data);
     normalizeSlug(data);
     normalizeSeason(data);
 
@@ -210,9 +211,7 @@ exports.removeImage = async (req, res, next) => {
   try {
     await connectDB();
 
-    // Só texto: { "$ne": null } tiraria todas as imagens da galeria
-    const imageUrl = str(req.body?.imageUrl);
-    if (!imageUrl) return res.status(422).json({ error: "Informe a imagem a remover" });
+    const { imageUrl } = req.body;
 
     await revisions.ensureBaseline(req.params.id);
 

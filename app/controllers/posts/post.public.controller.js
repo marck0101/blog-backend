@@ -9,6 +9,7 @@ const { withReadingMinutes } = require("../../utils/readingTime");
 const { isBot } = require("../../utils/userAgent");
 const { dayRangeFilter } = require("../../utils/dates");
 const { PUBLIC_FIELDS, CARD_FIELDS } = require("./post.rules");
+const { MAX_PINNED } = require("../../config/showcase");
 
 /**
  * Posts para o leitor (blog público): lista, post por endereço, episódios de
@@ -30,7 +31,6 @@ const PUBLIC_SORTS = {
 const ENGAGE_MAX = 60;
 const ENGAGE_WINDOW_MIN = 10;
 
-const MAX_PINNED = 3;
 
 /**
  * BLOG PÚBLICO - LIST PUBLISHED
@@ -248,8 +248,8 @@ exports.findHighlights = async (req, res, next) => {
  */
 exports.engage = async (req, res, next) => {
   try {
-    const type = str(req.body?.type);
-    const channel = str(req.body?.channel).toLowerCase();
+    const type = req.body.type || "";
+    const channel = (req.body.channel || "").toLowerCase();
 
     // Robô que roda JavaScript (pré-visualização, auditoria) não conta como leitor
     if (type === "view" && isBot(req.get("user-agent"))) return res.status(204).end();

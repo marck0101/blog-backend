@@ -21,54 +21,24 @@ const PUBLIC_FIELDS =
 // Cards da vitrine (fixados e destaques): sem o conteúdo inteiro
 const CARD_FIELDS = "_id title slug excerpt category coverImage coverImageAlt season publishedAt createdAt commentsCount";
 
-/* ================= O QUE O EDITOR PODE GRAVAR ================= */
+/* ================= O QUE O EDITOR GRAVA ================= */
+// O formato (campos permitidos, tipos, tamanhos) é conferido antes, pelo
+// esquema da rota: app/validation/posts.schemas.js. Aqui só o que depende dele.
 
-// Preenchidos pelo sistema (métricas, lixeira, vitrine, datas): o editor não
-// grava direto. publishedAt é decidido aqui (R-POST-06), nunca pelo navegador.
-const SYSTEM_FIELDS = [
-  "_id", "__v", "views", "favorites", "shares", "commentsCount", "deletedAt",
-  "pinnedOrder", "highlight", "publishedAt", "createdAt", "updatedAt", "previousSlugs",
-];
-// Texto ou vazio; objeto aqui viraria operador do MongoDB
-const TEXT_FIELDS = [
-  "title", "slug", "excerpt", "content", "category", "season", "coverImage", "coverImageAlt",
-  "emailTeaser", "emailSubject", "emailPreheader", "status",
-];
-
-/** Corpo do editor → dados do post: sem operadores ($inc…), caminhos com ponto e campos do sistema */
-function postInput(body) {
-  if (!body || typeof body !== "object" || Array.isArray(body)) return { error: "Dados inválidos" };
-  const data = {};
-  for (const [key, value] of Object.entries(body)) {
-    if (key.startsWith("$") || key.includes(".") || SYSTEM_FIELDS.includes(key)) continue;
-    data[key] = value;
-  }
-  const wrong = TEXT_FIELDS.find((f) => data[f] != null && typeof data[f] !== "string");
-  if (wrong) return { error: `Valor inválido no campo ${wrong}` };
-  // HTML do post: só o que o editor produz (SEC-01)
+/** HTML do post: só o que o editor produz (SEC-01) */
+function sanitizeContent(data) {
   if (data.content != null) data.content = sanitizeHtml(data.content);
-  return { data };
 }
 
-// Do LinkedIn, o painel só edita o conteúdo; status, URNs e erros são do sistema
-const LINKEDIN_EDITABLE = ["enabled", "text", "imageUrl", "comment"];
-
-/** Edição: linkedin { … } → "linkedin.campo" só dos campos editáveis (não apaga os do sistema) */
+/**
+ * Edição: linkedin { text, … } → "linkedin.text": grava só os campos enviados
+ * sem apagar os do sistema (status, URNs, erro). O esquema já limitou aos
+ * campos editáveis.
+ */
 function pickLinkedIn(data) {
-  if (!data.linkedin || typeof data.linkedin !== "object") {
-    delete data.linkedin;
-    return;
-  }
-  const input = data.linkedin;
+  if (!data.linkedin) return;
+  for (const [field, value] of Object.entries(data.linkedin)) data[`linkedin.${field}`] = value;
   delete data.linkedin;
-  for (const field of LINKEDIN_EDITABLE) {
-    if (input[field] !== undefined) data[`linkedin.${field}`] = input[field];
-  }
-}
-
-/** Criação: só os campos editáveis do LinkedIn */
-function newLinkedIn(input) {
-  return Object.fromEntries(LINKEDIN_EDITABLE.filter((f) => input[f] !== undefined).map((f) => [f, input[f]]));
 }
 
 /* ================= NORMALIZAÇÃO E VALIDAÇÃO ================= */
@@ -210,9 +180,8 @@ const revisionAuthor = (req) => ({ id: req.userId, name: req.user?.name || req.u
 module.exports = {
   PUBLIC_FIELDS,
   CARD_FIELDS,
-  postInput,
+  sanitizeContent,
   pickLinkedIn,
-  newLinkedIn,
   normalizeSlug,
   normalizeSeason,
   normalizePlannedAt,

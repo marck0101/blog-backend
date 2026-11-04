@@ -1,13 +1,12 @@
 const connectDB = require("../../config/db.config");
 const BlogPost = require("../../models/blogpost.model");
 const stats = require("../../services/postStats.service");
+const { MAX_PINNED } = require("../../config/showcase");
 
 /**
  * Vitrine no painel (R-VIT-01 a 03): fixados, regra de destaque e ranking dos
  * mais lidos da semana. O que o leitor vê da vitrine está em post.public.controller.js.
  */
-
-const MAX_PINNED = 3;
 
 /**
  * ADMIN - VITRINE: fixados, prévia dos destaques e ranking dos últimos 7 dias
@@ -59,9 +58,8 @@ exports.showcase = async (req, res, next) => {
  */
 exports.setPinned = async (req, res, next) => {
   try {
-    const ids = Array.isArray(req.body?.ids) ? [...new Set(req.body.ids.map(String))] : null;
-    if (!ids) return res.status(422).json({ error: "Envie a lista de posts fixados" });
-    if (ids.length > MAX_PINNED) return res.status(422).json({ error: `Fixe no máximo ${MAX_PINNED} posts` });
+    // Formato e limite conferidos pelo esquema (validation/posts.schemas.js)
+    const ids = [...new Set(req.body.ids)];
 
     await connectDB();
     const found = await BlogPost.countDocuments({ _id: { $in: ids }, deletedAt: null });
@@ -86,8 +84,7 @@ exports.setPinned = async (req, res, next) => {
  */
 exports.setHighlight = async (req, res, next) => {
   try {
-    const highlight = req.body?.highlight;
-    if (!["auto", "force", "hide"].includes(highlight)) return res.status(422).json({ error: "Opção inválida" });
+    const { highlight } = req.body;
 
     await connectDB();
     const post = await BlogPost.findOneAndUpdate(
