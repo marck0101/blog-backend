@@ -49,18 +49,14 @@ function mailerNotConfigured(res) {
   return true;
 }
 
-function validatePost(post) {
-  if (post === undefined || post === null || post === "") return null;
-  return mongoose.isValidObjectId(post) ? null : "Post inválido";
-}
-
-function pickEditable(body) {
-  const data = {};
-  for (const key of ["subject", "preheader", "content", "audience", "post"]) {
-    if (body[key] !== undefined) data[key] = body[key];
-  }
-  // HTML do envio: só o que o editor produz (SEC-01)
+/**
+ * Corpo já validado (validation/campaigns.schemas.js) → dados do envio:
+ * HTML limpo (SEC-01) e "" no post = sem post ligado.
+ */
+function campaignInput(body) {
+  const data = { ...body };
   if (data.content !== undefined) data.content = sanitizeHtml(data.content);
+  if (data.post === "") data.post = null;
   return data;
 }
 
@@ -97,10 +93,8 @@ exports.findAll = async (req, res, next) => {
   try {
     await connectDB();
 
-    // ?post= envios ligados a um post (ex.: o aviso automático dele)
-    if (req.query.post && !mongoose.isValidObjectId(req.query.post)) {
-      return res.status(400).json({ error: "Post inválido" });
-    }
+    // ?post= envios ligados a um post (ex.: o aviso automático dele); formato
+    // conferido pelo esquema (listQuery)
 
     // ?email= filtra envios que tiveram esse destinatário (busca parcial)
     const email = req.query.email?.trim().toLowerCase();
@@ -198,11 +192,9 @@ exports.findOne = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   try {
     await connectDB();
-    const data = pickEditable(req.body);
-
-    const audienceError = validateAudience(data.audience) || validatePost(data.post);
+    const data = campaignInput(req.body);
+    const audienceError = validateAudience(data.audience);
     if (audienceError) return res.status(422).json({ error: audienceError });
-    if (data.post === "") data.post = null;
 
     const campaign = await Campaign.create(data);
     res.status(201).json(serialize(campaign));
@@ -217,10 +209,9 @@ exports.update = async (req, res, next) => {
     const campaign = await findDraft(req.params.id, res);
     if (!campaign) return;
 
-    const data = pickEditable(req.body);
-    const audienceError = validateAudience(data.audience) || validatePost(data.post);
+    const data = campaignInput(req.body);
+    const audienceError = validateAudience(data.audience);
     if (audienceError) return res.status(422).json({ error: audienceError });
-    if (data.post === "") data.post = null;
 
     campaign.set(data);
     await campaign.save();

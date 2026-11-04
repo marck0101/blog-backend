@@ -1,5 +1,7 @@
 const { z } = require("zod");
-const { text, id, idList, categoryList, dateInput } = require("./fields");
+const BlogPost = require("../models/blogpost.model");
+const { text, id, dateInput } = require("./fields");
+const { audienceSchema } = require("./audience.schema");
 const { MAX_PINNED } = require("../config/showcase");
 
 /**
@@ -18,13 +20,8 @@ const { MAX_PINNED } = require("../config/showcase");
 
 const ALT_MAX = 125; // leitores de tela e buscadores (igual ao model)
 
-const emailAudience = z.object({
-  type: z.enum(["post-category", "members", "all", "categories", "selected", "lists"]),
-  categories: categoryList.optional(),
-  subscribers: idList.optional(),
-  lists: idList.optional(),
-  excludeMembers: z.boolean().optional(),
-});
+// Tipos do model (inclui "post-category": segue a categoria do post)
+const emailAudience = audienceSchema(BlogPost.schema.path("emailAudience.type").enumValues);
 
 // Só os campos que o painel edita; status, URNs e erros são do sistema
 const linkedin = z.object({
