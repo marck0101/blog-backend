@@ -233,7 +233,7 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
 - [ ] **BIZ-03 · Dashboard: avisos de post não enviados** · os dois · P — o alerta diário da SEC-07 já avisa por email; falta mostrar no Dashboard
   - Listar `post-notification` em rascunho de posts publicados (R-EMAIL-03).
 
-- [ ] **BIZ-04 · Redirecionar slug antigo** · os dois · M
+- [x] **BIZ-04 · Redirecionar slug antigo** · os dois · M — concluída em 03/11/2026 (branches `feat/biz-04-slug-redirect`; R-POST-17; 301 no prerender preservando UTMs, troca de URL no app; slug digitado normalizado; endereço antigo nunca é reusado por outro post; sitemap já lista só o atual. Deploy em qualquer ordem. De quebra: removidos 2 imports sem uso deixados pela DUP-07)
   - Guardar slugs anteriores do post; `/blog/<antigo>` responde 301 para o atual (prerender e sitemap).
 
 - [ ] **BIZ-05 · Provedor de email transacional** · `blog-backend` · M — ⏸️ **adiada por decisão (03/11/2026)**

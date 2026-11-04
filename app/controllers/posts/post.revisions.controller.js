@@ -1,6 +1,5 @@
 const connectDB = require("../../config/db.config");
 const BlogPost = require("../../models/blogpost.model");
-const Season = require("../../models/season.model");
 const revisions = require("../../services/postRevision.service");
 const { seasonExists } = require("../../services/season.service");
 const { sanitizeHtml } = require("../../utils/sanitizeHtml");

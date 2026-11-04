@@ -1,3 +1,4 @@
+const slugify = require("slugify");
 const { notifyNewPost } = require("../../services/campaign.service");
 const { safeShareArticle } = require("../../services/linkedin.service");
 const { sanitizeHtml } = require("../../utils/sanitizeHtml");
@@ -26,7 +27,7 @@ const CARD_FIELDS = "_id title slug excerpt category coverImage coverImageAlt se
 // grava direto. publishedAt é decidido aqui (R-POST-06), nunca pelo navegador.
 const SYSTEM_FIELDS = [
   "_id", "__v", "views", "favorites", "shares", "commentsCount", "deletedAt",
-  "pinnedOrder", "highlight", "publishedAt", "createdAt", "updatedAt",
+  "pinnedOrder", "highlight", "publishedAt", "createdAt", "updatedAt", "previousSlugs",
 ];
 // Texto ou vazio; objeto aqui viraria operador do MongoDB
 const TEXT_FIELDS = [
@@ -71,6 +72,14 @@ function newLinkedIn(input) {
 }
 
 /* ================= NORMALIZAÇÃO E VALIDAÇÃO ================= */
+
+/**
+ * Slug digitado no editor vira endereço válido ("Meu Post!" → "meu-post"), com a
+ * mesma regra do slug gerado do título. Vazio fica vazio: o model gera do título.
+ */
+function normalizeSlug(data) {
+  if (typeof data.slug === "string") data.slug = slugify(data.slug, { lower: true, strict: true });
+}
 
 /** Season vazia vira null (post sem season); ordem vazia também */
 function normalizeSeason(data) {
@@ -204,6 +213,7 @@ module.exports = {
   postInput,
   pickLinkedIn,
   newLinkedIn,
+  normalizeSlug,
   normalizeSeason,
   normalizePlannedAt,
   validatePost,

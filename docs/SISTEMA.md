@@ -105,8 +105,14 @@ públicas filtram por `published: true` e `deletedAt: null`.
 - **R-POST-07** Slug (endereço) é gerado do título no primeiro salvamento (`slugify`,
   minúsculas, sem acento). Se já existir, ganha sufixo `-1`, `-2`…
 - **R-POST-08** Mudar o título **não** muda o slug se o slug foi enviado (o editor sempre
-  envia). Mudar o slug de um post publicado quebra links compartilhados: o editor avisa,
-  mas não há redirecionamento do endereço antigo.
+  envia). Slug digitado à mão é normalizado com a mesma regra do gerado ("Meu Post!" →
+  `meu-post`).
+- **R-POST-17** Mudar o endereço **não quebra links**: o post guarda os endereços anteriores
+  (`previousSlugs`, só o sistema grava). Quem abre um endereço antigo é levado ao atual — o
+  prerender responde **301** (o Google transfere o posicionamento) mantendo UTMs, e o app
+  troca a URL. Endereço atual ou antigo de um post nunca é dado a outro (gerado do título
+  desvia com `-1`; digitado à mão responde 409). Voltar ao endereço antigo do próprio post é
+  permitido. Endereço antigo de post despublicado ou na lixeira dá 404, como o atual.
 - **R-POST-09** **Primeira publicação** dispara, em paralelo, o aviso por email
   (seção 5) e o post no LinkedIn (seção 7). Falha em qualquer um dos dois **não desfaz** a
   publicação.
@@ -736,9 +742,7 @@ Ordenadas por impacto. Itens riscados já foram resolvidos (código da tarefa no
    *Sugestão:* página de confirmação + POST.
 4. **Aviso de post que nasceu como rascunho nunca sai sozinho** (R-EMAIL-03). É regra, mas é
    fácil esquecer. *Sugestão:* destacar no Dashboard "avisos de post não enviados".
-5. **Slug editado à mão não é normalizado no backend** ao atualizar (pode gravar espaço ou
-   maiúscula) e **não há redirecionamento** do slug antigo. *Sugestão:* aplicar `slugify` no
-   update e guardar slugs anteriores para redirecionar (301).
+5. ~~**Slug sem normalização e sem redirecionamento**~~ — resolvido na BIZ-04 (R-POST-08 e 17).
 6. ~~**Datas no fuso do servidor (UTC)**~~ — resolvido na DUP-06 (R-DATE-01). O bug só
    aparecia em produção: a máquina de desenvolvimento está no fuso do Brasil. Texto original:
    "este mês" do Dashboard,

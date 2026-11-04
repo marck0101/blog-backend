@@ -98,9 +98,13 @@ exports.findBySlug = async (req, res, next) => {
 
     // Só leitura: a leitura do post é contada pelo navegador (engage "view",
     // BIZ-02). Contar aqui somava prerender e robôs e perdia o que a CDN servia.
-    const post = await BlogPost.findOne({ slug: req.params.slug, published: true, deletedAt: null })
-      .select(PUBLIC_FIELDS)
-      .lean();
+    const visible = { published: true, deletedAt: null };
+    const slug = str(req.params.slug);
+    // Endereço antigo (R-POST-17): devolve o post com o slug atual; o front e o
+    // prerender (301) levam o leitor para o endereço novo
+    const post =
+      (await BlogPost.findOne({ ...visible, slug }).select(PUBLIC_FIELDS).lean()) ||
+      (await BlogPost.findOne({ ...visible, previousSlugs: slug }).select(PUBLIC_FIELDS).lean());
 
     if (!post) {
       // ?soft=1 (front): "não encontrado" é resposta normal, sem erro de rede no
