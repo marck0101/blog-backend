@@ -4,6 +4,7 @@ const Subscriber = require("../models/subscriber.model");
 const CATEGORIES = require("../config/categories");
 const { recordUnsubscribe } = require("../services/tracking.service");
 const { str, escapeRegex } = require("../utils/sanitize");
+const { COLLATION_PT, pickSort, sortedFind } = require("../utils/listSort");
 const limiter = require("../services/ratelimit.service");
 
 // Rota pública sem login: 5 inscrições por IP a cada 30 min. Barra script
@@ -148,6 +149,37 @@ exports.unsubscribe = async (req, res, next) => {
   }
 };
 
+// Ordem da lista de assinantes (?sort=); a primeira é a padrão.
+// Nome vazio vai para o fim no A-Z.
+const LIST_SORTS = {
+  recent: { sort: { createdAt: -1, _id: -1 } },
+  oldest: { sort: { createdAt: 1, _id: 1 } },
+  name: { sort: { name: 1, email: 1, _id: 1 }, collation: COLLATION_PT, emptyLast: "name" },
+  name_desc: { sort: { name: -1, email: 1, _id: 1 }, collation: COLLATION_PT, emptyLast: "name" },
+  email: { sort: { email: 1, _id: 1 }, collation: COLLATION_PT },
+  email_desc: { sort: { email: -1, _id: -1 }, collation: COLLATION_PT },
+  // Plano: membros primeiro (mais antigos como membro no topo) ou gratuitos primeiro
+  tier: {
+    addFields: { _freeFirst: { $cond: [{ $eq: ["$tier", "member"] }, 0, 1] } },
+    sort: { _freeFirst: 1, memberSince: 1, createdAt: -1, _id: -1 },
+  },
+  tier_free: {
+    addFields: { _freeFirst: { $cond: [{ $eq: ["$tier", "member"] }, 1, 0] } },
+    sort: { _freeFirst: 1, createdAt: -1, _id: -1 },
+  },
+  // Status: ativos primeiro (o inverso é "Cancelados recentemente")
+  active: {
+    addFields: { _activeLast: { $cond: [{ $eq: ["$status", "active"] }, 0, 1] } },
+    sort: { _activeLast: 1, createdAt: -1, _id: -1 },
+  },
+  // Cancelados primeiro (mesmo os antigos, sem data de cancelamento), depois ativos
+  unsubscribed: {
+    addFields: { _activeLast: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] } },
+    sort: { _activeLast: 1, unsubscribedAt: -1, updatedAt: -1, _id: -1 },
+  },
+};
+const listOrder = (query) => LIST_SORTS[pickSort(LIST_SORTS, query.sort)];
+
 // Filtros da lista de assinantes (lista paginada e exportação CSV)
 function listFilter(query) {
   const filter = {};
@@ -204,9 +236,7 @@ const csvDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : "");
 exports.exportCsv = async (req, res, next) => {
   try {
     await connectDB();
-    const subscribers = await Subscriber.find(listFilter(req.query), "-token")
-      .sort({ createdAt: -1, _id: -1 })
-      .lean();
+    const subscribers = await sortedFind(Subscriber, listFilter(req.query), listOrder(req.query), { exclude: ["token"] });
 
     const header = [
       "email", "nome", "status", "plano", "categorias", "inscrito_em", "cancelado_em",
@@ -247,10 +277,7 @@ exports.findAll = async (req, res, next) => {
     const filter = listFilter(req.query);
 
     const [subscribers, total] = await Promise.all([
-      Subscriber.find(filter, "-token")
-        .sort({ createdAt: -1, _id: -1 })
-        .skip(skip)
-        .limit(limit),
+      sortedFind(Subscriber, filter, listOrder(req.query), { skip, limit, exclude: ["token"] }),
       Subscriber.countDocuments(filter),
     ]);
 

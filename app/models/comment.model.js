@@ -25,6 +25,10 @@ const CommentSchema = new mongoose.Schema(
     rejectedAt: { type: Date, default: null },
     rejectionReason: { type: String, default: "", maxlength: 500 },
     readerNotifiedAt: { type: Date, default: null },
+    // O leitor apagou o próprio comentário, mas outras pessoas já tinham
+    // respondido: fica só o lugar ("removido pelo autor"), sem texto nem dados
+    // dele, para não sumir com as respostas dos outros.
+    removedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

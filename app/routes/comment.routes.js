@@ -56,12 +56,15 @@ function validBody(body) {
 
 // Total de aprovados no post (aparece no card e no painel)
 async function syncCount(postId) {
-  const count = await Comment.countDocuments({ post: postId, status: "approved" });
+  const count = await Comment.countDocuments({ post: postId, status: "approved", removedAt: null });
   await BlogPost.updateOne({ _id: postId }, { $set: { commentsCount: count } }, { timestamps: false });
 }
 
 // O que o leitor vê de um comentário: nunca email nem id da conta Google
 function publicComment(c, reader) {
+  if (c.removedAt) {
+    return { id: c._id, parent: c.parent, removed: true, name: "", picture: "", isAuthor: false, body: "", status: c.status, createdAt: c.createdAt, mine: false };
+  }
   const mine = Boolean(reader && c.author?.sub && c.author.sub === reader.sub);
   return {
     id: c._id,
@@ -220,8 +223,11 @@ router.post("/post/:postId", requireAllowedOrigin, async (req, res, next) => {
     // Resposta: sempre presa ao comentário principal, aprovado, do mesmo post
     let parent = null;
     if (req.body?.parentId) {
-      if (!mongoose.isValidObjectId(req.body.parentId)) return res.status(422).json({ error: "Comentário inválido" });
-      const target = await Comment.findOne({ _id: req.body.parentId, post: post._id, status: "approved" }).lean();
+      const parentId = req.body.parentId;
+      if (typeof parentId !== "string" || !mongoose.isValidObjectId(parentId)) {
+        return res.status(422).json({ error: "Comentário inválido" });
+      }
+      const target = await Comment.findOne({ _id: parentId, post: post._id, status: "approved", removedAt: null }).lean();
       if (!target) return res.status(422).json({ error: "Comentário respondido não existe mais" });
       parent = target.parent || target._id;
     }
@@ -246,7 +252,9 @@ router.post("/post/:postId", requireAllowedOrigin, async (req, res, next) => {
   }
 });
 
-// A pessoa apaga o próprio comentário (e as respostas que ele recebeu)
+// A pessoa apaga o próprio comentário. Só mexe no que é dela: se outras
+// pessoas (ou o autor do blog) já responderam, o comentário vira "removido
+// pelo autor" e as respostas dos outros continuam no post.
 router.delete("/mine/:id", requireAllowedOrigin, async (req, res, next) => {
   try {
     const reader = readReader(req);
@@ -254,12 +262,31 @@ router.delete("/mine/:id", requireAllowedOrigin, async (req, res, next) => {
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ error: "Comentário não encontrado" });
 
     await connectDB();
-    const comment = await Comment.findOne({ _id: req.params.id, "author.sub": reader.sub }).lean();
+    const comment = await Comment.findOne({ _id: req.params.id, "author.sub": reader.sub, removedAt: null }).lean();
     if (!comment) return res.status(404).json({ error: "Comentário não encontrado" });
 
-    await Comment.deleteMany({ $or: [{ _id: comment._id }, { parent: comment._id }] });
+    const othersReplied = await Comment.exists({ parent: comment._id, "author.sub": { $ne: reader.sub } });
+    if (othersReplied) {
+      await Comment.updateOne(
+        { _id: comment._id },
+        {
+          $set: {
+            removedAt: new Date(),
+            body: "",
+            "author.name": "",
+            "author.email": "",
+            "author.picture": "",
+            "author.sub": "",
+            rejectionReason: "",
+          },
+        }
+      );
+    } else {
+      // Sem resposta de ninguém (no máximo respostas da própria pessoa)
+      await Comment.deleteMany({ $or: [{ _id: comment._id }, { parent: comment._id, "author.sub": reader.sub }] });
+    }
     await syncCount(comment.post);
-    res.json({ ok: true });
+    res.json({ ok: true, removed: Boolean(othersReplied) });
   } catch (err) {
     next(err);
   }
@@ -278,7 +305,7 @@ router.get("/admin/pending-count", auth, async (req, res, next) => {
   }
 });
 
-// ?status=pending|approved|rejected&page=1&post=<id>
+// ?status=pending|approved|rejected&page=1&post=<id>&sort=recent|oldest
 router.get("/admin", auth, async (req, res, next) => {
   try {
     await connectDB();
@@ -290,11 +317,12 @@ router.get("/admin", auth, async (req, res, next) => {
 
     const [comments, total, counts] = await Promise.all([
       Comment.find(filter)
-        .sort({ createdAt: -1 })
+        // ?sort=oldest: fila de moderação na ordem de chegada
+        .sort(req.query.sort === "oldest" ? { createdAt: 1, _id: 1 } : { createdAt: -1, _id: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .populate("post", "title slug")
-        .populate("parent", "author.name body")
+        .populate("parent", "author.name body removedAt")
         .lean(),
       Comment.countDocuments(filter),
       Comment.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
@@ -329,6 +357,7 @@ router.patch("/admin/:id", auth, async (req, res, next) => {
     await connectDB();
     const comment = await Comment.findById(req.params.id);
     if (!comment) return res.status(404).json({ error: "Comentário não encontrado" });
+    if (comment.removedAt) return res.status(409).json({ error: "O leitor removeu este comentário" });
 
     const wasRejected = comment.status === "rejected";
     comment.status = status;

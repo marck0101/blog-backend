@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { pickSort } = require("../utils/listSort");
 const connectDB = require("../config/db.config");
 const Campaign = require("../models/campaign.model");
 const User = require("../models/user.model");
@@ -127,9 +128,37 @@ exports.findAll = async (req, res, next) => {
     // Sem ?page= mantém a resposta antiga (array completo), usada pelo editor de post
     if (!req.query.page) return res.json(campaigns.map(toJson));
 
-    // Mais recente primeiro pela data que a tela mostra: envio, início ou última edição
+    // ?sort=: pela data que a tela mostra (envio, início ou última edição),
+    // assunto A-Z ou tamanho do público. Padrão: mais recente primeiro.
     const activity = (c) => (c.sentAt || c.startedAt || c.updatedAt || c.createdAt).getTime();
-    let list = campaigns.sort((a, b) => activity(b) - activity(a));
+    const bySubject = new Intl.Collator("pt", { sensitivity: "base" });
+    const size = (c) => c.recipients?.length || c.audience?.subscribers?.length || 0;
+    const STATUS_ORDER = ["sending", "failed", "partial", "draft", "sent"];
+    // stats() percorre os destinatários: calcula uma vez por envio
+    const sentCache = new Map();
+    const sentOf = (c) => {
+      if (!sentCache.has(c)) sentCache.set(c, c.stats().sent);
+      return sentCache.get(c);
+    };
+    const statusRank = (c) => {
+      const i = STATUS_ORDER.indexOf(statusKey(c));
+      return i === -1 ? STATUS_ORDER.length : i;
+    };
+    const sorters = {
+      recent: (a, b) => activity(b) - activity(a),
+      oldest: (a, b) => activity(a) - activity(b),
+      subject: (a, b) => bySubject.compare(a.subject || "", b.subject || "") || activity(b) - activity(a),
+      subject_desc: (a, b) => bySubject.compare(b.subject || "", a.subject || "") || activity(b) - activity(a),
+      audience: (a, b) => size(b) - size(a) || activity(b) - activity(a),
+      audience_small: (a, b) => size(a) - size(b) || activity(b) - activity(a),
+      // Status: o que precisa de atenção primeiro (enviando, falhou, parcial), depois rascunho e enviados
+      status: (a, b) => statusRank(a) - statusRank(b) || activity(b) - activity(a),
+      status_desc: (a, b) => statusRank(b) - statusRank(a) || activity(b) - activity(a),
+      // Entrega: quantos receberam
+      delivered: (a, b) => sentOf(b) - sentOf(a) || activity(b) - activity(a),
+      delivered_low: (a, b) => sentOf(a) - sentOf(b) || activity(b) - activity(a),
+    };
+    let list = campaigns.sort(sorters[pickSort(sorters, req.query.sort)]);
 
     const status = req.query.status;
     if (status && status !== "all") list = list.filter((c) => statusKey(c) === status);

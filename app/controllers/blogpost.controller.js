@@ -7,6 +7,7 @@ const { safeShareArticle } = require("../services/linkedin.service");
 const Season = require("../models/season.model");
 const { seasonExists } = require("../services/season.service");
 const { str, escapeRegex, isMeaningfulSearch } = require("../utils/sanitize");
+const { COLLATION_PT, pickSort, sortedFind } = require("../utils/listSort");
 const { withReadingMinutes } = require("../utils/readingTime");
 const { normalizeTags } = require("../utils/tags");
 const mongoose = require("mongoose");
@@ -229,40 +230,20 @@ exports.findPublicById = async (req, res, next) => {
   }
 };
 
-// Ordem da lista do painel (?sort=). _id desempata para a paginação não repetir post.
-const ADMIN_SORTS = ["created", "published_desc", "published_asc", "updated", "az"];
-
-function adminListQuery(filter, sortKey, skip, limit) {
-  if (sortKey === "published_desc" || sortKey === "published_asc") {
-    // Data de publicação; agendado usa a data planejada. Rascunho (mesmo com
-    // data no calendário) vai sempre para o fim, nas duas direções.
-    const dir = sortKey === "published_desc" ? -1 : 1;
-    return BlogPost.aggregate([
-      { $match: filter },
-      {
-        $addFields: {
-          _pubSort: {
-            $ifNull: ["$publishedAt", { $cond: [{ $eq: ["$status", "planned"] }, "$plannedAt", null] }],
-          },
-        },
-      },
-      { $addFields: { _noPub: { $cond: [{ $ifNull: ["$_pubSort", false] }, 0, 1] } } },
-      { $sort: { _noPub: 1, _pubSort: dir, createdAt: -1, _id: -1 } },
-      { $skip: skip },
-      { $limit: limit },
-      { $project: { _pubSort: 0, _noPub: 0 } },
-    ]);
-  }
-  const sorts = {
-    created: { sort: { createdAt: -1, _id: -1 } },
-    updated: { sort: { updatedAt: -1, _id: -1 } },
-    az: { sort: { title: 1, _id: 1 }, collation: { locale: "pt", strength: 1 } },
-  };
-  const order = sorts[sortKey] || sorts.created;
-  let query = BlogPost.find(filter).sort(order.sort).skip(skip).limit(limit);
-  if (order.collation) query = query.collation(order.collation);
-  return query;
-}
+// Ordem da lista do painel (?sort=); a primeira é a padrão.
+// Publicação: agendado usa a data planejada; rascunho (mesmo com data no
+// calendário) vai sempre para o fim, nas duas direções.
+const PUB_DATE = {
+  _pubSort: { $ifNull: ["$publishedAt", { $cond: [{ $eq: ["$status", "planned"] }, "$plannedAt", null] }] },
+};
+const PUB_LAST = { _noPub: { $cond: [{ $ifNull: [PUB_DATE._pubSort, false] }, 0, 1] } };
+const ADMIN_SORTS = {
+  created: { sort: { createdAt: -1, _id: -1 } },
+  published_desc: { addFields: { ...PUB_DATE, ...PUB_LAST }, sort: { _noPub: 1, _pubSort: -1, createdAt: -1, _id: -1 } },
+  published_asc: { addFields: { ...PUB_DATE, ...PUB_LAST }, sort: { _noPub: 1, _pubSort: 1, createdAt: -1, _id: -1 } },
+  updated: { sort: { updatedAt: -1, _id: -1 } },
+  az: { sort: { title: 1, _id: 1 }, collation: COLLATION_PT },
+};
 
 /**
  * ADMIN - LIST ALL
@@ -302,9 +283,9 @@ exports.findAll = async (req, res, next) => {
       }
     }
 
-    const sortKey = ADMIN_SORTS.includes(str(req.query.sort)) ? str(req.query.sort) : "created";
+    const order = ADMIN_SORTS[pickSort(ADMIN_SORTS, req.query.sort)];
     const [posts, total] = await Promise.all([
-      adminListQuery(filter, sortKey, skip, limit),
+      sortedFind(BlogPost, filter, order, { skip, limit }),
       BlogPost.countDocuments(filter),
     ]);
 
@@ -363,7 +344,7 @@ exports.findAllPublished = async (req, res, next) => {
       }
     }
 
-    const order = PUBLIC_SORTS[str(req.query.sort)] || PUBLIC_SORTS.recent;
+    const order = PUBLIC_SORTS[pickSort(PUBLIC_SORTS, req.query.sort)];
     // fields=card: lista da home e prerender — só o que o card mostra, sem o conteúdo inteiro
     const fields = req.query.fields === "card" ? CARD_FIELDS : PUBLIC_FIELDS;
     let query = BlogPost.find(filter).select(fields).sort(order.sort).skip(skip).limit(limit);
