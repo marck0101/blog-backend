@@ -27,6 +27,7 @@ const BODY_MAX = 2000;
 const COMMENT_MAX = 5;
 const COMMENT_WINDOW_MIN = 10;
 const PENDING_PER_READER = 5;
+const REASON_MAX = 500;
 
 const NONCE_COOKIE = "reader_oauth_nonce";
 const NONCE_OPTIONS = () => baseOptions("/api/comments/google");
@@ -61,6 +62,7 @@ async function syncCount(postId) {
 
 // O que o leitor vê de um comentário: nunca email nem id da conta Google
 function publicComment(c, reader) {
+  const mine = Boolean(reader && c.author?.sub && c.author.sub === reader.sub);
   return {
     id: c._id,
     parent: c.parent,
@@ -70,7 +72,9 @@ function publicComment(c, reader) {
     body: c.body,
     status: c.status,
     createdAt: c.createdAt,
-    mine: Boolean(reader && c.author?.sub && c.author.sub === reader.sub),
+    mine,
+    // Motivo da recusa: só para quem escreveu (os outros nem recebem o comentário)
+    ...(mine && c.status === "rejected" ? { rejectionReason: c.rejectionReason || "" } : {}),
   };
 }
 
@@ -97,6 +101,37 @@ async function notifyAuthor(comment, post) {
     });
   } catch (err) {
     console.error("[COMMENTS] aviso por email:", err.message);
+  }
+}
+
+// Aviso para o leitor: o comentário não foi publicado (com o motivo, se houver).
+// Devolve true se o email saiu.
+async function notifyReaderRejected(comment) {
+  const to = comment.author?.email;
+  if (!to || comment.isAuthor || !process.env.GMAIL_USER) return false;
+  const post = await BlogPost.findById(comment.post).select("title slug").lean();
+  if (!post) return false;
+
+  const link = `${FRONTEND_URL}/blog/${encodeURIComponent(post.slug)}#comentarios`;
+  const firstName = escapeHtml((comment.author.name || "").split(" ")[0] || "Olá");
+  const reason = comment.rejectionReason
+    ? `<p><strong>Motivo:</strong> ${escapeHtml(comment.rejectionReason)}</p>`
+    : "";
+  try {
+    await transporter.sendMail({
+      from: `"marck0101" <${process.env.GMAIL_USER}>`,
+      to,
+      subject: `Seu comentário em "${post.title}" não foi publicado`,
+      html: `<p>${firstName}, obrigado por comentar em <strong>${escapeHtml(post.title)}</strong>.</p>
+<p>Desta vez o comentário abaixo não foi publicado:</p>
+<blockquote style="border-left:3px solid #ddd;margin:0;padding:0 12px;white-space:pre-line">${escapeHtml(comment.body)}</blockquote>
+${reason}
+<p>Você pode ajustar e comentar de novo quando quiser: <a href="${link}">voltar ao post</a>.</p>`,
+    });
+    return true;
+  } catch (err) {
+    console.error("[COMMENTS] aviso de recusa:", err.message);
+    return false;
   }
 }
 
@@ -147,7 +182,7 @@ router.delete("/session", requireAllowedOrigin, (req, res) => {
 
 /* ================= LEITOR: COMENTÁRIOS ================= */
 
-// Aprovados do post + os pendentes da própria pessoa ("aguardando aprovação")
+// Aprovados do post + os pendentes e recusados da própria pessoa (só ela vê)
 router.get("/post/:postId", async (req, res, next) => {
   try {
     await connectDB();
@@ -157,7 +192,7 @@ router.get("/post/:postId", async (req, res, next) => {
 
     const reader = readReader(req);
     const or = [{ status: "approved" }];
-    if (reader) or.push({ status: "pending", "author.sub": reader.sub });
+    if (reader) or.push({ status: { $in: ["pending", "rejected"] }, "author.sub": reader.sub });
 
     const comments = await Comment.find({ post: post._id, $or: or }).sort({ createdAt: 1 }).limit(500).lean();
     res.json({ comments: comments.map((c) => publicComment(c, reader)) });
@@ -281,17 +316,44 @@ router.patch("/admin/:id", auth, async (req, res, next) => {
   try {
     const status = req.body?.status;
     if (!STATUSES.includes(status)) return res.status(422).json({ error: "Status inválido" });
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ error: "Comentário não encontrado" });
+
+    // Motivo da recusa (opcional): texto puro, vai para o leitor
+    const reason = cleanBody(req.body?.reason).replace(/\n+/g, " ");
+    if (status === "rejected" && reason.length > REASON_MAX) {
+      return res.status(422).json({ error: `O motivo pode ter até ${REASON_MAX} caracteres` });
+    }
+    // Avisar o leitor por email (padrão: sim)
+    const notify = req.body?.notify !== false;
 
     await connectDB();
-    const comment = await Comment.findByIdAndUpdate(
-      req.params.id,
-      { status, approvedAt: status === "approved" ? new Date() : null },
-      { new: true }
-    );
+    const comment = await Comment.findById(req.params.id);
     if (!comment) return res.status(404).json({ error: "Comentário não encontrado" });
 
+    const wasRejected = comment.status === "rejected";
+    comment.status = status;
+    comment.approvedAt = status === "approved" ? comment.approvedAt || new Date() : null;
+    if (status === "rejected") {
+      if (!wasRejected) comment.rejectedAt = new Date();
+      comment.rejectionReason = reason;
+    } else {
+      comment.rejectedAt = null;
+      comment.rejectionReason = "";
+      comment.readerNotifiedAt = null;
+    }
+    await comment.save();
+
+    let notified = false;
+    if (status === "rejected" && !wasRejected && notify) {
+      notified = await notifyReaderRejected(comment);
+      if (notified) {
+        comment.readerNotifiedAt = new Date();
+        await comment.save();
+      }
+    }
+
     await syncCount(comment.post);
-    res.json(comment);
+    res.json({ ...comment.toObject(), notified });
   } catch (err) {
     next(err);
   }
@@ -312,6 +374,9 @@ router.post("/admin/:id/reply", auth, async (req, res, next) => {
     if (target.status !== "approved") {
       target.status = "approved";
       target.approvedAt = new Date();
+      target.rejectedAt = null;
+      target.rejectionReason = "";
+      target.readerNotifiedAt = null;
       await target.save();
     }
 
