@@ -229,6 +229,41 @@ exports.findPublicById = async (req, res, next) => {
   }
 };
 
+// Ordem da lista do painel (?sort=). _id desempata para a paginação não repetir post.
+const ADMIN_SORTS = ["created", "published_desc", "published_asc", "updated", "az"];
+
+function adminListQuery(filter, sortKey, skip, limit) {
+  if (sortKey === "published_desc" || sortKey === "published_asc") {
+    // Data de publicação; agendado usa a data planejada. Rascunho (mesmo com
+    // data no calendário) vai sempre para o fim, nas duas direções.
+    const dir = sortKey === "published_desc" ? -1 : 1;
+    return BlogPost.aggregate([
+      { $match: filter },
+      {
+        $addFields: {
+          _pubSort: {
+            $ifNull: ["$publishedAt", { $cond: [{ $eq: ["$status", "planned"] }, "$plannedAt", null] }],
+          },
+        },
+      },
+      { $addFields: { _noPub: { $cond: [{ $ifNull: ["$_pubSort", false] }, 0, 1] } } },
+      { $sort: { _noPub: 1, _pubSort: dir, createdAt: -1, _id: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      { $project: { _pubSort: 0, _noPub: 0 } },
+    ]);
+  }
+  const sorts = {
+    created: { sort: { createdAt: -1, _id: -1 } },
+    updated: { sort: { updatedAt: -1, _id: -1 } },
+    az: { sort: { title: 1, _id: 1 }, collation: { locale: "pt", strength: 1 } },
+  };
+  const order = sorts[sortKey] || sorts.created;
+  let query = BlogPost.find(filter).sort(order.sort).skip(skip).limit(limit);
+  if (order.collation) query = query.collation(order.collation);
+  return query;
+}
+
 /**
  * ADMIN - LIST ALL
  */
@@ -267,11 +302,9 @@ exports.findAll = async (req, res, next) => {
       }
     }
 
+    const sortKey = ADMIN_SORTS.includes(str(req.query.sort)) ? str(req.query.sort) : "created";
     const [posts, total] = await Promise.all([
-      BlogPost.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
+      adminListQuery(filter, sortKey, skip, limit),
       BlogPost.countDocuments(filter),
     ]);
 
