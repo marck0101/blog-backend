@@ -138,53 +138,201 @@ router.get("/indexnow-key.txt", (req, res) => {
   res.type("text/plain").send(key);
 });
 
-// llms.txt (llmstxt.org): resumo do site em Markdown para agentes de IA —
-// título, descrição curta e os artigos agrupados por categoria, com link e resumo.
+/* ================= ARQUIVOS PARA IA (llmstxt.org) =================
+ * Gerados do banco a cada acesso: publicar um post (no painel ou pelo cron)
+ * já atualiza os dois, sem passo manual. Só entra o que é público:
+ * post publicado e fora da lixeira, season com episódio publicado.
+ *   /llms.txt       mapa curto: os 10 posts mais recentes, seasons e categorias
+ *   /llms-full.txt  conteúdo completo de todos os posts publicados, em Markdown
+ */
+const TurndownService = require("turndown");
+const { BLOG_FAQ, SEASONS_FAQ } = require("../config/siteFaq");
+
+const LLMS_RECENT = 10;
+const PUBLISHED = { published: true, deletedAt: null };
+// Cache curto na CDN: post novo aparece em até 5 min
+const LLMS_CACHE = "public, max-age=0, s-maxage=300, stale-while-revalidate=86400";
+
+const LLMS_TITLE = "# Blog do Marcos Henrique Corrêa";
+const LLMS_SUMMARY =
+  "> Artigos práticos em português sobre marketing digital, tráfego pago, growth e tecnologia, escritos por Marcos Henrique Corrêa, desenvolvedor full stack e gestor de tráfego.";
+
+// Markdown de uma linha: sem quebras que quebrariam a lista
+const oneLine = (str = "") => String(str).replace(/\s+/g, " ").trim();
+// Texto de link Markdown: colchetes do título ("[TESTE] ...") quebrariam o link
+const linkText = (str = "") => oneLine(str).replace(/([[\]])/g, "\\$1");
+const dateBR = (d) => (d ? new Date(d).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }) : "");
+const categoryLabel = (slug) => CATEGORIES.find((c) => c.slug === slug)?.label || slug;
+const postLink = (p) => `${SITE_URL}/blog/${p.slug}`;
+
+// Seasons públicas (com pelo menos um episódio publicado), na ordem do painel
+async function publicSeasons() {
+  const [seasons, counts] = await Promise.all([
+    Season.find({}, { slug: 1, title: 1, description: 1, faq: 1, order: 1 }).sort({ order: 1, createdAt: 1 }).lean(),
+    BlogPost.aggregate([{ $match: { ...PUBLISHED, season: { $ne: null } } }, { $group: { _id: "$season", n: { $sum: 1 } } }]),
+  ]);
+  const episodes = new Map(counts.map((c) => [c._id, c.n]));
+  return seasons.filter((s) => episodes.has(s.slug)).map((s) => ({ ...s, episodes: episodes.get(s.slug) }));
+}
+
+function sendText(res, txt) {
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Cache-Control", LLMS_CACHE);
+  res.send(txt);
+}
+
 router.get("/llms.txt", async (req, res) => {
   try {
     await connectDB();
+    const [posts, total, seasons] = await Promise.all([
+      BlogPost.find(PUBLISHED, { slug: 1, title: 1, excerpt: 1, seo: 1, category: 1, publishedAt: 1 })
+        .sort({ publishedAt: -1, _id: -1 })
+        .limit(LLMS_RECENT)
+        .lean(),
+      BlogPost.countDocuments(PUBLISHED),
+      publicSeasons(),
+    ]);
 
-    const posts = await BlogPost.find(
-      { published: true, deletedAt: null },
-      { slug: 1, title: 1, excerpt: 1, seo: 1, category: 1 }
-    )
-      .sort({ publishedAt: -1 })
-      .lean();
+    const recent = posts.map((p) => {
+      const summary = oneLine(p.seo?.description || p.excerpt);
+      return `- [${linkText(p.title)}](${postLink(p)}): ${dateBR(p.publishedAt)} · ${categoryLabel(p.category)}${summary ? `. ${summary}` : ""}`;
+    });
+    const seasonItems = seasons.map(
+      (s) => `- [${linkText(s.title)}](${SITE_URL}/seasons/${s.slug}): ${s.episodes} episódio(s)${s.description ? `. ${oneLine(s.description)}` : ""}`
+    );
+    const categoryItems = CATEGORIES.map(({ slug, label }) => `- [${label}](${SITE_URL}/blog?categoria=${slug})`);
 
-    // Markdown de uma linha: sem quebras que quebrariam a lista
-    const oneLine = (str = "") => String(str).replace(/\s+/g, " ").trim();
+    const txt = `${LLMS_TITLE}
 
-    const sections = CATEGORIES.map(({ slug, label }) => {
-      const items = posts
-        .filter((p) => p.category === slug)
-        .map((p) => {
-          const summary = oneLine(p.seo?.description || p.excerpt);
-          return `- [${oneLine(p.title)}](${SITE_URL}/blog/${p.slug})${summary ? `: ${summary}` : ""}`;
-        });
-      return items.length ? `## ${label}\n\n${items.join("\n")}` : "";
-    }).filter(Boolean);
+${LLMS_SUMMARY}
 
-    const txt = `# Blog do Marcos Henrique Corrêa
-
-> Artigos práticos em português sobre marketing digital, tráfego pago, growth e tecnologia, escritos por Marcos Henrique Corrêa, desenvolvedor full stack e gestor de tráfego.
-
+- Conteúdo completo de todos os ${total} artigos, em Markdown: ${SITE_URL}/llms-full.txt
 - Lista completa e datas: ${SITE_URL}/sitemap.xml
-- Últimos artigos: ${SITE_URL}/rss.xml
-- Séries de artigos em sequência: ${SITE_URL}/seasons
+- Últimos artigos (RSS): ${SITE_URL}/rss.xml
 
-${sections.join("\n\n")}
+## Artigos mais recentes
+
+${recent.join("\n")}
+${seasonItems.length ? `\n## Seasons (séries para ler em sequência)\n\n${seasonItems.join("\n")}\n` : ""}
+## Categorias
+
+${categoryItems.join("\n")}
 
 ## Optional
 
+- [Todas as seasons](${SITE_URL}/seasons)
 - [Política de Privacidade](${SITE_URL}/privacidade)
 `;
-
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.setHeader("Cache-Control", "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400");
-    res.send(txt);
+    sendText(res, txt);
   } catch (err) {
     console.error("[LLMS]", err);
     res.status(500).send("Erro ao gerar llms.txt");
+  }
+});
+
+// HTML do editor (TipTap) → Markdown. Links do próprio blog viram absolutos;
+// embeds e scripts saem (não são texto).
+function markdownConverter() {
+  const td = new TurndownService({
+    headingStyle: "atx",
+    codeBlockStyle: "fenced",
+    bulletListMarker: "-",
+    emDelimiter: "*",
+  });
+  td.remove(["script", "style", "iframe", "noscript", "button", "form"]);
+  const absolute = (url = "") => (url.startsWith("/") ? `${SITE_URL}${url}` : url);
+  td.addRule("absoluteLinks", {
+    filter: (node) => node.nodeName === "A" && node.getAttribute("href"),
+    replacement: (content, node) => (content.trim() ? `[${content}](${absolute(node.getAttribute("href"))})` : ""),
+  });
+  td.addRule("absoluteImages", {
+    filter: "img",
+    replacement: (content, node) => {
+      const src = node.getAttribute("src");
+      return src ? `![${oneLine(node.getAttribute("alt") || "")}](${absolute(src)})` : "";
+    },
+  });
+  // Títulos do post ficam abaixo do título do artigo ("##"): h2 → ###, h3 → ####
+  td.addRule("nestedHeadings", {
+    filter: ["h1", "h2", "h3", "h4", "h5", "h6"],
+    replacement: (content, node) => {
+      const level = Math.min(6, Math.max(3, Number(node.nodeName[1]) + 1));
+      return `\n\n${"#".repeat(level)} ${oneLine(content)}\n\n`;
+    },
+  });
+  // O editor põe <p> dentro de cada <li>: item com um parágrafo só vira lista
+  // compacta (sem linha em branco entre os itens)
+  td.addRule("tightListParagraph", {
+    filter: (node) =>
+      node.nodeName === "P" && node.parentNode?.nodeName === "LI" && node.parentNode.children.length === 1,
+    replacement: (content) => content,
+  });
+  return td;
+}
+
+const faqMarkdown = (faq, heading) => {
+  const pairs = (faq || []).filter((f) => f?.question?.trim() && f?.answer?.trim());
+  if (!pairs.length) return "";
+  return `\n\n${heading} Perguntas frequentes\n\n${pairs.map((f) => `**${oneLine(f.question)}**\n\n${f.answer.trim()}`).join("\n\n")}`;
+};
+
+router.get("/llms-full.txt", async (req, res) => {
+  try {
+    await connectDB();
+    const [posts, seasons] = await Promise.all([
+      BlogPost.find(PUBLISHED, {
+        slug: 1, title: 1, excerpt: 1, directAnswer: 1, content: 1, category: 1, tags: 1,
+        season: 1, seasonOrder: 1, faq: 1, readingMinutes: 1, publishedAt: 1, updatedAt: 1, seo: 1,
+      })
+        .sort({ publishedAt: -1, _id: -1 })
+        .lean(),
+      publicSeasons(),
+    ]);
+    const seasonTitle = new Map(seasons.map((s) => [s.slug, s.title]));
+    const td = markdownConverter();
+
+    const articles = posts.map((p) => {
+      const meta = [
+        `- URL: ${postLink(p)}`,
+        `- Publicado em: ${dateBR(p.publishedAt)}`,
+        p.updatedAt && dateBR(p.updatedAt) !== dateBR(p.publishedAt) ? `- Atualizado em: ${dateBR(p.updatedAt)}` : "",
+        `- Categoria: ${categoryLabel(p.category)}`,
+        p.season && seasonTitle.has(p.season)
+          ? `- Season: ${seasonTitle.get(p.season)}${p.seasonOrder ? ` (episódio ${p.seasonOrder})` : ""}`
+          : "",
+        p.tags?.length ? `- Tags: ${p.tags.map((t) => t.replace(/-/g, " ")).join(", ")}` : "",
+        p.readingMinutes ? `- Leitura: ${p.readingMinutes} min` : "",
+        "- Autor: Marcos Henrique Corrêa",
+      ].filter(Boolean);
+      const summary = oneLine(p.seo?.description || p.excerpt);
+      const answer = p.directAnswer?.trim() ? `\n\n**Resposta direta:** ${oneLine(p.directAnswer)}` : "";
+      const body = td.turndown(p.content || "").trim();
+      return `## ${oneLine(p.title)}\n\n${meta.join("\n")}${summary ? `\n\n> ${summary}` : ""}${answer}\n\n${body}${faqMarkdown(p.faq, "###")}`;
+    });
+
+    const seasonBlocks = seasons.map(
+      (s) =>
+        `## Season: ${oneLine(s.title)}\n\n- URL: ${SITE_URL}/seasons/${s.slug}\n- Episódios publicados: ${s.episodes}${
+          s.description ? `\n\n${s.description.trim()}` : ""
+        }${faqMarkdown(s.faq, "###")}`
+    );
+
+    // Mesmo FAQ visível na home e em /seasons
+    const qa = (items) => items.map((f) => `**${oneLine(f.question)}**\n\n${f.answer.trim()}`).join("\n\n");
+    const about = `## Sobre o blog\n\n- Autor: Marcos Henrique Corrêa (https://marck0101.com.br/)\n- Site: ${SITE_URL}/blog\n\n${qa(BLOG_FAQ)}\n\n### Sobre as seasons\n\n${qa(SEASONS_FAQ)}`;
+
+    const txt = `${LLMS_TITLE} — conteúdo completo
+
+${LLMS_SUMMARY}
+
+Todos os ${posts.length} artigos publicados, do mais recente ao mais antigo, com o texto integral em Markdown. Gerado automaticamente a cada publicação. Versão resumida: ${SITE_URL}/llms.txt
+
+${[about, ...articles, ...seasonBlocks].join("\n\n---\n\n")}
+`;
+    sendText(res, txt);
+  } catch (err) {
+    console.error("[LLMS-FULL]", err);
+    res.status(500).send("Erro ao gerar llms-full.txt");
   }
 });
 
