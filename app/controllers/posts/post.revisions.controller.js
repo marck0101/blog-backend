@@ -2,8 +2,9 @@ const connectDB = require("../../config/db.config");
 const BlogPost = require("../../models/blogpost.model");
 const revisions = require("../../services/postRevision.service");
 const { seasonExists } = require("../../services/season.service");
+const { pingPost } = require("../../services/indexnow.service");
 const { sanitizeHtml } = require("../../utils/sanitizeHtml");
-const { validatePost, revisionAuthor } = require("./post.rules");
+const { validatePost, withRelatedForEditor, revisionAuthor } = require("./post.rules");
 
 /**
  * Histórico de versões do post no painel (R-REV-01 a 04): listar, ver uma
@@ -74,6 +75,10 @@ exports.restoreRevision = async (req, res, next) => {
     const fields = Object.fromEntries(
       revisions.REVISION_FIELDS.filter((f) => f !== "slug").map((f) => [f, revision.snapshot[f]])
     );
+    // Versões de antes da resposta direta não têm o campo: restaurar limpa
+    fields.directAnswer = fields.directAnswer ?? "";
+    fields.tags = fields.tags ?? [];
+    fields.relatedPosts = fields.relatedPosts ?? [];
     // Sem o slug no update, mudar o título geraria um endereço novo
     fields.slug = existing.slug;
     // Versão gravada antes da limpeza de HTML (SEC-01) volta já limpa
@@ -101,7 +106,9 @@ exports.restoreRevision = async (req, res, next) => {
       author: revisionAuthor(req),
     });
 
-    res.json(post);
+    if (post.published) await pingPost(post);
+
+    res.json(await withRelatedForEditor(post));
   } catch (err) {
     next(err);
   }

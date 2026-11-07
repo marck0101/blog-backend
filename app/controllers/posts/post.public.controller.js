@@ -8,7 +8,8 @@ const { str, escapeRegex, isMeaningfulSearch } = require("../../utils/sanitize")
 const { withReadingMinutes } = require("../../utils/readingTime");
 const { isBot } = require("../../utils/userAgent");
 const { dayRangeFilter } = require("../../utils/dates");
-const { PUBLIC_FIELDS, CARD_FIELDS } = require("./post.rules");
+const { pickSort } = require("../../utils/listSort");
+const { PUBLIC_FIELDS, CARD_FIELDS, RELATED_LIMIT } = require("./post.rules");
 const { MAX_PINNED } = require("../../config/showcase");
 
 /**
@@ -72,7 +73,7 @@ exports.findAllPublished = async (req, res, next) => {
     const publishedAt = dayRangeFilter(req.query.dateFrom, req.query.dateTo);
     if (publishedAt) filter.publishedAt = publishedAt;
 
-    const order = PUBLIC_SORTS[str(req.query.sort)] || PUBLIC_SORTS.recent;
+    const order = PUBLIC_SORTS[pickSort(PUBLIC_SORTS, req.query.sort)];
     // fields=card: lista da home e prerender — só o que o card mostra, sem o conteúdo inteiro
     const fields = req.query.fields === "card" ? CARD_FIELDS : PUBLIC_FIELDS;
     let query = BlogPost.find(filter).select(fields).sort(order.sort).skip(skip).limit(limit);
@@ -170,39 +171,60 @@ exports.findSeasonEpisodes = async (req, res, next) => {
 
 /**
  * BLOG PÚBLICO - LEITURAS SUGERIDAS ("Continue lendo", fim do post)
- * Mesma categoria, mais lidos primeiro; se faltar, completa com os mais lidos
- * das outras categorias. Nunca o próprio post.
+ * 1. as escolhidas à mão no editor (relatedPosts), na ordem do autor
+ * 2. o resto por afinidade: cada tag em comum vale 3, mesma categoria 1,
+ *    mesma season 1; empate (e zero afinidade) vai pelos mais lidos
+ * Só publicados, nunca o próprio post. Também entra no HTML pré-renderizado:
+ * são os links internos que os buscadores seguem a partir do artigo.
  */
-const RELATED_LIMIT = 3;
+const CARD_PROJECTION = Object.fromEntries(CARD_FIELDS.split(" ").map((f) => [f, 1]));
+
+async function relatedFor(current) {
+  const base = { published: true, deletedAt: null };
+
+  const pickIds = (current.relatedPosts || []).filter((id) => String(id) !== String(current._id));
+  const picked = pickIds.length
+    ? await BlogPost.find({ ...base, _id: { $in: pickIds } }).select(CARD_FIELDS).lean()
+    : [];
+  const byId = new Map(picked.map((p) => [String(p._id), p]));
+  const manual = pickIds.map((id) => byId.get(String(id))).filter(Boolean).slice(0, RELATED_LIMIT);
+
+  const missing = RELATED_LIMIT - manual.length;
+  if (missing <= 0) return manual;
+
+  const exclude = [current._id, ...manual.map((p) => p._id)];
+  const tags = current.tags || [];
+  const auto = await BlogPost.aggregate([
+    { $match: { ...base, _id: { $nin: exclude } } },
+    {
+      $addFields: {
+        _score: {
+          $add: [
+            { $multiply: [3, { $size: { $setIntersection: [{ $ifNull: ["$tags", []] }, tags] } }] },
+            { $cond: [{ $eq: ["$category", current.category] }, 1, 0] },
+            current.season ? { $cond: [{ $eq: ["$season", current.season] }, 1, 0] } : 0,
+          ],
+        },
+      },
+    },
+    { $sort: { _score: -1, views: -1, publishedAt: -1, _id: -1 } },
+    { $limit: missing },
+    { $project: CARD_PROJECTION },
+  ]);
+
+  return [...manual, ...auto];
+}
 
 exports.findRelated = async (req, res, next) => {
   try {
     await connectDB();
     const current = await BlogPost.findOne({ _id: req.params.id, published: true, deletedAt: null })
-      .select("_id category")
+      .select("_id category season tags relatedPosts")
       .lean();
     if (!current) return res.status(404).json({ error: "Post não encontrado" });
 
-    const base = { published: true, deletedAt: null, _id: { $ne: current._id } };
-    const order = { views: -1, publishedAt: -1, _id: -1 };
-
-    const sameCategory = await BlogPost.find({ ...base, category: current.category })
-      .select(CARD_FIELDS)
-      .sort(order)
-      .limit(RELATED_LIMIT)
-      .lean();
-
-    let others = [];
-    if (sameCategory.length < RELATED_LIMIT) {
-      others = await BlogPost.find({ ...base, category: { $ne: current.category } })
-        .select(CARD_FIELDS)
-        .sort(order)
-        .limit(RELATED_LIMIT - sameCategory.length)
-        .lean();
-    }
-
     res.set("Cache-Control", "public, max-age=300, s-maxage=600, stale-while-revalidate=3600");
-    res.json([...sameCategory, ...others]);
+    res.json(await relatedFor(current));
   } catch (err) {
     next(err);
   }

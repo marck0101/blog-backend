@@ -33,6 +33,7 @@ router.get("/calendar", auth, adminPosts.calendar);
 router.get("/heatmap", auth, adminPosts.heatmap);
 router.get("/today-planned", auth, adminPosts.todayPlanned);
 router.get("/showcase", auth, showcase.showcase);
+router.get("/tags", auth, adminPosts.tags);
 router.put("/showcase/pinned", auth, validate({ body: pinnedBody }), showcase.setPinned);
 router.patch("/:id/highlight", auth, validate({ body: highlightBody }), showcase.setHighlight);
 

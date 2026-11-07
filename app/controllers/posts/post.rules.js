@@ -1,10 +1,13 @@
 const slugify = require("slugify");
+const mongoose = require("mongoose");
 const { notifyNewPost } = require("../../services/campaign.service");
 const { safeShareArticle } = require("../../services/linkedin.service");
+const { pingPost } = require("../../services/indexnow.service");
 const { sanitizeHtml } = require("../../utils/sanitizeHtml");
 const { SLUGS: ALLOWED_CATEGORIES } = require("../../config/categories");
 const { DAILY_JOB_UTC_HOUR } = require("../../config/schedule");
 const { addDays, dayKey, parseDayKey } = require("../../utils/dates");
+const { normalizeTags } = require("../../utils/tags");
 
 /**
  * Regras do post usadas por mais de um controller (SISTEMA.md, seção 2):
@@ -16,10 +19,13 @@ const { addDays, dayKey, parseDayKey } = require("../../utils/dates");
 // Campos que as rotas públicas podem devolver. Lista de permitidos (não de
 // proibidos): campo novo de admin (email, LinkedIn, views…) nunca vaza por padrão.
 const PUBLIC_FIELDS =
-  "_id title slug excerpt content category coverImage coverImageAlt gallery faq seo season seasonOrder publishedAt createdAt updatedAt commentsCount";
+  "_id title slug excerpt directAnswer content category tags coverImage coverImageAlt gallery faq seo season seasonOrder publishedAt createdAt updatedAt commentsCount readingMinutes";
 
 // Cards da vitrine (fixados e destaques): sem o conteúdo inteiro
-const CARD_FIELDS = "_id title slug excerpt category coverImage coverImageAlt season publishedAt createdAt commentsCount";
+const CARD_FIELDS = "_id title slug excerpt category coverImage coverImageAlt season publishedAt createdAt commentsCount readingMinutes";
+
+// Leituras sugeridas no fim do post (manuais + automáticas)
+const RELATED_LIMIT = 3;
 
 /* ================= O QUE O EDITOR GRAVA ================= */
 // O formato (campos permitidos, tipos, tamanhos) é conferido antes, pelo
@@ -49,6 +55,17 @@ function pickLinkedIn(data) {
  */
 function normalizeSlug(data) {
   if (typeof data.slug === "string") data.slug = slugify(data.slug, { lower: true, strict: true });
+}
+
+// Tags em slug; leituras sugeridas: ids válidos, sem repetir e sem o próprio post
+function normalizeLinks(data, selfId = null) {
+  if (data.tags !== undefined) data.tags = normalizeTags(data.tags);
+  if (data.relatedPosts !== undefined) {
+    const ids = Array.isArray(data.relatedPosts) ? data.relatedPosts : [];
+    data.relatedPosts = [...new Set(ids.map((id) => String(id?._id ?? id)))]
+      .filter((id) => mongoose.isValidObjectId(id) && id !== String(selfId))
+      .slice(0, RELATED_LIMIT);
+  }
 }
 
 /** Season vazia vira null (post sem season); ordem vazia também */
@@ -168,11 +185,17 @@ async function safeNotify(post) {
   }
 }
 
-// Primeira publicação (R-POST-09): email e LinkedIn em paralelo (cabem juntos
-// no tempo da função serverless). Nenhum dos dois desfaz a publicação se falhar.
+// Primeira publicação (R-POST-09): email, LinkedIn e IndexNow em paralelo
+// (cabem juntos no tempo da função serverless). Nenhum deles desfaz a
+// publicação se falhar.
 function announcePost(post) {
-  return Promise.all([safeNotify(post), safeShareArticle(post)]);
+  return Promise.all([safeNotify(post), safeShareArticle(post), pingPost(post)]);
 }
+
+// Editor mostra título e status das leituras sugeridas, não só o id.
+// Chamar só na resposta: revisões e avisos usam os ids.
+const RELATED_EDITOR_FIELDS = "_id title slug status";
+const withRelatedForEditor = (post) => post.populate("relatedPosts", RELATED_EDITOR_FIELDS);
 
 // Quem fez a alteração, para o histórico de versões
 const revisionAuthor = (req) => ({ id: req.userId, name: req.user?.name || req.user?.email || "" });
@@ -180,14 +203,18 @@ const revisionAuthor = (req) => ({ id: req.userId, name: req.user?.name || req.u
 module.exports = {
   PUBLIC_FIELDS,
   CARD_FIELDS,
+  RELATED_LIMIT,
+  RELATED_EDITOR_FIELDS,
   sanitizeContent,
   pickLinkedIn,
   normalizeSlug,
   normalizeSeason,
+  normalizeLinks,
   normalizePlannedAt,
   validatePost,
   firstSchedulableDay,
   syncPublished,
   announcePost,
+  withRelatedForEditor,
   revisionAuthor,
 };

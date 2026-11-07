@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const QRCode = require("qrcode");
 const User = require("../models/user.model");
 const auth = require("../middlewares/auth.middleware");
-const { requireAllowedOrigin } = require("../middlewares/auth.middleware");
+const { requireAllowedOrigin, resolveSession } = require("../middlewares/auth.middleware");
 const {
   setSessionCookie,
   clearSessionCookie,
@@ -346,6 +346,19 @@ router.post("/2fa/verify", requireAllowedOrigin, validate({ body: codeBody }, { 
 /* ================= SESSÃO ================= */
 
 // Sessão atual (o painel confere ao abrir; 401 = precisa entrar)
+// Conferência da sessão ao abrir o painel: sem login responde 200 { user: null }
+// (não 401), para o console do navegador não mostrar erro em uma situação
+// normal (sessão expirada, primeira visita). Mesmas regras do middleware auth.
+router.get("/session", async (req, res, next) => {
+  try {
+    res.set("Cache-Control", "no-store");
+    const session = await resolveSession(req);
+    res.json({ user: session.user ? publicUser(session.user) : null });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/me", auth, async (req, res, next) => {
   try {
     const full = await User.findById(req.userId).select("+mfa.recoveryCodes +googleSub").lean();

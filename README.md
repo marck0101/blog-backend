@@ -16,6 +16,8 @@ O site e o painel estão no repositório **blog-front**.
 - **[docs/SISTEMA.md](docs/SISTEMA.md)**: o que o sistema faz e as regras de negócio
   (códigos `R-…`), como ler os dashboards, como achar erros, segurança e
   **convenções do código (seção 18)**. Comece por aqui.
+- **[docs/OPERACAO.md](docs/OPERACAO.md)**: regras de deploy, dependências, SEO/IA, segurança e
+  ambiente local. Leia antes de subir código.
 - **[docs/BACKLOG.md](docs/BACKLOG.md)**: tarefas de melhoria, com prioridade e critério de pronto.
 - **[content/_modelo/GUIA.md](content/_modelo/GUIA.md)**: como escrever e importar um artigo.
 

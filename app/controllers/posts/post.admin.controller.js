@@ -5,12 +5,14 @@ const Campaign = require("../../models/campaign.model");
 const PostDailyStat = require("../../models/postDailyStat.model");
 const revisions = require("../../services/postRevision.service");
 const { seasonExists } = require("../../services/season.service");
+const { pingPost } = require("../../services/indexnow.service");
 const { str, escapeRegex } = require("../../utils/sanitize");
+const { COLLATION_PT, pickSort, sortedFind } = require("../../utils/listSort");
 const { calendarRange } = require("../../utils/calendarRange");
 const { dayKey, startOfDay, endOfDay, yearRange, dayRangeFilter } = require("../../utils/dates");
 const {
-  sanitizeContent, pickLinkedIn, normalizeSlug, normalizeSeason, normalizePlannedAt,
-  validatePost, syncPublished, announcePost, revisionAuthor,
+  RELATED_EDITOR_FIELDS, sanitizeContent, pickLinkedIn, normalizeSlug, normalizeSeason, normalizeLinks,
+  normalizePlannedAt, validatePost, syncPublished, announcePost, withRelatedForEditor, revisionAuthor,
 } = require("./post.rules");
 require("../../models/subscriber.model"); // para o populate de emailAudience.subscribers
 
@@ -47,6 +49,7 @@ exports.create = async (req, res, next) => {
     sanitizeContent(data);
     normalizeSlug(data);
     normalizeSeason(data);
+    normalizeLinks(data);
 
     const validationError = validatePost(data, true);
     if (validationError) {
@@ -68,10 +71,25 @@ exports.create = async (req, res, next) => {
       await announcePost(post);
     }
 
-    res.status(201).json(post);
+    res.status(201).json(await withRelatedForEditor(post));
   } catch (err) {
     next(err);
   }
+};
+
+// Ordem da lista do painel (?sort=); a primeira é a padrão.
+// Publicação: agendado usa a data planejada; rascunho (mesmo com data no
+// calendário) vai sempre para o fim, nas duas direções.
+const PUB_DATE = {
+  _pubSort: { $ifNull: ["$publishedAt", { $cond: [{ $eq: ["$status", "planned"] }, "$plannedAt", null] }] },
+};
+const PUB_LAST = { _noPub: { $cond: [{ $ifNull: [PUB_DATE._pubSort, false] }, 0, 1] } };
+const ADMIN_SORTS = {
+  created: { sort: { createdAt: -1, _id: -1 } },
+  published_desc: { addFields: { ...PUB_DATE, ...PUB_LAST }, sort: { _noPub: 1, _pubSort: -1, createdAt: -1, _id: -1 } },
+  published_asc: { addFields: { ...PUB_DATE, ...PUB_LAST }, sort: { _noPub: 1, _pubSort: 1, createdAt: -1, _id: -1 } },
+  updated: { sort: { updatedAt: -1, _id: -1 } },
+  az: { sort: { title: 1, _id: 1 }, collation: COLLATION_PT },
 };
 
 /**
@@ -105,11 +123,9 @@ exports.findAll = async (req, res, next) => {
     const createdAt = dayRangeFilter(req.query.dateFrom, req.query.dateTo);
     if (createdAt) filter.createdAt = createdAt;
 
+    const order = ADMIN_SORTS[pickSort(ADMIN_SORTS, req.query.sort)];
     const [posts, total] = await Promise.all([
-      BlogPost.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
+      sortedFind(BlogPost, filter, order, { skip, limit }),
       BlogPost.countDocuments(filter),
     ]);
 
@@ -126,10 +142,9 @@ exports.findOne = async (req, res, next) => {
   try {
     await connectDB();
 
-    const post = await BlogPost.findById(req.params.id).populate(
-      "emailAudience.subscribers",
-      "name email tier"
-    );
+    const post = await BlogPost.findById(req.params.id)
+      .populate("emailAudience.subscribers", "name email tier")
+      .populate("relatedPosts", RELATED_EDITOR_FIELDS);
 
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
@@ -153,6 +168,7 @@ exports.update = async (req, res, next) => {
     sanitizeContent(data);
     normalizeSlug(data);
     normalizeSeason(data);
+    normalizeLinks(data, req.params.id);
 
     const existing = await BlogPost.findById(req.params.id)
       .select("status publishedAt plannedAt content slug")
@@ -196,9 +212,12 @@ exports.update = async (req, res, next) => {
 
     if (post.status === "published" && existing?.status !== "published") {
       await announcePost(post);
+    } else if (post.status === "published" || existing?.status === "published") {
+      // Post no ar foi editado ou saiu do ar: buscadores revisitam a URL
+      await pingPost(post);
     }
 
-    res.json(post);
+    res.json(await withRelatedForEditor(post));
   } catch (err) {
     next(err);
   }
@@ -250,6 +269,9 @@ exports.softDelete = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
     }
+
+    // A URL passa a dar 404: avisa para sair do índice mais rápido
+    if (post.published) await pingPost(post);
 
     res.json(post);
   } catch (err) {
@@ -409,6 +431,25 @@ exports.todayPlanned = async (req, res, next) => {
       .lean();
 
     res.json(posts);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * ADMIN - TAGS EM USO (sugestões no editor, mais usadas primeiro)
+ */
+exports.tags = async (req, res, next) => {
+  try {
+    await connectDB();
+    const list = await BlogPost.aggregate([
+      { $match: { deletedAt: null } },
+      { $unwind: "$tags" },
+      { $group: { _id: "$tags", count: { $sum: 1 } } },
+      { $sort: { count: -1, _id: 1 } },
+      { $limit: 200 },
+    ]);
+    res.json(list.map((t) => ({ tag: t._id, count: t.count })));
   } catch (err) {
     next(err);
   }

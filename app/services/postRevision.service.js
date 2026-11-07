@@ -9,6 +9,7 @@ const REVISION_FIELDS = [
   "title",
   "slug",
   "excerpt",
+  "directAnswer",
   "content",
   "category",
   "season",
@@ -18,6 +19,8 @@ const REVISION_FIELDS = [
   "gallery",
   "faq",
   "seo",
+  "tags",
+  "relatedPosts",
 ];
 
 const MAX_VERSION_RETRIES = 3;
@@ -29,6 +32,9 @@ function snapshotOf(post) {
     title: p.title || "",
     slug: p.slug || "",
     excerpt: p.excerpt || "",
+    // Só entra quando preenchido: post sem resposta direta mantém o hash de
+    // antes do campo existir (senão o 1º save geraria versão sem mudança)
+    ...(p.directAnswer ? { directAnswer: p.directAnswer } : {}),
     content: p.content || "",
     category: p.category || "",
     season: p.season || null,
@@ -38,6 +44,9 @@ function snapshotOf(post) {
     gallery: (p.gallery || []).map((g) => ({ url: g.url || "", alt: g.alt || "" })),
     faq: (p.faq || []).map((f) => ({ question: f.question || "", answer: f.answer || "" })),
     seo: { title: p.seo?.title || "", description: p.seo?.description || "" },
+    // Como directAnswer: só quando preenchidos, para não mudar o hash dos posts antigos
+    ...(p.tags?.length ? { tags: [...p.tags] } : {}),
+    ...(p.relatedPosts?.length ? { relatedPosts: p.relatedPosts.map(String) } : {}),
   };
 }
 

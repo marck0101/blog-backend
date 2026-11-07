@@ -252,6 +252,42 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
 
 ---
 
+## Pendências de operação (vindas da `main` em 06/11/2026)
+
+Itens anotados em paralelo, na `main`, durante o trabalho de SEO/IA. Regras de operação
+(deploy, npm 12 no lockfile, SEO/IA) estão em [OPERACAO.md](OPERACAO.md).
+
+- [ ] **OPS-01 · Uma fonte só para o FAQ do blog** · os dois · M
+  - O FAQ da home (`BLOG_FAQ`) e o de `/seasons` (`SEASONS_FAQ`) existem no front
+    (`src/seo/site.js`, página e schema FAQPage) e numa cópia aqui (`app/config/siteFaq.js`,
+    que alimenta o `/llms-full.txt`). Mudar um e esquecer o outro faz a IA ler um FAQ
+    diferente do que o site mostra.
+  - Caminho: a API vira dona do texto (ex.: `GET /api/site/faq` ou campo no painel) e o
+    front e o prerender consomem de lá. Dá para começar só servindo `siteFaq.js`.
+
+- [ ] **OPS-02 · Tamanho do `/llms-full.txt`** · `blog-backend` · P · monitorar
+  - Cresce ~10 KB por post (114 KB com 10 posts em 06/11/2026). A Vercel limita a resposta
+    de uma função a 4,5 MB (~400 posts no ritmo atual).
+  - Caminho: passando de ~2 MB, gerar estático na publicação (Storage/Blob) ou dividir por
+    ano (`/llms-full-2026.txt`) e listar as partes no `/llms.txt`. Código em
+    `app/routes/sitemap.routes.js`.
+
+- [ ] **OPS-03 · Aviso moderado em `uuid` (via firebase-admin)** · `blog-backend` · P · monitorar
+  - `npm audit --omit=dev` aponta avisos moderados do `uuid@9` que vem do `firebase-admin`.
+    Não usamos `uuid` diretamente; risco baixo.
+  - Caminho: atualizar o `firebase-admin` quando sair versão corrigida. **Não** rodar
+    `npm audit fix --force` (troca versões principais e pode quebrar o upload de imagens).
+
+- [ ] **OPS-04 · Conferir se `scripts/fix-updated-at.js` rodou em produção** · `blog-backend` · P
+  - Até 09/10/2026 cada visualização alterava o `updatedAt` do post (bug corrigido). Em
+    06/11/2026 o sitemap mostra datas variadas, então o bug parou; não dá para saber de fora
+    se o script foi aplicado.
+  - Como conferir: `npm run` não tem atalho; rodar
+    `npx cross-env NODE_ENV=production node scripts/fix-updated-at.js` (sem `--apply` só
+    mostra o que mudaria). Se não listar nada, marcar como concluída.
+
+---
+
 ## Resumo
 
 | Fase | Tarefas | Tamanho estimado |
@@ -261,5 +297,6 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
 | 2 · Duplicatas | DUP-01 a DUP-09 | ~8–10 dias |
 | 3 · Testes e validadores | VAL-01, TEST-02 a TEST-08 | ~12–15 dias |
 | 4 · Regras de negócio | BIZ-01 a BIZ-06 | ~6–8 dias |
+| Operação | OPS-01 a OPS-04 | ~2 dias |
 
 Estimativas para uma pessoa, com teste incluído em cada tarefa.

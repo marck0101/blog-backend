@@ -42,34 +42,42 @@ const INVALID = errorBody("Sessão inválida ou expirada");
 
 // Painel admin: sessão válida, que passou pelo 2º fator, na versão atual do
 // usuário (sair/trocar senha derruba as outras), e usuário ainda ativo e admin.
-async function auth(req, res, next) {
+// Devolve { userId, user } ou { status, body } com o motivo da recusa.
+// Erro de banco é lançado (vira 500 no tratador), nunca "sessão válida".
+async function resolveSession(req) {
   const { token, fromCookie, error } = readToken(req);
-  if (error) return res.status(401).json(errorBody(error));
+  if (error) return { status: 401, body: errorBody(error) };
 
   if (fromCookie && !originAllowed(req)) {
-    return res.status(403).json(errorBody("Origem não permitida"));
+    return { status: 403, body: errorBody("Origem não permitida") };
   }
 
   let decoded;
   try {
     decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
   } catch {
-    return res.status(401).json(INVALID);
+    return { status: 401, body: INVALID };
   }
 
   // Sessão emitida antes do 2º fator (ou etapa intermediária do login) não vale
   if (decoded?.mfa !== true || !mongoose.isValidObjectId(decoded?.id)) {
-    return res.status(401).json(INVALID);
+    return { status: 401, body: INVALID };
   }
 
+  await connectDB();
+  const user = await User.findById(decoded.id).select("name email role active sessionVersion").lean();
+  if (!user || !user.active || user.role !== "admin" || (user.sessionVersion || 0) !== decoded.v) {
+    return { status: 401, body: INVALID };
+  }
+  return { userId: decoded.id, user };
+}
+
+async function auth(req, res, next) {
   try {
-    await connectDB();
-    const user = await User.findById(decoded.id).select("name email role active sessionVersion").lean();
-    if (!user || !user.active || user.role !== "admin" || (user.sessionVersion || 0) !== decoded.v) {
-      return res.status(401).json(INVALID);
-    }
-    req.userId = decoded.id;
-    req.user = user;
+    const session = await resolveSession(req);
+    if (!session.user) return res.status(session.status).json(session.body);
+    req.userId = session.userId;
+    req.user = session.user;
     return next();
   } catch (err) {
     return next(err);
@@ -78,3 +86,4 @@ async function auth(req, res, next) {
 
 module.exports = auth;
 module.exports.requireAllowedOrigin = requireAllowedOrigin;
+module.exports.resolveSession = resolveSession;

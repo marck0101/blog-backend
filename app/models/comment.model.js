@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 // Comentário de leitor (login com Google) ou resposta do autor do blog.
 // Leitor: entra como pending e só aparece depois de aprovado no painel.
+// Recusado: some para os outros; o autor do comentário continua vendo, com o motivo.
 // Um nível de resposta: parent aponta sempre para um comentário principal.
 const CommentSchema = new mongoose.Schema(
   {
@@ -20,6 +21,14 @@ const CommentSchema = new mongoose.Schema(
     body: { type: String, required: true, maxlength: 2000 },
     status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
     approvedAt: { type: Date, default: null },
+    // Recusa: motivo opcional (o leitor vê no post e no email) e quando ele foi avisado
+    rejectedAt: { type: Date, default: null },
+    rejectionReason: { type: String, default: "", maxlength: 500 },
+    readerNotifiedAt: { type: Date, default: null },
+    // O leitor apagou o próprio comentário, mas outras pessoas já tinham
+    // respondido: fica só o lugar ("removido pelo autor"), sem texto nem dados
+    // dele, para não sumir com as respostas dos outros.
+    removedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

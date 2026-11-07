@@ -5,7 +5,7 @@ import { PANEL_ORIGIN, api, asAdmin, createPost, models } from "../helpers.mjs";
 // nome errado depois de mover código (DUP-07): esse tipo de erro só aparece
 // quando a rota é chamada.
 describe("rotas de post respondem (nenhum 500)", () => {
-  it("todas as 26", async () => {
+  it("todas as 27", async () => {
     const errors = vi.spyOn(console, "error").mockImplementation(() => {});
     const admin = await asAdmin();
     await models.Season.create({ title: "Série", slug: "serie" });
@@ -38,6 +38,7 @@ describe("rotas de post respondem (nenhum 500)", () => {
       ["get", "/api/posts/heatmap"],
       ["get", "/api/posts/today-planned"],
       ["get", "/api/posts/showcase"],
+      ["get", "/api/posts/tags"],
       ["put", "/api/posts/showcase/pinned", { ids: [String(id)] }],
       ["patch", `/api/posts/${id}/highlight`, { highlight: "force" }],
       ["get", `/api/posts/${id}`],
@@ -50,7 +51,7 @@ describe("rotas de post respondem (nenhum 500)", () => {
       ["delete", `/api/posts/${trashed._id}`],
       ["delete", `/api/posts/${trashed._id}/hard`],
     ];
-    expect(calls).toHaveLength(26);
+    expect(calls).toHaveLength(27);
 
     const results = [];
     for (const [method, url, body, publicRoute] of calls) {

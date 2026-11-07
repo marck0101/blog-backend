@@ -35,8 +35,12 @@ const postBody = z.object({
   title: text(300).optional(),
   slug: text(200).optional(),
   excerpt: text(500).optional(),
+  directAnswer: text(400).optional(),
   content: z.string().optional(),
   category: text(60).optional(),
+  // Lista ou "a, b"; o model normaliza (slugs, até 8)
+  tags: z.union([z.array(text(100)).max(50), text(1000)]).optional(),
+  relatedPosts: z.array(id).max(20).optional(),
   season: text(120).nullable().optional(),
   seasonOrder: z.union([z.number(), text(10), z.null()]).optional(),
   status: z.enum(["draft", "planned", "published"]).optional(),

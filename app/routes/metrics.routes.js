@@ -8,7 +8,8 @@ const Campaign = require("../models/campaign.model");
 const EmailEvent = require("../models/emailEvent.model");
 const BlogPost = require("../models/blogpost.model");
 const Comment = require("../models/comment.model");
-const { engagementSummary } = require("../services/postStats.service");
+const { engagementSummary, contentPerformance } = require("../services/postStats.service");
+const { str } = require("../utils/sanitize");
 
 router.use(auth);
 
@@ -240,6 +241,30 @@ router.get("/engagement", async (req, res, next) => {
         rejected: byStatus.rejected || 0,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * Desempenho por conteúdo (?days=30&category=&season=&search=): série diária de
+ * leituras, favoritos, compartilhamentos e visitas por compartilhamento de cada
+ * post publicado, com o total do período anterior para a variação.
+ */
+const CONTENT_PERIODS = [7, 14, 30, 90];
+
+router.get("/content", async (req, res, next) => {
+  try {
+    await connectDB();
+    const asked = parseInt(req.query.days) || 30;
+    const days = CONTENT_PERIODS.includes(asked) ? asked : 30;
+    res.json(
+      await contentPerformance(days, {
+        category: str(req.query.category),
+        season: str(req.query.season),
+        search: str(req.query.search),
+      })
+    );
   } catch (err) {
     next(err);
   }
