@@ -1,12 +1,15 @@
 const express = require("express");
 const connectDB = require("../config/db.config");
 const limiter = require("../services/ratelimit.service");
+const auth = require("../middlewares/auth.middleware");
+const CspReport = require("../models/cspReport.model");
 
 const router = express.Router();
 
 // Relatórios da Content-Security-Policy do site (SEC-02, vercel.json do front).
 // O navegador manda quando algo seria bloqueado. Vira uma linha "[CSP]" nos
-// logs da Vercel; nada é gravado no banco.
+// logs da Vercel e soma no agrupado do banco (CspReport), que dura 30 dias:
+// os logs do plano Hobby somem antes da semana de observação.
 // 30 relatórios por IP a cada 10 min: uma página com problema repete o mesmo aviso.
 const REPORT_MAX = 30;
 const REPORT_WINDOW_MIN = 10;
@@ -38,6 +41,11 @@ router.post("/", parse, async (req, res) => {
         const blocked = noQuery(r["blocked-uri"] || r.blockedURL);
         const page = noQuery(r["document-uri"] || r.documentURL);
         console.warn(`[CSP] ${directive} bloquearia ${blocked || "(inline)"} em ${page}`);
+        await CspReport.updateOne(
+          { directive, blocked, page },
+          { $inc: { count: 1 }, $set: { lastSeen: new Date() } },
+          { upsert: true }
+        );
       }
     }
   } catch (err) {
@@ -45,6 +53,17 @@ router.post("/", parse, async (req, res) => {
   }
   // Sempre 204: o navegador não faz nada com a resposta
   res.status(204).end();
+});
+
+// ADMIN: o que a CSP bloquearia, do mais frequente ao menos (decisão da SEC-02)
+router.get("/", auth, async (req, res, next) => {
+  try {
+    await connectDB();
+    const reports = await CspReport.find().sort({ count: -1, lastSeen: -1 }).limit(200).lean();
+    res.json({ reports });
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;
