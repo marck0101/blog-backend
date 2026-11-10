@@ -22,9 +22,9 @@ const updateBody = z.object({
 // Importação: cada linha é conferida no controller, que devolve quais linhas
 // não serviram (uma linha ruim não recusa o arquivo inteiro)
 const importBody = z.object({
-  consent: z.literal(true, { errorMap: () => ({ message: "Confirme que as pessoas da lista autorizaram receber seus emails" }) }),
+  consent: z.literal(true, { error: "Confirme que as pessoas da lista autorizaram receber seus emails" }),
   rows: z
-    .array(z.record(z.unknown()), { required_error: "A lista está vazia" })
+    .array(z.record(z.string(), z.unknown()), { error: (issue) => (issue.input === undefined ? "A lista está vazia" : undefined) })
     .min(1, "A lista está vazia")
     .max(IMPORT_MAX_ROWS, `Envie no máximo ${IMPORT_MAX_ROWS} linhas por vez`),
   categories: categoryList.default([]),

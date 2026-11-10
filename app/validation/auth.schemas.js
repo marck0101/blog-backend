@@ -7,7 +7,7 @@ const { text } = require("./fields");
  * Senha errada, código errado e limite de tentativas continuam nas rotas.
  */
 
-const invalid = { errorMap: () => ({ message: "Dados inválidos" }) };
+const invalid = { error: "Dados inválidos" };
 
 const loginBody = z.object({
   email: z.string(invalid).trim().toLowerCase().min(1).max(254),
@@ -15,7 +15,7 @@ const loginBody = z.object({
 }, invalid);
 
 const forgotBody = z.object({
-  email: z.string({ errorMap: () => ({ message: "Email é obrigatório" }) }).trim().toLowerCase().min(1).max(254),
+  email: z.string({ error: "Email é obrigatório" }).trim().toLowerCase().min(1).max(254),
 });
 
 const resetBody = z.object({

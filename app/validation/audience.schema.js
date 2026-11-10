@@ -8,7 +8,7 @@ const { idList, categoryList } = require("./fields");
  */
 function audienceSchema(types) {
   return z.object({
-    type: z.enum(types, { errorMap: () => ({ message: "Público inválido" }) }),
+    type: z.enum(types, { error: "Público inválido" }),
     categories: categoryList.optional(),
     subscribers: idList.optional(),
     lists: idList.optional(),

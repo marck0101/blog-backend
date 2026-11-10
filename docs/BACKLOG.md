@@ -112,6 +112,8 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - Coleção própria com expiração (ex.: 1 ano). Útil se um dia houver outro autor
     ou se a conta for invadida.
 
+- [x] **SEC-10 · zod 3 → 4 (vulnerabilidade alta)** · `blog-backend` · P — concluída em 09/11/2026 (branch `fix/sec-10-zod4`). O zod 3 podia esgotar a memória validando listas grandes (GHSA-mrhx-c7xc-m3w5, alta) e deixava a CI vermelha no `npm audit`. Mensagens de erro iguais às de antes: 56 casos comparados entre as duas versões, sem diferença. Na mesma data, o `sanitize-html` ficou preso na 2.17.5: a 2.18 derrubou a API na Vercel (ERR_REQUIRE_ESM; ver `tests/boot/vercel-require.test.mjs`)
+
 ---
 
 ## Fase 2 — Duplicatas

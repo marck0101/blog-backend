@@ -7,7 +7,7 @@ const { isEmail } = require("../utils/validators");
  * conferida no controller (categoriesError), que conhece a lista.
  */
 
-const email = z.string({ required_error: "Email inválido", invalid_type_error: "Email inválido" }).trim().refine(isEmail, "Email inválido");
+const email = z.string({ error: "Email inválido" }).trim().refine(isEmail, "Email inválido");
 
 // Formulário público: nome e origem longos demais são cortados, não recusados
 // (um link de origem comprido não pode impedir alguém de assinar)
@@ -40,8 +40,8 @@ const unsubscribeBody = z.object({ c: text(30).optional() });
 
 /* ================= PAINEL ================= */
 
-const tier = z.enum(["free", "member"], { errorMap: () => ({ message: "Plano inválido" }) });
-const status = z.enum(["active", "unsubscribed"], { errorMap: () => ({ message: "Status inválido" }) });
+const tier = z.enum(["free", "member"], { error: "Plano inválido" });
+const status = z.enum(["active", "unsubscribed"], { error: "Status inválido" });
 
 const manualBody = z.object({
   email,

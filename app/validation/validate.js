@@ -18,24 +18,22 @@ const PARTS = ["params", "query", "body"];
 
 // Mensagens padrão em português; o esquema pode trocar por uma própria
 const fieldName = (path) => (path.length ? path.join(".") : "dados");
-z.setErrorMap((issue, ctx) => {
-  const field = fieldName(issue.path);
-  switch (issue.code) {
-    case "invalid_type":
-      return { message: issue.received === "undefined" ? `Campo obrigatório: ${field}` : `Valor inválido em ${field}` };
-    case "too_big":
-      return {
-        message: issue.type === "array" ? `${field}: no máximo ${issue.maximum} itens` : `${field}: no máximo ${issue.maximum} caracteres`,
-      };
-    case "too_small":
-      return {
-        message: issue.type === "array" ? `${field}: pelo menos ${issue.minimum} item(ns)` : `${field}: pelo menos ${issue.minimum} caracteres`,
-      };
-    case "invalid_enum_value":
-      return { message: `${field}: valor não permitido` };
-    default:
-      return { message: ctx.defaultError === "Required" ? `Campo obrigatório: ${field}` : `Valor inválido em ${field}` };
-  }
+z.config({
+  customError: (issue) => {
+    const field = fieldName(issue.path || []);
+    switch (issue.code) {
+      case "invalid_type":
+        return issue.input === undefined ? `Campo obrigatório: ${field}` : `Valor inválido em ${field}`;
+      case "too_big":
+        return issue.origin === "array" ? `${field}: no máximo ${issue.maximum} itens` : `${field}: no máximo ${issue.maximum} caracteres`;
+      case "too_small":
+        return issue.origin === "array" ? `${field}: pelo menos ${issue.minimum} item(ns)` : `${field}: pelo menos ${issue.minimum} caracteres`;
+      case "invalid_value":
+        return `${field}: valor não permitido`;
+      default:
+        return `Valor inválido em ${field}`;
+    }
+  },
 });
 
 /**

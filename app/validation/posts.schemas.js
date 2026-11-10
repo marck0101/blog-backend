@@ -68,18 +68,18 @@ const postBody = z.object({
 // Vitrine: posts fixados no topo da home, na ordem enviada (R-VIT-01)
 const pinnedBody = z.object({
   ids: z
-    .array(id, { required_error: "Envie a lista de posts fixados" })
+    .array(id, { error: (issue) => (issue.input === undefined ? "Envie a lista de posts fixados" : undefined) })
     .max(MAX_PINNED, `Fixe no máximo ${MAX_PINNED} posts`),
 });
 
 // Regra de destaque da semana (R-VIT-02)
 const highlightBody = z.object({
-  highlight: z.enum(["auto", "force", "hide"], { errorMap: () => ({ message: "Opção inválida" }) }),
+  highlight: z.enum(["auto", "force", "hide"], { error: "Opção inválida" }),
 });
 
 // Remover uma imagem da galeria. Texto obrigatório: { "$ne": null } tiraria todas
 const removeImageBody = z.object({
-  imageUrl: z.string({ required_error: "Informe a imagem a remover" }).trim().min(1, "Informe a imagem a remover").max(2000),
+  imageUrl: z.string({ error: (issue) => (issue.input === undefined ? "Informe a imagem a remover" : undefined) }).trim().min(1, "Informe a imagem a remover").max(2000),
 });
 
 // Evento do leitor (público). Os tipos e canais válidos são conferidos em

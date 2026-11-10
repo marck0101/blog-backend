@@ -11,7 +11,7 @@ const { audienceSchema } = require("./audience.schema");
  */
 
 // Post de onde veio o conteúdo (opcional); "" = desligar
-const linkedPost = z.union([id, z.literal(""), z.null()], { errorMap: () => ({ message: "Post inválido" }) });
+const linkedPost = z.union([id, z.literal(""), z.null()], { error: "Post inválido" });
 
 const campaignBody = z.object({
   subject: text(300).optional(),

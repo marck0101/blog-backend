@@ -7,7 +7,7 @@ const { text } = require("./fields");
  */
 
 // Folga acima do limite real: quem corta e explica é o cleanBody
-const body = z.string({ required_error: "Escreva o comentário" }).max(10000);
+const body = z.string({ error: (issue) => (issue.input === undefined ? "Escreva o comentário" : undefined) }).max(10000);
 
 // Resposta a um comentário principal (a existência é conferida na rota)
 const parentId = z.string().regex(/^[a-f0-9]{24}$/i, "Comentário inválido");
@@ -20,7 +20,7 @@ const newCommentBody = z.object({
 const replyBody = z.object({ body });
 
 const moderateBody = z.object({
-  status: z.enum(["pending", "approved", "rejected"], { errorMap: () => ({ message: "Status inválido" }) }),
+  status: z.enum(["pending", "approved", "rejected"], { error: "Status inválido" }),
   // Motivo da recusa: o limite real (500) é conferido na rota, depois do cleanBody
   reason: z.string().max(10000).nullable().optional(),
   // Avisar o leitor da recusa por email (padrão: sim)
