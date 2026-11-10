@@ -589,7 +589,7 @@ que está nos destaques agora (e por quê: forçado ou automático).
 
 ### 12.4 O que conta como "leitura" (views)
 
-Desde a **BIZ-02** (deploy previsto a partir de 03/11/2026), uma leitura é: **o navegador de
+Desde a **BIZ-02** (deploy em produção em 09/11/2026), uma leitura é: **o navegador de
 uma pessoa abriu o post**, contado **uma vez por post por sessão** (recarregar não soma).
 Não contam robôs (pelo user-agent), o prerender e o seu navegador de autor (o mesmo critério
 do GA4: `?notrack=1` ou ter entrado no painel).

@@ -225,7 +225,7 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
   - Hoje só publica amanhã (cron 1×/dia). Editor: bloquear "hoje" após 9h com explicação,
     e backend recusar com 422. (Alternativa: cron de hora em hora — avaliar o plano da Vercel.)
 
-- [x] **BIZ-02 · Contador de leituras confiável** · os dois · M — concluída em 03/11/2026 (branches `feat/biz-02-leituras`; R-ENG-03; `GET /slug` virou só leitura; detecção de robô unificada em `app/utils/userAgent.js`). ⚠️ **Deploy: front antes do backend** (com o backend novo e o front antigo, nenhuma leitura seria contada). **Anotar a data do deploy**: números de leitura de antes e depois não são comparáveis (SISTEMA.md 12.4)
+- [x] **BIZ-02 · Contador de leituras confiável** · os dois · M — concluída em 03/11/2026 (branches `feat/biz-02-leituras`; R-ENG-03; `GET /slug` virou só leitura; detecção de robô unificada em `app/utils/userAgent.js`). ⚠️ **Deploy: front antes do backend** (com o backend novo e o front antigo, nenhuma leitura seria contada). **Deploy em produção: 09/11/2026**: números de leitura de antes e depois não são comparáveis (SISTEMA.md 12.4)
   - Tirar o `$inc` de `GET /posts/slug/:slug` (prerender e robôs contam, cache não conta).
     Contar por evento do navegador (como o engajamento), ignorando robôs e o navegador do autor.
   - Afeta destaques, "Continue lendo" e conversão por post: anotar no SISTEMA.md a data da
