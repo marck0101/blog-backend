@@ -1,0 +1,23 @@
+# CI-01: todo push e PR roda os testes. PR vermelho = não fazer merge.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22 # mesma da Vercel (package.json → engines)
+          cache: npm
+      - run: npm ci
+      # Banco MongoDB em memória (mongodb-memory-server); nada de DEV/PROD
+      - run: npm test
+      # Produção sem vulnerabilidade alta ou crítica
+      - run: npm audit --omit=dev --audit-level=high

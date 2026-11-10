@@ -7,6 +7,8 @@ const Comment = require("../models/comment.model");
 const BlogPost = require("../models/blogpost.model");
 const google = require("../services/google-auth.service");
 const limiter = require("../services/ratelimit.service");
+const { validate } = require("../validation/validate");
+const { newCommentBody, replyBody, moderateBody, adminListQuery } = require("../validation/comments.schemas");
 const transporter = require("../config/mailer");
 const escapeHtml = require("../utils/escapeHtml");
 const { str } = require("../utils/sanitize");
@@ -204,7 +206,7 @@ router.get("/post/:postId", async (req, res, next) => {
   }
 });
 
-router.post("/post/:postId", requireAllowedOrigin, async (req, res, next) => {
+router.post("/post/:postId", requireAllowedOrigin, validate({ body: newCommentBody }), async (req, res, next) => {
   try {
     const reader = readReader(req);
     if (!reader) return res.status(401).json({ error: "Entre com sua conta Google para comentar" });
@@ -216,18 +218,14 @@ router.post("/post/:postId", requireAllowedOrigin, async (req, res, next) => {
     const post = await publishedPost(req.params.postId);
     if (!post) return res.status(404).json({ error: "Post não encontrado" });
 
-    const body = cleanBody(req.body?.body);
+    const body = cleanBody(req.body.body);
     const invalid = validBody(body);
     if (invalid) return res.status(422).json({ error: invalid });
 
     // Resposta: sempre presa ao comentário principal, aprovado, do mesmo post
     let parent = null;
-    if (req.body?.parentId) {
-      const parentId = req.body.parentId;
-      if (typeof parentId !== "string" || !mongoose.isValidObjectId(parentId)) {
-        return res.status(422).json({ error: "Comentário inválido" });
-      }
-      const target = await Comment.findOne({ _id: parentId, post: post._id, status: "approved", removedAt: null }).lean();
+    if (req.body.parentId) {
+      const target = await Comment.findOne({ _id: req.body.parentId, post: post._id, status: "approved", removedAt: null }).lean();
       if (!target) return res.status(422).json({ error: "Comentário respondido não existe mais" });
       parent = target.parent || target._id;
     }
@@ -306,7 +304,7 @@ router.get("/admin/pending-count", auth, async (req, res, next) => {
 });
 
 // ?status=pending|approved|rejected&page=1&post=<id>&sort=recent|oldest
-router.get("/admin", auth, async (req, res, next) => {
+router.get("/admin", auth, validate({ query: adminListQuery }), async (req, res, next) => {
   try {
     await connectDB();
     const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -340,19 +338,18 @@ router.get("/admin", auth, async (req, res, next) => {
   }
 });
 
-router.patch("/admin/:id", auth, async (req, res, next) => {
+router.patch("/admin/:id", auth, validate({ body: moderateBody }), async (req, res, next) => {
   try {
-    const status = req.body?.status;
-    if (!STATUSES.includes(status)) return res.status(422).json({ error: "Status inválido" });
+    const { status } = req.body;
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ error: "Comentário não encontrado" });
 
     // Motivo da recusa (opcional): texto puro, vai para o leitor
-    const reason = cleanBody(req.body?.reason).replace(/\n+/g, " ");
+    const reason = cleanBody(req.body.reason).replace(/\n+/g, " ");
     if (status === "rejected" && reason.length > REASON_MAX) {
       return res.status(422).json({ error: `O motivo pode ter até ${REASON_MAX} caracteres` });
     }
     // Avisar o leitor por email (padrão: sim)
-    const notify = req.body?.notify !== false;
+    const notify = req.body.notify !== false;
 
     await connectDB();
     const comment = await Comment.findById(req.params.id);
@@ -390,9 +387,9 @@ router.patch("/admin/:id", auth, async (req, res, next) => {
 
 // Resposta do autor: aparece na hora (não passa por aprovação). Responder
 // também aprova o comentário respondido, se ainda estava pendente.
-router.post("/admin/:id/reply", auth, async (req, res, next) => {
+router.post("/admin/:id/reply", auth, validate({ body: replyBody }), async (req, res, next) => {
   try {
-    const body = cleanBody(req.body?.body);
+    const body = cleanBody(req.body.body);
     const invalid = validBody(body);
     if (invalid) return res.status(422).json({ error: invalid });
 

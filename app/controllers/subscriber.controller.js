@@ -1,31 +1,25 @@
 const mongoose = require("mongoose");
 const connectDB = require("../config/db.config");
 const Subscriber = require("../models/subscriber.model");
-const CATEGORIES = require("../config/categories");
+const Campaign = require("../models/campaign.model");
+
+// O que fica no lugar do email de quem foi excluído, no histórico dos envios
+const REMOVED_EMAIL = "(removido)";
 const { recordUnsubscribe } = require("../services/tracking.service");
 const { str, escapeRegex } = require("../utils/sanitize");
 const { COLLATION_PT, pickSort, sortedFind } = require("../utils/listSort");
 const limiter = require("../services/ratelimit.service");
+const { FRONTEND_URL } = require("../config/urls");
+const { dayRangeFilter } = require("../utils/dates");
+const { categoriesError } = require("../utils/validators");
 
 // Rota pública sem login: 5 inscrições por IP a cada 30 min. Barra script
 // cadastrando emails de terceiros em massa (que depois receberiam os envios).
 const SUBSCRIBE_MAX = 5;
 const SUBSCRIBE_WINDOW_MIN = 30;
 
-const VALID_SLUGS = CATEGORIES.map((c) => c.slug);
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const TIERS = ["free", "member"];
-
-// Origem enviada pelo formulário do blog: só texto curto, campos conhecidos
-const SOURCE_FIELDS = ["location", "path", "post", "landingPath", "referrer", "utmSource", "utmMedium", "utmCampaign"];
-function pickSource(raw) {
-  if (!raw || typeof raw !== "object") return undefined;
-  const source = {};
-  for (const field of SOURCE_FIELDS) {
-    if (typeof raw[field] === "string") source[field] = raw[field].trim().slice(0, 200);
-  }
-  return source;
-}
+// O formato de cada rota (tipos, tamanhos, campos permitidos) é conferido antes,
+// pelo esquema: app/validation/subscribers.schemas.js. Aqui ficam as regras.
 
 // Mesma resposta para email novo e já inscrito: a rota pública não pode
 // revelar quem é assinante (um pentester testaria emails um a um).
@@ -39,22 +33,9 @@ exports.subscribe = async (req, res, next) => {
     if (wait) return limiter.tooMany(res, wait);
     await limiter.hit("subscribe", req, SUBSCRIBE_WINDOW_MIN);
 
-    // Só tipos esperados: objetos virariam operadores do MongoDB
-    const email = typeof req.body?.email === "string" ? req.body.email.trim().slice(0, 254) : "";
-    const name = typeof req.body?.name === "string" ? req.body.name.trim().slice(0, 100) : undefined;
-    const categories = Array.isArray(req.body?.categories) ? req.body.categories : [];
-    const source = pickSource(req.body?.source);
-
-    if (!email || !EMAIL_RE.test(email)) {
-      return res.status(422).json({ error: "Email inválido" });
-    }
-
-    const invalidCats = categories.filter((c) => !VALID_SLUGS.includes(c));
-    if (invalidCats.length > 0) {
-      return res
-        .status(422)
-        .json({ error: `Categorias inválidas: ${invalidCats.join(", ")}` });
-    }
+    const { email, name, categories, source } = req.body;
+    const categoryError = categoriesError(categories);
+    if (categoryError) return res.status(422).json({ error: categoryError });
 
     const existing = await Subscriber.findOne({
       email: email.toLowerCase().trim(),
@@ -88,20 +69,9 @@ exports.createManual = async (req, res, next) => {
   try {
     await connectDB();
 
-    const { email, name, categories = [], tier = "free", notes } = req.body;
-
-    if (!email || !EMAIL_RE.test(email)) {
-      return res.status(422).json({ error: "Email inválido" });
-    }
-    if (!TIERS.includes(tier)) {
-      return res.status(422).json({ error: "Plano inválido" });
-    }
-    const invalidCats = categories.filter((c) => !VALID_SLUGS.includes(c));
-    if (invalidCats.length > 0) {
-      return res
-        .status(422)
-        .json({ error: `Categorias inválidas: ${invalidCats.join(", ")}` });
-    }
+    const { email, name, categories, tier, notes } = req.body;
+    const categoryError = categoriesError(categories);
+    if (categoryError) return res.status(422).json({ error: categoryError });
 
     const subscriber = await Subscriber.create({
       email,
@@ -120,11 +90,34 @@ exports.createManual = async (req, res, next) => {
   }
 };
 
+const campaignParam = (value) => (typeof value === "string" && /^[a-f0-9]{24}$/.test(value) ? value : null);
+
+/**
+ * GET do link de cancelar (rodapé do email e cabeçalho List-Unsubscribe).
+ * Não altera nada: antivírus de email abrem todos os links ao receber, e
+ * cancelariam a inscrição de quem nem viu o email. Leva à página de
+ * confirmação no blog, com o token depois do # (o navegador não envia essa
+ * parte a nenhum servidor; a página tira da barra de endereço ao abrir).
+ */
+exports.unsubscribePage = (req, res) => {
+  const params = new URLSearchParams({ t: str(req.params.token) });
+  const campaign = campaignParam(req.query.c);
+  if (campaign) params.set("c", campaign);
+  res.set("Cache-Control", "no-store");
+  res.redirect(302, `${FRONTEND_URL}/cancelar-inscricao#${params}`);
+};
+
+/**
+ * POST: cancela. Vem do botão da página de confirmação ou do "cancelar
+ * inscrição" do próprio Gmail/Yahoo (RFC 8058, corpo List-Unsubscribe=One-Click).
+ * O token secreto (64 hex) é a autorização.
+ */
 exports.unsubscribe = async (req, res, next) => {
   try {
     await connectDB();
 
-    const subscriber = await Subscriber.findOne({ token: req.params.token });
+    const token = str(req.params.token);
+    const subscriber = /^[a-f0-9]{64}$/.test(token) ? await Subscriber.findOne({ token }) : null;
 
     if (!subscriber) {
       return res.status(404).json({ error: "Token inválido ou não encontrado" });
@@ -134,9 +127,10 @@ exports.unsubscribe = async (req, res, next) => {
     if (subscriber.status !== "unsubscribed") {
       subscriber.status = "unsubscribed";
       subscriber.unsubscribedAt = new Date();
-      if (req.query.c && /^[a-f0-9]{24}$/.test(req.query.c)) {
-        subscriber.unsubscribeCampaign = req.query.c;
-        await recordUnsubscribe(req.query.c, subscriber._id).catch((err) =>
+      const campaign = campaignParam(req.query.c) || campaignParam(req.body.c);
+      if (campaign) {
+        subscriber.unsubscribeCampaign = campaign;
+        await recordUnsubscribe(campaign, subscriber._id).catch((err) =>
           console.error("[TRACK] unsubscribe:", err.message)
         );
       }
@@ -205,17 +199,8 @@ function listFilter(query) {
     filter.$or = [{ name: regex }, { email: regex }];
   }
 
-  const dateFrom = str(query.dateFrom);
-  const dateTo = str(query.dateTo);
-  if (dateFrom || dateTo) {
-    filter.createdAt = {};
-    if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
-    if (dateTo) {
-      const to = new Date(dateTo);
-      to.setHours(23, 59, 59, 999);
-      filter.createdAt.$lte = to;
-    }
-  }
+  const createdAt = dayRangeFilter(query.dateFrom, query.dateTo);
+  if (createdAt) filter.createdAt = createdAt;
   return filter;
 }
 
@@ -296,6 +281,14 @@ exports.remove = async (req, res, next) => {
       return res.status(404).json({ error: "Assinante não encontrado" });
     }
 
+    // R-SUB-07 (LGPD): o email também sai do histórico dos envios que a pessoa
+    // recebeu. A linha continua lá, então entregas, aberturas e cliques não mudam.
+    await Campaign.updateMany(
+      { "recipients.subscriber": subscriber._id },
+      { $set: { "recipients.$[person].email": REMOVED_EMAIL } },
+      { arrayFilters: [{ "person.subscriber": subscriber._id }], timestamps: false }
+    );
+
     res.json({ message: "Assinante removido com sucesso" });
   } catch (err) {
     next(err);
@@ -306,36 +299,18 @@ exports.update = async (req, res, next) => {
   try {
     await connectDB();
 
-    const { status, categories, tier, notes, name } = req.body;
-    const patch = {};
+    const { categories, tier, ...rest } = req.body;
+    if (categories !== undefined) {
+      const categoryError = categoriesError(categories);
+      if (categoryError) return res.status(422).json({ error: categoryError });
+    }
 
-    if (name !== undefined) patch.name = String(name).trim();
-
+    // name, notes, status como vieram; plano novo reinicia o "membro desde" (R-SUB-05)
+    const patch = { ...rest };
+    if (categories !== undefined) patch.categories = categories;
     if (tier !== undefined) {
-      if (!TIERS.includes(tier)) {
-        return res.status(422).json({ error: "Plano inválido" });
-      }
       patch.tier = tier;
       patch.memberSince = tier === "member" ? new Date() : null;
-    }
-
-    if (notes !== undefined) patch.notes = String(notes).trim();
-
-    if (status !== undefined) {
-      if (!["active", "unsubscribed"].includes(status)) {
-        return res.status(422).json({ error: "Status inválido" });
-      }
-      patch.status = status;
-    }
-
-    if (categories !== undefined) {
-      const invalidCats = categories.filter((c) => !VALID_SLUGS.includes(c));
-      if (invalidCats.length > 0) {
-        return res
-          .status(422)
-          .json({ error: `Categorias inválidas: ${invalidCats.join(", ")}` });
-      }
-      patch.categories = categories;
     }
 
     const subscriber = await Subscriber.findByIdAndUpdate(

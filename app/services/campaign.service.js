@@ -146,7 +146,8 @@ function buildMail(campaign, subscriber, postUrl) {
     from: `"marck0101" <${process.env.GMAIL_USER}>`,
     to: subscriber.email,
     subject: campaign.subject,
-    headers: { "List-Unsubscribe": `<${unsub}>` },
+    // Botão "cancelar inscrição" do Gmail/Yahoo: POST direto na API (RFC 8058)
+    headers: { "List-Unsubscribe": `<${unsub}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
     html: campaignEmail({
       subscriberName: subscriber.name,
       subject: campaign.subject,
@@ -281,7 +282,23 @@ async function notifyNewPost(post) {
   return processCampaign(campaign);
 }
 
+/**
+ * Avisos de post publicado que ficaram em rascunho (R-EMAIL-03: não saem
+ * sozinhos — público vazio ou email sem configuração na hora da publicação).
+ * Usado pelo alerta diário e pelo Dashboard. [{ _id, subject, post: { _id, title } }]
+ */
+async function unsentPostNotices() {
+  const drafts = await Campaign.find({ kind: "post-notification", status: "draft" }).select("_id subject post").lean();
+  if (!drafts.length) return [];
+  const posts = await BlogPost.find({ _id: { $in: drafts.map((c) => c.post).filter(Boolean) }, published: true, deletedAt: null })
+    .select("_id title")
+    .lean();
+  const byId = new Map(posts.map((p) => [String(p._id), p]));
+  return drafts.filter((c) => byId.has(String(c.post))).map((c) => ({ ...c, post: byId.get(String(c.post)) }));
+}
+
 module.exports = {
+  unsentPostNotices,
   audienceFilter,
   countAudience,
   previewAudience,

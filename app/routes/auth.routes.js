@@ -25,6 +25,9 @@ const { str } = require("../utils/sanitize");
 const { FRONTEND_URL } = require("../config/urls");
 const limiter = require("../services/ratelimit.service");
 const jwt = require("jsonwebtoken");
+const { validate } = require("../validation/validate");
+const { loginBody, forgotBody, resetBody, codeBody } = require("../validation/auth.schemas");
+const { errorBody } = require("../utils/http");
 
 /**
  * Login do painel em duas etapas:
@@ -102,11 +105,12 @@ async function userSecret(user, field) {
 
 // Chave trocada: nenhum código vai servir; o caminho é refazer o cadastro
 function secretUnreadable(res) {
-  return res.status(500).json({
-    message:
+  return res.status(500).json(
+    errorBody(
       "O servidor não consegue ler o app autenticador cadastrado (a chave MFA_SECRET_KEY/JWT_SECRET mudou). " +
-      "Use um código de recuperação ou rode scripts/reset-2fa.js.",
-  });
+        "Use um código de recuperação ou rode scripts/reset-2fa.js."
+    )
+  );
 }
 
 function finishLogin(res, user) {
@@ -123,17 +127,12 @@ if (skip2fa()) console.warn("[AUTH] SKIP_2FA ativo: login sem 2º fator (apenas 
 
 /* ================= ETAPA 1: SENHA (RESERVA) ================= */
 
-router.post("/login", requireAllowedOrigin, async (req, res) => {
+router.post("/login", requireAllowedOrigin, validate({ body: loginBody }, { status: 400 }), async (req, res) => {
   try {
     await connectDB();
 
-    // Só string: {"$ne": null} viraria operador do MongoDB
-    const email = str(req.body?.email).toLowerCase();
-    const password = typeof req.body?.password === "string" ? req.body.password : "";
-
-    if (!email || !password) {
-      return res.status(400).json({ message: "Dados inválidos" });
-    }
+    // Formato conferido pelo esquema (loginBody): texto, email em minúsculas
+    const { email, password } = req.body;
 
     const wait = await limiter.blockedFor("login", req, LOGIN_MAX);
     if (wait) return limiter.tooMany(res, wait);
@@ -144,7 +143,7 @@ router.post("/login", requireAllowedOrigin, async (req, res) => {
 
     if (!passwordMatch) {
       await limiter.hit("login", req, LOGIN_WINDOW_MIN);
-      return res.status(401).json({ message: "Credenciais inválidas" });
+      return res.status(401).json(errorBody("Credenciais inválidas"));
     }
 
     await limiter.reset("login", req);
@@ -159,7 +158,7 @@ router.post("/login", requireAllowedOrigin, async (req, res) => {
     return res.json({ next: isEnrolled(user) ? "verify" : "setup" });
   } catch (err) {
     console.error("ERRO LOGIN:", err);
-    return res.status(500).json({ message: "Erro interno" });
+    return res.status(500).json(errorBody("Erro interno"));
   }
 });
 
@@ -219,7 +218,7 @@ router.get("/2fa/pending", async (req, res, next) => {
   try {
     await connectDB();
     const pending = await pendingUser(req);
-    if (!pending) return res.status(401).json({ message: "Entre novamente" });
+    if (!pending) return res.status(401).json(errorBody("Entre novamente"));
     res.set("Cache-Control", "no-store");
     res.json({ method: pending.method, email: pending.user.email, enrolled: isEnrolled(pending.user) });
   } catch (err) {
@@ -232,9 +231,9 @@ router.post("/2fa/setup", requireAllowedOrigin, async (req, res, next) => {
   try {
     await connectDB();
     const pending = await pendingUser(req);
-    if (!pending) return res.status(401).json({ message: "Entre novamente" });
+    if (!pending) return res.status(401).json(errorBody("Entre novamente"));
     if (isEnrolled(pending.user)) {
-      return res.status(409).json({ message: "O app autenticador já está configurado" });
+      return res.status(409).json(errorBody("O app autenticador já está configurado"));
     }
 
     const secret = generateSecret();
@@ -250,22 +249,22 @@ router.post("/2fa/setup", requireAllowedOrigin, async (req, res, next) => {
 });
 
 // Confirma o cadastro com o primeiro código do app; devolve os códigos de recuperação
-router.post("/2fa/enable", requireAllowedOrigin, async (req, res, next) => {
+router.post("/2fa/enable", requireAllowedOrigin, validate({ body: codeBody }, { status: 400 }), async (req, res, next) => {
   try {
     await connectDB();
     const wait = await limiter.blockedFor("mfa", req, MFA_MAX);
     if (wait) return limiter.tooMany(res, wait);
 
     const pending = await pendingUser(req, "+mfa.pendingSecret");
-    if (!pending) return res.status(401).json({ message: "Entre novamente" });
+    if (!pending) return res.status(401).json(errorBody("Entre novamente"));
     const { user } = pending;
-    if (isEnrolled(user)) return res.status(409).json({ message: "O app autenticador já está configurado" });
-    if (!user.mfa?.pendingSecret) return res.status(400).json({ message: "Gere o QR code primeiro" });
+    if (isEnrolled(user)) return res.status(409).json(errorBody("O app autenticador já está configurado"));
+    if (!user.mfa?.pendingSecret) return res.status(400).json(errorBody("Gere o QR code primeiro"));
 
-    const step = verifyTotp(await userSecret(user, "pendingSecret"), req.body?.code);
+    const step = verifyTotp(await userSecret(user, "pendingSecret"), req.body.code);
     if (step === null) {
       await limiter.hit("mfa", req, MFA_WINDOW_MIN);
-      return res.status(401).json({ message: "Código incorreto. Confira o horário do celular e tente o código atual." });
+      return res.status(401).json(errorBody("Código incorreto. Confira o horário do celular e tente o código atual."));
     }
 
     const { codes, hashes } = newRecoveryCodes();
@@ -293,18 +292,18 @@ router.post("/2fa/enable", requireAllowedOrigin, async (req, res, next) => {
 });
 
 // Login normal: código do app ou um código de recuperação
-router.post("/2fa/verify", requireAllowedOrigin, async (req, res, next) => {
+router.post("/2fa/verify", requireAllowedOrigin, validate({ body: codeBody }, { status: 400 }), async (req, res, next) => {
   try {
     await connectDB();
     const wait = await limiter.blockedFor("mfa", req, MFA_MAX);
     if (wait) return limiter.tooMany(res, wait);
 
     const pending = await pendingUser(req, "+mfa.secret +mfa.lastStep +mfa.recoveryCodes");
-    if (!pending) return res.status(401).json({ message: "Entre novamente" });
+    if (!pending) return res.status(401).json(errorBody("Entre novamente"));
     const { user } = pending;
-    if (!isEnrolled(user)) return res.status(409).json({ message: "Configure o app autenticador primeiro" });
+    if (!isEnrolled(user)) return res.status(409).json(errorBody("Configure o app autenticador primeiro"));
 
-    const code = String(req.body?.code || "").trim();
+    const code = String(req.body.code || "").trim();
     let accepted = false;
     let usedRecovery = false;
 
@@ -331,7 +330,7 @@ router.post("/2fa/verify", requireAllowedOrigin, async (req, res, next) => {
 
     if (!accepted) {
       await limiter.hit("mfa", req, MFA_WINDOW_MIN);
-      return res.status(401).json({ message: "Código incorreto" });
+      return res.status(401).json(errorBody("Código incorreto"));
     }
 
     await limiter.reset("mfa", req);
@@ -379,18 +378,18 @@ router.get("/me", auth, async (req, res, next) => {
 });
 
 // Novos códigos de recuperação (os antigos deixam de valer). Pede o código do app.
-router.post("/2fa/recovery-codes", auth, async (req, res, next) => {
+router.post("/2fa/recovery-codes", auth, validate({ body: codeBody }, { status: 400 }), async (req, res, next) => {
   try {
     const wait = await limiter.blockedFor("mfa", req, MFA_MAX);
     if (wait) return limiter.tooMany(res, wait);
 
     const user = await User.findById(req.userId).select("+mfa.secret +mfa.lastStep");
     const step = user?.mfa?.secret
-      ? verifyTotp(await userSecret(user, "secret"), req.body?.code, user.mfa.lastStep ?? -1)
+      ? verifyTotp(await userSecret(user, "secret"), req.body.code, user.mfa.lastStep ?? -1)
       : null;
     if (step === null) {
       await limiter.hit("mfa", req, MFA_WINDOW_MIN);
-      return res.status(401).json({ message: "Código incorreto" });
+      return res.status(401).json(errorBody("Código incorreto"));
     }
 
     const { codes, hashes } = newRecoveryCodes();
@@ -424,14 +423,11 @@ router.post("/logout", requireAllowedOrigin, async (req, res) => {
 
 /* ================= SENHA ================= */
 
-router.post("/forgot-password", async (req, res) => {
+router.post("/forgot-password", validate({ body: forgotBody }, { status: 400 }), async (req, res) => {
   try {
     await connectDB();
 
-    const email = str(req.body?.email).toLowerCase();
-    if (!email) {
-      return res.status(400).json({ message: "Email é obrigatório" });
-    }
+    const { email } = req.body;
 
     // Cada pedido conta (evita usar a rota para disparar emails em massa)
     const wait = await limiter.blockedFor("forgot", req, FORGOT_MAX);
@@ -468,26 +464,22 @@ router.post("/forgot-password", async (req, res) => {
     });
   } catch (err) {
     console.error("ERRO FORGOT PASSWORD:", err);
-    return res.status(500).json({ message: "Erro interno" });
+    return res.status(500).json(errorBody("Erro interno"));
   }
 });
 
 // Redefinir a senha não pula o 2º fator (o próximo login ainda pede o código)
 // e derruba as sessões abertas.
-router.post("/reset-password", async (req, res) => {
+router.post("/reset-password", validate({ body: resetBody }, { status: 400 }), async (req, res) => {
   try {
     await connectDB();
 
-    const token = str(req.body?.token);
-    const password = typeof req.body?.password === "string" ? req.body.password : "";
-    if (!token || !password) {
-      return res.status(400).json({ message: "Dados inválidos" });
-    }
+    const { token, password } = req.body;
 
     if (password.length < 8) {
       return res
         .status(400)
-        .json({ message: "A senha deve ter no mínimo 8 caracteres" });
+        .json(errorBody("A senha deve ter no mínimo 8 caracteres"));
     }
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -498,7 +490,7 @@ router.post("/reset-password", async (req, res) => {
     }).select("+resetPasswordToken +resetPasswordExpires");
 
     if (!user) {
-      return res.status(400).json({ message: "Token inválido ou expirado" });
+      return res.status(400).json(errorBody("Token inválido ou expirado"));
     }
 
     user.password = await bcrypt.hash(password, 10);
@@ -510,7 +502,7 @@ router.post("/reset-password", async (req, res) => {
     return res.json({ message: "Senha redefinida com sucesso" });
   } catch (err) {
     console.error("ERRO RESET PASSWORD:", err);
-    return res.status(500).json({ message: "Erro interno" });
+    return res.status(500).json(errorBody("Erro interno"));
   }
 });
 

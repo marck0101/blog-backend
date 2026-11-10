@@ -1,5 +1,6 @@
 const RateLimit = require("../models/ratelimit.model");
 const { clientIp } = require("../utils/sanitize");
+const { errorBody } = require("../utils/http");
 
 const keyFor = (action, req) => `${action}:${clientIp(req)}`;
 
@@ -39,9 +40,7 @@ async function reset(action, req) {
 
 function tooMany(res, seconds) {
   res.set("Retry-After", String(seconds));
-  return res.status(429).json({
-    message: `Muitas tentativas. Tente novamente em ${Math.ceil(seconds / 60)} minuto(s).`,
-  });
+  return res.status(429).json(errorBody(`Muitas tentativas. Tente novamente em ${Math.ceil(seconds / 60)} minuto(s).`));
 }
 
 module.exports = { blockedFor, hit, reset, tooMany };

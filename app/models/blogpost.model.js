@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const { SLUGS: CATEGORY_SLUGS } = require("../config/categories");
 const { readingMinutes } = require("../utils/readingTime");
 const { normalizeTags } = require("../utils/tags");
 
@@ -15,6 +16,8 @@ const altField = {
   maxlength: [ALT_MAX, `O texto alternativo deve ter no máximo ${ALT_MAX} caracteres`],
 };
 
+// Endereço livre: nem o atual nem um antigo de outro post (o link antigo
+// compartilhado abriria o post errado; ver previousSlugs, R-POST-17)
 async function generateUniqueSlug(title, excludeId) {
   const base = slugify(title, { lower: true, strict: true });
   let slug = base;
@@ -22,7 +25,7 @@ async function generateUniqueSlug(title, excludeId) {
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const query = { slug };
+    const query = { $or: [{ slug }, { previousSlugs: slug }] };
     if (excludeId) query._id = { $ne: excludeId };
     const existing = await mongoose.models.BlogPost.findOne(query);
     if (!existing) break;
@@ -44,6 +47,8 @@ const BlogPostSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
+    // Endereços que o post já teve: o link antigo leva ao atual (301, R-POST-17)
+    previousSlugs: { type: [String], default: [], index: true },
     excerpt: String,
     // Resposta direta (BLUF): 1–3 frases logo abaixo do título com a conclusão do
     // artigo. É o trecho que buscadores e assistentes de IA citam; vira o
@@ -77,8 +82,8 @@ const BlogPostSchema = new mongoose.Schema(
     category: {
       type: String,
       enum: {
-        values: ["tecnologia", "design", "carreira", "negocios", "marketing", "trafego", "growth"],
-        message: "Categoria inválida. Valores permitidos: tecnologia, design, carreira, negocios, marketing, trafego, growth",
+        values: CATEGORY_SLUGS,
+        message: `Categoria inválida. Valores permitidos: ${CATEGORY_SLUGS.join(", ")}`,
       },
       required: [true, "A categoria é obrigatória"],
     },

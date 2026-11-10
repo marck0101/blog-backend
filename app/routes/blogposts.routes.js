@@ -1,57 +1,62 @@
 const express = require("express");
 const router = express.Router();
-const post = require("../controllers/blogpost.controller");
+const publicPosts = require("../controllers/posts/post.public.controller");
+const adminPosts = require("../controllers/posts/post.admin.controller");
+const revisions = require("../controllers/posts/post.revisions.controller");
+const showcase = require("../controllers/posts/post.showcase.controller");
 const auth = require("../middlewares/auth.middleware");
 const { requireAllowedOrigin } = require("../middlewares/auth.middleware");
+const { validate } = require("../validation/validate");
+const { postBody, pinnedBody, highlightBody, removeImageBody, engageBody } = require("../validation/posts.schemas");
 
 /**
  * ================= BLOG PÚBLICO =================
  */
-router.get("/published", post.findAllPublished);
-router.get("/public/:id", post.findPublicById);
-router.get("/public/:id/related", post.findRelated);
-router.get("/slug/:slug", post.findBySlug);
-router.get("/season/:season", post.findSeasonEpisodes);
-router.get("/pinned", post.findPinned);
-router.get("/highlights", post.findHighlights);
-router.post("/public/:id/engage", requireAllowedOrigin, post.engage);
+router.get("/published", publicPosts.findAllPublished);
+router.get("/public/:id", publicPosts.findPublicById);
+router.get("/public/:id/related", publicPosts.findRelated);
+router.get("/slug/:slug", publicPosts.findBySlug);
+router.get("/season/:season", publicPosts.findSeasonEpisodes);
+router.get("/pinned", publicPosts.findPinned);
+router.get("/highlights", publicPosts.findHighlights);
+router.post("/public/:id/engage", requireAllowedOrigin, validate({ body: engageBody }), publicPosts.engage);
 
 /**
  * ================= ADMIN (PROTEGIDO) =================
  */
-router.post("/", auth, post.create);
-router.get("/", auth, post.findAll);
-router.get("/deleted/all", auth, post.findAllDeleted);
+router.post("/", auth, validate({ body: postBody }), adminPosts.create);
+router.get("/", auth, adminPosts.findAll);
+router.get("/deleted/all", auth, adminPosts.findAllDeleted);
 
 // Rotas específicas antes de /:id para evitar colisão
-router.get("/calendar", auth, post.calendar);
-router.get("/heatmap", auth, post.heatmap);
-router.get("/today-planned", auth, post.todayPlanned);
-router.get("/showcase", auth, post.showcase);
-router.get("/tags", auth, post.tags);
-router.put("/showcase/pinned", auth, post.setPinned);
-router.patch("/:id/highlight", auth, post.setHighlight);
+router.get("/calendar", auth, adminPosts.calendar);
+router.get("/heatmap", auth, adminPosts.heatmap);
+router.get("/today-planned", auth, adminPosts.todayPlanned);
+router.get("/showcase", auth, showcase.showcase);
+router.get("/tags", auth, adminPosts.tags);
+router.put("/showcase/pinned", auth, validate({ body: pinnedBody }), showcase.setPinned);
+router.patch("/:id/highlight", auth, validate({ body: highlightBody }), showcase.setHighlight);
 
-router.get("/:id", auth, post.findOne);
-router.put("/:id", auth, post.update);
+router.get("/:id", auth, adminPosts.findOne);
+router.put("/:id", auth, validate({ body: postBody }), adminPosts.update);
 
 /**
  * ================= HISTÓRICO DE VERSÕES =================
  */
-router.get("/:id/revisions", auth, post.listRevisions);
-router.get("/:id/revisions/:version", auth, post.getRevision);
-router.post("/:id/revisions/:version/restore", auth, post.restoreRevision);
+router.get("/:id/revisions", auth, revisions.listRevisions);
+router.get("/:id/revisions/:version", auth, revisions.getRevision);
+router.post("/:id/revisions/:version/restore", auth, revisions.restoreRevision);
 
 /**
  * ================= IMAGENS =================
  */
-router.delete("/:id/images", auth, post.removeImage);
+router.delete("/:id/images", auth, validate({ body: removeImageBody }), adminPosts.removeImage);
 
 /**
  * ================= LIXEIRA =================
  */
-router.delete("/:id", auth, post.softDelete);
-router.patch("/:id/restore", auth, post.restore);
-router.delete("/:id/hard", auth, post.deletePermanent);
+router.delete("/:id", auth, adminPosts.softDelete);
+router.patch("/:id/restore", auth, adminPosts.restore);
+router.delete("/:id/hard", auth, adminPosts.deletePermanent);
 
 module.exports = router;

@@ -2,12 +2,14 @@ const BlogPost = require("../models/blogpost.model");
 const Campaign = require("../models/campaign.model");
 const { notifyNewPost, processCampaign, isMailerConfigured } = require("./campaign.service");
 const { shareArticle } = require("./linkedin.service");
+const { collectAlerts, sendAlerts } = require("./alerts.service");
 const { pingPost } = require("./indexnow.service");
 
 /**
  * Rotina diária (cron da Vercel):
  * 1. publica os posts agendados cuja data já chegou, disparando o email, o LinkedIn e o IndexNow do post
  * 2. continua envios que ficaram "enviando" (lote não coube no tempo)
+ * 3. manda ao admin o resumo do que precisa de atenção (alerts.service)
  */
 async function runDailyJobs(now = new Date()) {
   const summary = { published: [], linkedin: [], resumed: [], errors: [] };
@@ -56,6 +58,15 @@ async function runDailyJobs(now = new Date()) {
         summary.errors.push(`envio "${campaign.subject}": ${err.message}`);
       }
     }
+  }
+
+  // 3. Resumo de pendências por email para o admin, só se houver alguma (SEC-07)
+  try {
+    const alerts = await collectAlerts(summary, now);
+    summary.alerts = alerts.length;
+    summary.alertEmail = await sendAlerts(alerts);
+  } catch (err) {
+    console.error("[CRON] alertas:", err.message);
   }
 
   console.log("[CRON]", JSON.stringify(summary));

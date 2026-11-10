@@ -4,6 +4,7 @@ const connectDB = require("../config/db.config");
 const User = require("../models/user.model");
 const ALLOWED_ORIGINS = require("../config/origins");
 const { readSessionCookie } = require("../utils/session");
+const { errorBody } = require("../utils/http");
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
 
@@ -18,7 +19,7 @@ function originAllowed(req) {
 
 // Para rotas com cookie que não passam pelo auth (etapas do login)
 function requireAllowedOrigin(req, res, next) {
-  if (!originAllowed(req)) return res.status(403).json({ message: "Origem não permitida" });
+  if (!originAllowed(req)) return res.status(403).json(errorBody("Origem não permitida"));
   next();
 }
 
@@ -37,7 +38,7 @@ function readToken(req) {
   return token ? { token, fromCookie: true } : { error: "Token não informado" };
 }
 
-const INVALID = { message: "Sessão inválida ou expirada" };
+const INVALID = errorBody("Sessão inválida ou expirada");
 
 // Painel admin: sessão válida, que passou pelo 2º fator, na versão atual do
 // usuário (sair/trocar senha derruba as outras), e usuário ainda ativo e admin.
@@ -45,10 +46,10 @@ const INVALID = { message: "Sessão inválida ou expirada" };
 // Erro de banco é lançado (vira 500 no tratador), nunca "sessão válida".
 async function resolveSession(req) {
   const { token, fromCookie, error } = readToken(req);
-  if (error) return { status: 401, body: { message: error } };
+  if (error) return { status: 401, body: errorBody(error) };
 
   if (fromCookie && !originAllowed(req)) {
-    return { status: 403, body: { message: "Origem não permitida" } };
+    return { status: 403, body: errorBody("Origem não permitida") };
   }
 
   let decoded;

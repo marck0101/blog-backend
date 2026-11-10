@@ -146,21 +146,10 @@ exports.adminList = async (req, res, next) => {
   }
 };
 
-function pickSeason(body) {
-  const data = {};
-  if (body.title !== undefined) data.title = str(body.title);
-  if (body.description !== undefined) data.description = str(body.description);
-  if (body.order !== undefined) {
-    const order = parseInt(body.order, 10);
-    data.order = Number.isFinite(order) ? order : 0;
-  }
-  if (body.slug !== undefined) data.slug = slugify(str(body.slug), { lower: true, strict: true });
-  // Só pares completos, como strings (objetos viram operadores do MongoDB)
-  if (Array.isArray(body.faq)) {
-    data.faq = body.faq
-      .map((item) => ({ question: str(item?.question), answer: str(item?.answer) }))
-      .filter((item) => item.question && item.answer);
-  }
+/** Corpo já validado (validation/seasons.schemas.js) → dados: slug no formato de endereço */
+function seasonInput(body) {
+  const data = { ...body };
+  if (data.slug !== undefined) data.slug = slugify(data.slug, { lower: true, strict: true });
   return data;
 }
 
@@ -179,7 +168,7 @@ function reservedSlug(res, slug) {
 exports.create = async (req, res, next) => {
   try {
     await connectDB();
-    const data = pickSeason(req.body || {});
+    const data = seasonInput(req.body);
     if (!data.slug) data.slug = slugify(data.title || "", { lower: true, strict: true });
     if (reservedSlug(res, data.slug)) return;
     const season = await Season.create(data);
@@ -198,7 +187,7 @@ exports.update = async (req, res, next) => {
     const season = await Season.findById(req.params.id);
     if (!season) return res.status(404).json({ error: "Season não encontrada" });
 
-    const data = pickSeason(req.body || {});
+    const data = seasonInput(req.body);
     if (data.slug !== undefined && reservedSlug(res, data.slug)) return;
     const oldSlug = season.slug;
     Object.assign(season, data);
