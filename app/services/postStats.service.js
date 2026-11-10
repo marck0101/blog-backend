@@ -1,37 +1,46 @@
 const mongoose = require("mongoose");
 const BlogPost = require("../models/blogpost.model");
 const PostDailyStat = require("../models/postDailyStat.model");
-const { dayKey, addDays } = require("../utils/dates");
 const { escapeRegex } = require("../utils/sanitize");
 
+const TZ = "America/Sao_Paulo";
 const SHARE_CHANNELS = ["whatsapp", "linkedin", "x", "facebook", "telegram", "email", "copy", "native"];
 const HIGHLIGHT_DAYS = 7;
 const HIGHLIGHT_LIMIT = 4;
 
-// Primeiro dia de "últimos N dias" (inclui hoje): últimos 7 dias = hoje e os 6 anteriores
+// "YYYY-MM-DD" no fuso de Brasília (en-CA já formata assim)
+function dayKey(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(date);
+}
+
+// Dia de hoje menos (days - 1): "últimos 7 dias" inclui hoje
 function sinceKey(days) {
-  return addDays(dayKey(), -(days - 1));
+  return dayKey(new Date(Date.now() - (days - 1) * 24 * 60 * 60 * 1000));
 }
 
 function bump(postId, inc) {
   return PostDailyStat.updateOne({ post: postId, day: dayKey() }, { $inc: inc }, { upsert: true });
 }
 
+// Leitura do post (best-effort: estatística nunca derruba a página)
+async function recordView(postId) {
+  try {
+    await bump(postId, { views: 1 });
+  } catch (err) {
+    if (err.code === 11000) return bump(postId, { views: 1 }).catch(() => {});
+    console.error("[STATS] view:", err.message);
+  }
+}
+
 /**
- * Evento do leitor: view | favorite | unfavorite | share | share_visit.
+ * Evento do leitor: favorite | unfavorite | share | share_visit.
  * Devolve false quando o evento não é válido.
- *
- * view (BIZ-02): a leitura é contada pelo navegador de quem abriu o post, uma
- * vez por sessão. Abrir a página (prerender, robô, cache da CDN) não conta.
  */
 async function recordEvent(postId, type, channel) {
   if ((type === "share" || type === "share_visit") && !SHARE_CHANNELS.includes(channel)) return false;
 
   let daily;
-  if (type === "view") {
-    daily = { views: 1 };
-    await BlogPost.updateOne({ _id: postId }, { $inc: { views: 1 } }, { timestamps: false });
-  } else if (type === "favorite") {
+  if (type === "favorite") {
     daily = { favorites: 1 };
     await BlogPost.updateOne({ _id: postId }, { $inc: { favorites: 1 } }, { timestamps: false });
   } else if (type === "unfavorite") {
@@ -268,6 +277,8 @@ module.exports = {
   CONTENT_METRICS,
   contentPerformance,
   HIGHLIGHT_DAYS,
+  dayKey,
+  recordView,
   recordEvent,
   viewsSince,
   weeklyHighlights,

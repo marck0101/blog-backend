@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const Campaign = require("../models/campaign.model");
 const EmailEvent = require("../models/emailEvent.model");
 const { API_URL } = require("../config/urls");
-const { isBot } = require("../utils/userAgent");
 
 /**
  * Rastreio de envios: pixel de abertura e links de clique por destinatário.
@@ -49,11 +48,13 @@ function trackLinks(html, campaignId, subscriberId) {
   });
 }
 
+// Robôs, antivírus de email (clicam em tudo ao receber) e pré-carregamento
+const BOT_UA = /bot|spider|crawl|scan|preview|monitor|curl|wget|python|java\/|go-http|headless|phantom|proofpoint|mimecast|barracuda|fortiguard|safelinks/i;
 // Clique segundos depois da entrega = scanner do servidor de email, não pessoa
 const SCANNER_WINDOW_MS = 10 * 1000;
 
 function isAutomated(userAgent, sentAt, type) {
-  if (isBot(userAgent)) return true;
+  if (!userAgent || BOT_UA.test(userAgent)) return true;
   if (type === "click" && sentAt && Date.now() - new Date(sentAt).getTime() < SCANNER_WINDOW_MS) return true;
   return false;
 }

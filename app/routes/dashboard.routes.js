@@ -6,8 +6,6 @@ const BlogPost = require("../models/blogpost.model");
 const Subscriber = require("../models/subscriber.model");
 const SearchQuery = require("../models/searchquery.model");
 const { isMeaningfulSearch } = require("../utils/sanitize");
-const { monthRange } = require("../utils/dates");
-const { unsentPostNotices } = require("../services/campaign.service");
 
 const DAY = 24 * 60 * 60 * 1000;
 // Rascunho sem mexer há mais que isso aparece como "parado" no dashboard
@@ -17,9 +15,10 @@ router.get("/stats", auth, async (req, res, next) => {
   try {
     await connectDB();
 
-    // Comparação com o mês anterior (meses do calendário, em Brasília)
-    const { start: monthStart } = monthRange();
-    const { start: prevMonthStart } = monthRange(new Date(), -1);
+    // Comparação com o mês anterior (mês do calendário, horário do servidor)
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const staleBefore = new Date(Date.now() - STALE_DRAFT_DAYS * DAY);
 
     const [
@@ -36,7 +35,7 @@ router.get("/stats", auth, async (req, res, next) => {
       BlogPost.countDocuments({ status: "draft", deletedAt: null, updatedAt: { $lt: staleBefore } }),
     ]);
 
-    const [totalPosts, published, drafts, planned, deleted, lastPostArr, totalSubscribers, activeSubscribers, notices] = await Promise.all([
+    const [totalPosts, published, drafts, planned, deleted, lastPostArr, totalSubscribers, activeSubscribers] = await Promise.all([
       BlogPost.countDocuments({ deletedAt: null }),
       BlogPost.countDocuments({ published: true, deletedAt: null }),
       // Agendado também tem published false: conta separado do rascunho
@@ -49,7 +48,6 @@ router.get("/stats", auth, async (req, res, next) => {
         .select("title publishedAt slug"),
       Subscriber.countDocuments({}),
       Subscriber.countDocuments({ status: "active" }),
-      unsentPostNotices(),
     ]);
 
     res.json({
@@ -67,8 +65,6 @@ router.get("/stats", auth, async (req, res, next) => {
       lastPost: lastPostArr[0] || null,
       totalSubscribers,
       activeSubscribers,
-      // Avisos de post publicado que não saíram (BIZ-03): enviar pelo painel
-      unsentNotices: notices.map((c) => ({ _id: c._id, postTitle: c.post.title })),
     });
   } catch (err) {
     next(err);

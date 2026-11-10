@@ -19,7 +19,6 @@ const mongoose = require("mongoose");
 const BlogPost = require("../app/models/blogpost.model");
 const Season = require("../app/models/season.model");
 const { ensureDefaultSeasons } = require("../app/services/season.service");
-const { sanitizeHtml } = require("../app/utils/sanitizeHtml");
 
 // Trechos que não podem aparecer no conteúdo público (prefixo interno de nomenclatura etc.)
 const FORBIDDEN = [/\bGH_/];
@@ -52,8 +51,7 @@ function loadSeason(seasonDir) {
       slug: p.slug,
       excerpt: p.excerpt,
       category: p.category,
-      // Mesma limpeza do painel (SEC-01)
-      content: sanitizeHtml(content),
+      content,
       season: manifest.season,
       seasonOrder: p.seasonOrder,
     };
