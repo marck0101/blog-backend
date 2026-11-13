@@ -90,7 +90,7 @@ exports.setHighlight = async (req, res, next) => {
     const post = await BlogPost.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { $set: { highlight } },
-      { new: true, timestamps: false, projection: "_id highlight" }
+      { returnDocument: "after", timestamps: false, projection: "_id highlight" }
     );
     if (!post) return res.status(404).json({ error: "Post não encontrado" });
     res.json(post);

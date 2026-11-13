@@ -316,7 +316,7 @@ exports.update = async (req, res, next) => {
     const subscriber = await Subscriber.findByIdAndUpdate(
       req.params.id,
       patch,
-      { new: true, select: "-token" }
+      { returnDocument: "after", select: "-token" }
     );
 
     if (!subscriber) {

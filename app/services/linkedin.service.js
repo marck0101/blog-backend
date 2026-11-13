@@ -251,7 +251,7 @@ async function shareArticle(postId) {
       "linkedin.status": { $in: ["idle", "failed", null] },
     },
     { $set: { "linkedin.status": "posting", "linkedin.error": "", "linkedin.attemptedAt": new Date() } },
-    { new: true, timestamps: false }
+    { returnDocument: "after", timestamps: false }
   );
   if (!claimed) return null;
 

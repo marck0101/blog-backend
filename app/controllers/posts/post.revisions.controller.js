@@ -96,7 +96,7 @@ exports.restoreRevision = async (req, res, next) => {
     await revisions.ensureBaseline(req.params.id);
 
     const post = await BlogPost.findByIdAndUpdate(req.params.id, fields, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     });
 

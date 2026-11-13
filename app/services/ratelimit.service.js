@@ -17,7 +17,7 @@ async function hit(action, req, windowMinutes) {
   const updated = await RateLimit.findOneAndUpdate(
     { key, expiresAt: { $gt: new Date() } },
     { $inc: { count: 1 } },
-    { new: true }
+    { returnDocument: "after" }
   );
   if (updated) return;
   try {

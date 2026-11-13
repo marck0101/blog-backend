@@ -199,7 +199,7 @@ exports.update = async (req, res, next) => {
     await revisions.ensureBaseline(req.params.id);
 
     const post = await BlogPost.findByIdAndUpdate(req.params.id, data, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     });
 
@@ -237,7 +237,7 @@ exports.removeImage = async (req, res, next) => {
     const post = await BlogPost.findByIdAndUpdate(
       req.params.id,
       { $pull: { gallery: { url: imageUrl } } },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     if (!post) {
@@ -263,7 +263,7 @@ exports.softDelete = async (req, res, next) => {
     const post = await BlogPost.findByIdAndUpdate(
       req.params.id,
       { deletedAt: new Date(), pinnedOrder: null },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     if (!post) {
@@ -289,7 +289,7 @@ exports.restore = async (req, res, next) => {
     const post = await BlogPost.findByIdAndUpdate(
       req.params.id,
       { deletedAt: null },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     // Agendado com data já passada voltaria ao ar sozinho no próximo cron

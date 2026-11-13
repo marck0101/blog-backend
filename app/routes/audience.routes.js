@@ -112,7 +112,7 @@ router.patch("/:id", validate({ body: updateBody }), async (req, res, next) => {
     if (!validId(req, res)) return;
     await connectDB();
     const list = await AudienceList.findOneAndUpdate({ _id: req.params.id, deletedAt: null }, req.body, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     });
     if (!list) return res.status(404).json({ error: "Público não encontrado" });
@@ -136,7 +136,7 @@ router.delete("/:id", async (req, res, next) => {
     const list = await AudienceList.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       { $set: { deletedAt: new Date() } },
-      { new: true }
+      { returnDocument: "after" }
     );
     if (!list) return res.status(404).json({ error: "Público não encontrado" });
     res.json(list);
@@ -152,7 +152,7 @@ router.patch("/:id/restore", async (req, res, next) => {
     const list = await AudienceList.findOneAndUpdate(
       { _id: req.params.id, deletedAt: { $ne: null } },
       { $set: { deletedAt: null } },
-      { new: true }
+      { returnDocument: "after" }
     );
     if (!list) return res.status(404).json({ error: "Público não está na lixeira" });
     res.json(list);
