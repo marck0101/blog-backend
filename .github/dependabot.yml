@@ -14,6 +14,11 @@ updates:
     groups:
       menores:
         update-types: [minor, patch]
+    ignore:
+      # 2.18+ puxa o htmlparser2 12 (só ESM) e a API cai na Vercel (09/11/2026).
+      # tests/boot/vercel-require.test.mjs barra; voltar só quando ele passar.
+      - dependency-name: sanitize-html
+        versions: [">=2.18.0"]
     labels: [dependencias]
 
   - package-ecosystem: github-actions
