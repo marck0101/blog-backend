@@ -6,6 +6,7 @@ const FEATURES = {
   terminalOffer: true, // Convite do Terminal nos posts de Tecnologia
   toc: true, // Sumário "Neste post"
   readingProgress: true, // Barra de leitura no topo do post
+  readingHistory: true, // Posts lidos e % de leitura (só no navegador do leitor)
 };
 
 const FEATURE_NAMES = Object.keys(FEATURES);

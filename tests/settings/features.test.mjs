@@ -9,7 +9,7 @@ const { forgetPublic } = require("../../app/routes/settings.routes");
 // O banco é limpo entre testes; a memória de 30 s da leitura pública também
 beforeEach(() => forgetPublic());
 
-const ALL_ON = { skins: true, terminalOffer: true, toc: true, readingProgress: true };
+const ALL_ON = { skins: true, terminalOffer: true, toc: true, readingProgress: true, readingHistory: true };
 
 // Recursos do blog ligados/desligados pelo painel
 describe("recursos do blog", () => {
@@ -103,7 +103,7 @@ describe("recursos do blog", () => {
     expect(res.status).toBe(200);
     const doc = await models.SiteSettings.findOne({ key: "site" }).lean();
     // Só nomes de recurso conhecidos (o que não foi salvo fica no padrão na leitura)
-    const known = ["readingProgress", "skins", "terminalOffer", "toc"];
+    const known = ["readingHistory", "readingProgress", "skins", "terminalOffer", "toc"];
     expect(Object.keys(doc.features).every((k) => known.includes(k))).toBe(true);
     expect(doc.features.toc).toBe(false);
     expect(doc).not.toHaveProperty("features.x");
