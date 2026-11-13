@@ -1,4 +1,7 @@
-const admin = require("firebase-admin");
+// API modular (firebase-admin/app e /storage): o firebase-admin 14 tirou o
+// formato antigo admin.apps / admin.storage(). Existe desde a versão 10.
+const { cert, getApps, initializeApp } = require("firebase-admin/app");
+const { getStorage } = require("firebase-admin/storage");
 const fs = require("fs");
 const path = require("path");
 
@@ -17,7 +20,7 @@ function loadServiceAccount() {
   return null;
 }
 
-if (!admin.apps.length) {
+if (!getApps().length) {
   try {
     const serviceAccount = loadServiceAccount();
 
@@ -29,8 +32,8 @@ if (!admin.apps.length) {
           "   → ou defina FIREBASE_SERVICE_ACCOUNT_JSON no .env"
       );
     } else {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
+      initializeApp({
+        credential: cert(serviceAccount),
         storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
       });
     }
@@ -39,4 +42,9 @@ if (!admin.apps.length) {
   }
 }
 
-module.exports = admin;
+// Bucket do Storage, ou null sem credencial (upload responde 503)
+function getBucket() {
+  return getApps().length ? getStorage().bucket() : null;
+}
+
+module.exports = { getBucket };
