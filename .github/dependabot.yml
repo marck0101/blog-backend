@@ -15,10 +15,13 @@ updates:
       menores:
         update-types: [minor, patch]
     ignore:
-      # 2.18+ puxa o htmlparser2 12 (só ESM) e a API cai na Vercel (09/11/2026).
-      # tests/boot/vercel-require.test.mjs barra; voltar só quando ele passar.
+      # 2.17.6+ puxa o htmlparser2 12 (só ESM) e a API cai na Vercel (09/11/2026;
+      # o PR #9 de 13/11 trouxe a 2.17.7). tests/boot/vercel-require.test.mjs
+      # barra; voltar só quando ele passar. As correções de segurança dessas
+      # versões (textarea/xmp e animação SVG) não nos atingem: nenhuma dessas
+      # tags passa pelo filtro (app/utils/sanitizeHtml.js).
       - dependency-name: sanitize-html
-        versions: [">=2.18.0"]
+        versions: [">2.17.5"]
     labels: [dependencias]
 
   - package-ecosystem: github-actions
