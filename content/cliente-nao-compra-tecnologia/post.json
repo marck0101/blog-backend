@@ -1,0 +1,26 @@
+{
+  "title": "Cliente não compra tecnologia: compra o problema resolvido",
+  "slug": "cliente-nao-compra-tecnologia-compra-o-problema-resolvido",
+  "excerpt": "Comunicação não é o que você fala, é o que o outro entende. Como traduzir tecnologia em resultado e montar dashboards que se explicam sozinhos.",
+  "category": "negocios",
+  "file": "content.html",
+  "plannedAt": "2026-11-16T12:00:00-03:00",
+  "faq": [
+    {
+      "question": "Devo explicar ao cliente qual tecnologia vou usar no projeto?",
+      "answer": "Sim, mas pelo que ela resolve, não pelo nome. Em vez de falar a linguagem ou o framework, mostre qual requisito a escolha atende (segurança, desempenho, acessibilidade, custo) e qual resultado o cliente pode esperar."
+    },
+    {
+      "question": "Como saber se um dashboard está bom?",
+      "answer": "Faça o teste: alguém do time consegue entender os dados e tomar uma decisão sem você explicando? Se não consegue, o painel falhou e é preciso voltar às perguntas do cliente, aos dados ou ao desenho."
+    },
+    {
+      "question": "Quanto custa um dashboard que ninguém usa?",
+      "answer": "Custa o investimento do projeto e, principalmente, as decisões que continuam sendo tomadas no escuro ou na planilha antiga. Um número mal interpretado pode levar a investir no canal errado durante meses."
+    },
+    {
+      "question": "Por onde começo um projeto de dashboard?",
+      "answer": "Pelas reuniões, não pela ferramenta. Pergunte ao cliente qual decisão ele quer tomar com o painel, confirme com o time de onde vêm os dados e alinhe com o PO o que entra na primeira versão."
+    }
+  ]
+}

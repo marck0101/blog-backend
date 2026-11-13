@@ -290,6 +290,86 @@ Itens anotados em paralelo, na `main`, durante o trabalho de SEO/IA. Regras de o
 
 ---
 
+## Fase 5 — Desempenho do blog no painel (GA4, Search Console, PageSpeed)
+
+> Planejada em 10/11/2026. Hoje esses números só aparecem no "Radar de pautas" do
+> benchmark0101, que classifica as páginas em pilares pelo título. No painel do blog dá para
+> ligar cada página ao post e à categoria reais e juntar com os números internos
+> (`PostDailyStat`, assinantes). **Próxima fase a desenvolver.**
+
+**Decisões já tomadas:**
+- **O cron grava e o painel só lê.** O painel nunca chama o Google ao abrir: a rotina diária
+  (`/api/cron/daily`) busca e grava no Mongo, e o painel lê do banco. Assim abre rápido, não
+  gasta cota e guarda histórico além dos 16 meses do Search Console. Para forçar a coleta, há
+  um botão "Atualizar agora", com login.
+- **Clientes do Google copiados do benchmark0101** (`src/server/google/serviceAccount.ts`,
+  `analytics.ts`, `searchConsole.ts`), convertidos para CommonJS. Usam só `fetch` e
+  `node:crypto`, sem SDK, e **só escopos de leitura**.
+- **Credencial:** a mesma conta de serviço do benchmark, que já tem leitura no GA4 e no
+  Search Console. Na Vercel não existe arquivo, então a credencial vai em
+  `GOOGLE_SERVICE_ACCOUNT_JSON` (conteúdo do JSON). Localmente, `GOOGLE_SERVICE_ACCOUNT_FILE`
+  continua aceito. Outras variáveis: `GA4_PROPERTY_ID`, `GSC_SITE_URL`, `PSI_API_KEY`.
+- **Pilar = categoria do post** (`app/config/categories.js`), sem classificar pelo título.
+- **O YouTube fica fora.** Ele mede o mercado, não o blog, e continua só no benchmark.
+- A fonte da verdade de assinantes continua sendo o banco. O `generate_lead` do GA4 (evento
+  principal desde 10/11/2026, sem dados antes disso) serve para atribuir a assinatura à
+  página e conferir o funil.
+
+- [ ] **PERF-01 · Clientes do Google + coleta diária** · `blog-backend` · M
+  - `app/services/google/`: autenticação da conta de serviço (arquivo ou variável), GA4
+    `runReport` e Search Console `searchAnalytics.query`.
+  - Modelo novo com um documento por dia, fonte e `pagePath`, e o `post` associado quando o
+    caminho é `/post/:slug` (slug antigo resolvido pelo redirecionamento da BIZ-04).
+    - GA4: visualizações, sessões, usuários, tempo de engajamento, eventos-chave,
+      `generate_lead` por página e média de LCP/INP/CLS reais por página (`eventValue` dos
+      eventos de Web Vitals).
+    - Search Console: cliques, impressões, CTR e posição por página e por busca (os dados têm
+      cerca de 3 dias de atraso).
+  - Etapa nova no cron diário que **não derruba as outras**: se o Google falhar, o alerta da
+    SEC-07 avisa e o resto da rotina segue. A coleta reprocessa os últimos dias, porque o
+    GA4 e o Search Console revisam números recentes.
+  - Testes com `fetch` simulado. Nenhum teste chama o Google.
+  - **Pronto quando:** o cron grava os dados de ontem; rodar duas vezes não duplica; sem
+    credencial, a etapa é pulada com aviso e não dá erro 500.
+
+- [ ] **PERF-02 · API de desempenho** · `blog-backend` · P · depende de PERF-01
+  - `GET /api/dashboard/performance?days=30|90|365`, com login: resumo comparado ao período
+    anterior, totais por categoria e por post (somando leituras e favoritos do
+    `PostDailyStat`) e data da última coleta.
+  - `POST /api/dashboard/performance/refresh`, com login e limite de frequência.
+  - **Pronto quando:** testes cobrem a agregação por categoria, um post sem dados do Google e
+    a rota sem sessão (401).
+
+- [ ] **PERF-03 · Página "Desempenho" no painel** · `blog-front` · M · depende de PERF-02
+  - Página nova, com link a partir de Métricas e o mesmo seletor 30/90/365.
+  - Resumo (visitantes, visualizações, tempo médio, assinaturas, cliques do Google), tabela
+    por categoria e tabela por post (com link para editar), ordenáveis como as de Métricas.
+  - Estados de vazio claros: "Google ainda não configurado" ou "primeira coleta pendente".
+  - **Pronto quando:** a página abre com dados reais em produção e funciona no tema escuro e
+    no celular.
+
+- [ ] **PERF-04 · "Quase lá no Google" + funil da newsletter** · os dois · P · depende de PERF-03
+  - Buscas na posição 4–20 com impressões relevantes, com o post e um botão "Editar post".
+  - Funil: `newsletter_cta_click` → `newsletter_form_start` → `generate_lead` (GA4),
+    comparado com os assinantes novos do banco no período. A diferença indica testes ou
+    bloqueadores.
+  - **Pronto quando:** as duas seções aparecem na página, com regra e limiares cobertos por
+    teste.
+
+- [ ] **PERF-05 · PageSpeed semanal + saúde técnica** · os dois · P · depende de PERF-01
+  - PageSpeed (celular) só da home e dos ~5 posts mais vistos, **uma vez por semana** (cada
+    chamada leva cerca de 20 s). Verificar o plano da Vercel: no Hobby, só crons diários e
+    funções de até 60 s, então pode ser preciso rodar um URL por dia em rodízio ou como passo
+    do cron diário só às segundas.
+  - Seção "Saúde técnica": Core Web Vitals reais (GA4) ao lado da nota de laboratório (PSI).
+  - **Pronto quando:** cada URL tem no máximo uma medição por semana e a seção mostra a data
+    da medição.
+
+**Depois (fora desta fase):** o "Seu blog" do benchmark0101 passa a ler esta API em vez de
+consultar o Google, e os dados ficam num lugar só.
+
+---
+
 ## Resumo
 
 | Fase | Tarefas | Tamanho estimado |
@@ -300,5 +380,6 @@ Itens anotados em paralelo, na `main`, durante o trabalho de SEO/IA. Regras de o
 | 3 · Testes e validadores | VAL-01, TEST-02 a TEST-08 | ~12–15 dias |
 | 4 · Regras de negócio | BIZ-01 a BIZ-06 | ~6–8 dias |
 | Operação | OPS-01 a OPS-04 | ~2 dias |
+| 5 · Desempenho no painel | PERF-01 a PERF-05 | ~5–7 dias |
 
 Estimativas para uma pessoa, com teste incluído em cada tarefa.
