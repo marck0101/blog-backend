@@ -16,7 +16,7 @@ const {
   baseOptions,
 } = require("../utils/session");
 const { generateSecret, verifyTotp, otpauthUrl } = require("../utils/totp");
-const { seal, openSecret } = require("../utils/secretBox");
+const { seal } = require("../utils/secretBox");
 const google = require("../services/google-auth.service");
 const connectDB = require("../config/db.config");
 const transporter = require("../config/mailer");
@@ -28,6 +28,7 @@ const jwt = require("jsonwebtoken");
 const { validate } = require("../validation/validate");
 const { loginBody, forgotBody, resetBody, codeBody } = require("../validation/auth.schemas");
 const { errorBody } = require("../utils/http");
+const { SecretUnreadable, userSecret, secretUnreadable } = require("../services/mfa.service");
 
 /**
  * Login do painel em duas etapas:
@@ -79,38 +80,6 @@ async function pendingUser(req, fields = "") {
   const user = await User.findById(pending.id).select(`name email role active sessionVersion mfa.enabledAt ${fields}`);
   if (!user || !user.active || user.role !== "admin" || (user.sessionVersion || 0) !== pending.v) return null;
   return { user, method: pending.method };
-}
-
-class SecretUnreadable extends Error {}
-
-/**
- * Segredo do app (mfa.secret ou mfa.pendingSecret) já aberto. Se estava na
- * chave antiga, regrava com a atual. Se nenhuma chave abre (MFA_SECRET_KEY ou
- * JWT_SECRET trocados), lança SecretUnreadable.
- */
-async function userSecret(user, field) {
-  let opened;
-  try {
-    opened = openSecret(user.mfa[field]);
-  } catch (err) {
-    console.error(`[AUTH] Não foi possível abrir mfa.${field} de ${user.email}:`, err.message);
-    throw new SecretUnreadable();
-  }
-  if (opened.resealed) {
-    await User.updateOne({ _id: user._id }, { $set: { [`mfa.${field}`]: opened.resealed } });
-    console.log(`[AUTH] mfa.${field} de ${user.email} regravado com a MFA_SECRET_KEY`);
-  }
-  return opened.plain;
-}
-
-// Chave trocada: nenhum código vai servir; o caminho é refazer o cadastro
-function secretUnreadable(res) {
-  return res.status(500).json(
-    errorBody(
-      "O servidor não consegue ler o app autenticador cadastrado (a chave MFA_SECRET_KEY/JWT_SECRET mudou). " +
-        "Use um código de recuperação ou rode scripts/reset-2fa.js."
-    )
-  );
 }
 
 function finishLogin(res, user) {
