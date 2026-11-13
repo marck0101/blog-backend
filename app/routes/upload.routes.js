@@ -3,7 +3,7 @@ const router = express.Router();
 const { saveCover } = require("../services/coverImage.service");
 const auth = require("../middlewares/auth.middleware");
 const upload = require("../middlewares/upload.middleware");
-const admin = require("../config/firebase.admin");
+const { getBucket } = require("../config/firebase.admin");
 
 router.post("/cover", auth, upload.single("cover"), async (req, res, next) => {
   try {
@@ -11,13 +11,13 @@ router.post("/cover", auth, upload.single("cover"), async (req, res, next) => {
       return res.status(400).json({ error: "Nenhuma imagem enviada" });
     }
 
-    if (!admin.apps.length) {
+    const bucket = getBucket();
+    if (!bucket) {
       return res.status(503).json({
         error: "Serviço de upload não disponível. Configure o Firebase Admin SDK.",
       });
     }
 
-    const bucket = admin.storage().bucket();
     const { filename, width, height } = await saveCover(bucket, req.file.buffer);
 
     const url = `https://storage.googleapis.com/${bucket.name}/${filename}`;

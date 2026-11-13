@@ -10,14 +10,14 @@
  * Usa a mesma credencial do upload (FIREBASE_SERVICE_ACCOUNT_JSON ou service-account.json).
  */
 require("dotenv").config();
-const admin = require("../app/config/firebase.admin");
+const { getBucket } = require("../app/config/firebase.admin");
 const { CACHE_CONTROL, VARIANT_WIDTHS, variantName, isVariant, saveVariants } = require("../app/services/coverImage.service");
 
 const apply = process.argv.includes("--apply");
 
 (async () => {
-  if (!admin.apps.length) throw new Error("Firebase Admin sem credencial");
-  const bucket = admin.storage().bucket();
+  const bucket = getBucket();
+  if (!bucket) throw new Error("Firebase Admin sem credencial");
   console.log(`Bucket: ${bucket.name} | ${apply ? "GRAVANDO" : "dry run"}`);
 
   const [files] = await bucket.getFiles({ prefix: "covers/" });
