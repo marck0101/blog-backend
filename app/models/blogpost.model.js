@@ -193,44 +193,41 @@ const BlogPostSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Ganchos sem next(): o mongoose 9 tirou o callback (vale a função síncrona ou
+// a promise da async); este formato funciona também nas versões anteriores.
+
 // Gera slug automático ao criar (ou quando slug está vazio)
-BlogPostSchema.pre("validate", async function (next) {
-  if (this.slug) return next();
-  if (!this.title) return next();
+BlogPostSchema.pre("validate", async function () {
+  if (this.slug || !this.title) return;
   this.slug = await generateUniqueSlug(this.title, this._id);
-  next();
 });
 
 // Tempo de leitura acompanha o conteúdo, em qualquer forma de salvar
-BlogPostSchema.pre("validate", function (next) {
+BlogPostSchema.pre("validate", function () {
   if (this.isModified("content") || this.isNew) this.readingMinutes = readingMinutes(this.content);
-  next();
 });
 
-BlogPostSchema.pre("findOneAndUpdate", function (next) {
+BlogPostSchema.pre("findOneAndUpdate", function () {
   const update = this.getUpdate();
   const content = update?.content ?? update?.$set?.content;
-  if (typeof content !== "string") return next();
+  if (typeof content !== "string") return;
   if (update.$set) update.$set.readingMinutes = readingMinutes(content);
   else update.readingMinutes = readingMinutes(content);
-  next();
 });
 
 // Regenera slug ao atualizar título via findByIdAndUpdate (apenas se slug não for enviado)
-BlogPostSchema.pre("findOneAndUpdate", async function (next) {
+BlogPostSchema.pre("findOneAndUpdate", async function () {
   const update = this.getUpdate();
   const title = update?.title || update?.$set?.title;
   const providedSlug = update?.slug || update?.$set?.slug;
 
-  if (!title || providedSlug) return next();
+  if (!title || providedSlug) return;
 
   const docId = this.getQuery()._id;
   const slug = await generateUniqueSlug(title, docId);
 
   if (update.$set) update.$set.slug = slug;
   else update.slug = slug;
-
-  next();
 });
 
 module.exports =

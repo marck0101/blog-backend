@@ -74,11 +74,11 @@ SubscriberSchema.index({ status: 1, tier: 1 });
 SubscriberSchema.index({ createdAt: 1 });
 SubscriberSchema.index({ lists: 1, status: 1 });
 
-SubscriberSchema.pre("save", function (next) {
+// Sem next(): o mongoose 9 tirou o callback dos ganchos
+SubscriberSchema.pre("save", function () {
   if (!this.token) {
     this.token = crypto.randomBytes(32).toString("hex");
   }
-  next();
 });
 
 module.exports = mongoose.model("Subscriber", SubscriberSchema);
