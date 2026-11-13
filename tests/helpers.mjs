@@ -18,6 +18,7 @@ export const models = {
   Season: require("../app/models/season.model"),
   Subscriber: require("../app/models/subscriber.model"),
   User: require("../app/models/user.model"),
+  SiteSettings: require("../app/models/siteSettings.model"),
 };
 
 const { addDays, dayKey } = require("../app/utils/dates");
