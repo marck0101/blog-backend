@@ -690,16 +690,21 @@ Olhe nesta ordem, 7 e 30 dias depois da publicação:
 ### Cabeçalhos
 - API: `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, sem
   `X-Powered-By`, CORS restrito.
-- Front: os mesmos + `Permissions-Policy` e CSP `frame-ancestors 'none'; object-src 'none';
-  base-uri 'self'`. `/admin` com `noindex`.
-- **CSP completa em observação** (`Content-Security-Policy-Report-Only` no `vercel.json` do
-  front): scripts só do próprio site, GA4, Clarity e Meta Pixel; **nenhum script inline**.
-  Por enquanto só relata, não bloqueia. Violações aparecem nos logs do backend como
-  `[CSP] <diretiva> bloquearia <endereço> em <página>` (rota `/api/csp-report`).
+- Front: os mesmos + `Permissions-Policy` e a CSP completa. `/admin` com `noindex`.
+- **CSP valendo** (`Content-Security-Policy` no `vercel.json` do front, SEC-02; esteve em
+  `Report-Only` de 09/11 a 17/11/2026): scripts só do próprio site, GA4, Clarity e Meta
+  Pixel; **nenhum script inline**; `frame-src 'self'` (post com vídeo do YouTube exige
+  liberar o domínio). O que for bloqueado aparece nos logs do backend como
+  `[CSP] <diretiva> bloquearia <endereço> em <página>` e fica agrupado na coleção
+  `cspreports` por 30 dias (`GET /api/csp-report`, com login). O teste
+  `api/csp.test.js` do front trava a política.
   - **R-CSP-01** Dados do prerender vão em blocos `<script type="application/json">`
     (não executáveis), nunca em `<script>window.x = …</script>`.
   - **R-CSP-02** Ferramenta nova de terceiro (chat, vídeo, outro pixel) exige incluir o
-    domínio na política, senão ela é bloqueada quando a CSP passar a valer.
+    domínio na política no mesmo PR, senão ela é bloqueada em produção.
+  - **R-CSP-03** O GA4 com sinais do Google manda parte das batidas para
+    `www.google.com` (ou o domínio regional, como `google.com.br`) e `*.g.doubleclick.net`;
+    por isso eles estão no `connect-src`.
 
 ---
 
