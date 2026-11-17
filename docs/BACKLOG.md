@@ -243,10 +243,23 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
   - **Decisão:** continuar no Gmail enquanto a base de assinantes for pequena; não vale o
     investimento agora. **Gatilho para retomar:** a base se aproximar do limite diário do
     Gmail (~500 emails/dia), ou falhas de entrega aparecerem no alerta diário (SEC-07).
-  - **Quando trocar:** o remetente passa a ser o email do próprio domínio,
-    **marcos@marck0101.com.br**. Isso exige configurar SPF, DKIM e DMARC no DNS de
-    `marck0101.com.br` (sem eles os emails caem no spam), e trocar `config/mailer.js`
-    e o `from` em `services/campaign.service.js` / `services/alerts.service.js`.
+  - **Email do domínio já existe (17/11/2026):** **marck.mhc@marck0101.com.br**, no
+    **Zoho Mail** (MX `mx.zoho.com`). DNS conferido em 17/11/2026: SPF
+    `v=spf1 include:zohomail.com ~all` ok; **sem DKIM** (nenhum seletor `zmail`
+    publicado) e **sem DMARC**. Até a troca, os envios continuam saindo do Gmail
+    (`GMAIL_USER`), e isso não é afetado pelo SPF do domínio, porque o remetente é o
+    próprio Gmail.
+  - **Passos que já dá para fazer sem mexer no código:** ativar o DKIM no painel do Zoho
+    (Domínios › Autenticação de email) e publicar o TXT; publicar
+    `_dmarc.marck0101.com.br` com `v=DMARC1; p=none; rua=mailto:marck.mhc@marck0101.com.br`
+    e subir para `quarantine` depois de algumas semanas de relatórios limpos.
+  - **Quando trocar:** remetente `"marck0101" <marck.mhc@marck0101.com.br>` com
+    `Reply-To` caindo no Zoho. O envio em si vai por um **provedor de envio**
+    (Resend, Brevo ou SES), e não pelo SMTP do Zoho: o Zoho limita o volume diário, exige
+    plano pago para SMTP e não aceita envio em massa. O provedor escolhido entra no SPF
+    (`include:` dele) e ganha DKIM próprio. No código: trocar `app/config/mailer.js` e
+    o `from` em `services/campaign.service.js`, `services/alerts.service.js`,
+    `routes/comment.routes.js` e `routes/auth.routes.js` (hoje todos usam `GMAIL_USER`).
   - Ganha também relatório de entrega e bounce.
 
 - [x] **BIZ-06 · Excluir assinante = anonimizar** · `blog-backend` · P — concluída em 03/11/2026 (branches `feat/biz-06-excluir-dados`; achado: excluir apagava o cadastro mas o email continuava no histórico de cada envio; agora sai de tudo e os números dos envios ficam iguais; R-SUB-07)

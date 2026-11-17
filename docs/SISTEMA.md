@@ -758,7 +758,8 @@ Ordenadas por impacto. Itens riscados já foram resolvidos (código da tarefa no
 7. ~~**Exclusão definitiva deixa órfãos**~~ — resolvido na SEC-04 (ver R-TRASH-03).
 8. **Limite do Gmail**: conta Gmail comum envia ~500 emails/dia (Workspace ~2000). Com a base
    crescendo, envios vão falhar no meio. **Decisão (03/11/2026):** manter o Gmail até a base
-   crescer; a troca será para o email do próprio domínio (marcos@marck0101.com.br). Ver BIZ-05.
+   crescer; a troca será para o email do próprio domínio (marck.mhc@marck0101.com.br, no Zoho Mail desde
+   17/11/2026), enviado por um provedor de envio. Ver BIZ-05.
 9. ~~**Excluir assinante deixava o email no histórico dos envios**~~ — resolvido na BIZ-06 (R-SUB-07).
 
 ### Segurança (defesa em profundidade)
