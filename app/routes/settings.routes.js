@@ -24,6 +24,19 @@ function forgetPublic() {
   memory = null;
 }
 
+/**
+ * Recursos ligados agora, para as rotas que dependem de um (ex.: a caixinha de
+ * sugestões recusa envio com ela desligada). Usa a mesma memória de 30 s.
+ * Banco fora do ar: lança o erro (quem chama decide).
+ */
+async function readFeatures() {
+  if (memory && Date.now() - memory.at < MEMORY_MS) return memory.features;
+  await connectDB();
+  const features = featuresOf(await SiteSettings.findOne({ key: "site" }).lean());
+  memory = { features, at: Date.now() };
+  return features;
+}
+
 // PÚBLICO: o blog pergunta ao abrir. Cache curto na CDN: desligar no painel
 // chega aos leitores em até ~1 minuto. Falha no banco = tudo no padrão (ligado).
 router.get("/features", async (req, res) => {
@@ -76,3 +89,4 @@ router.patch("/features", auth, validate({ body: featuresBody }), async (req, re
 
 module.exports = router;
 module.exports.forgetPublic = forgetPublic;
+module.exports.readFeatures = readFeatures;

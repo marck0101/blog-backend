@@ -27,6 +27,8 @@
 16. [Brechas e oportunidades de melhoria](#16-brechas-e-oportunidades-de-melhoria)
 17. [Checklist para refatorar sem perder regra](#17-checklist-para-refatorar-sem-perder-regra)
 18. [Convenções do código (manutenção e suporte)](#18-convenções-do-código-manutenção-e-suporte)
+19. [Caixinha de sugestões](#19-caixinha-de-sugestões)
+20. [Mapa de conteúdo](#20-mapa-de-conteúdo)
 
 ---
 
@@ -834,6 +836,9 @@ precisar mudar a regra, mude ali (e o teste correspondente).
 | Limite de tentativas | `app/services/ratelimit.service.js` | — |
 | Alertas para o admin | `app/services/alerts.service.js` | — |
 | Regras do post (o que o editor grava, validação, status, publicação) | `app/controllers/posts/post.rules.js` | `src/utils/postStatus.js` |
+| Inscrição vinda de formulário público (newsletter, sugestões) | `app/services/subscription.service.js` (`subscribeEmail`) | — |
+| Recurso do blog ligado/desligado, lido por uma rota | `app/routes/settings.routes.js` (`readFeatures`) | `src/utils/features.js` (`useFeatures`) |
+| Ligações entre posts (links internos, órfãos) | `app/services/contentMap.service.js` | `src/utils/graphLayout.js` (desenho) |
 
 ### Regras de escrita
 
@@ -864,7 +869,7 @@ precisar mudar a regra, mude ali (e o teste correspondente).
 - Front: `npm test` (Vitest + jsdom + Testing Library).
 - **Correção de bug começa por um teste que reproduz o bug** (ele falha antes e passa depois).
 - Pastas: `tests/security` (acesso e entrada), `tests/posts`, `tests/subscribers`,
-  `tests/cron`, `tests/utils`, `tests/config`.
+  `tests/suggestions`, `tests/dashboard`, `tests/cron`, `tests/utils`, `tests/config`.
 
 ### Suporte: por onde começar
 
@@ -872,3 +877,88 @@ precisar mudar a regra, mude ali (e o teste correspondente).
 2. A regra envolvida neste documento (busque pelo assunto ou pelo código `R-…`).
 3. O teste da regra: mostra o comportamento esperado com exemplo.
 4. O arquivo indicado na tabela acima.
+
+---
+
+## 19. Caixinha de sugestões
+
+Arquivos: `app/models/suggestion.model.js`, `app/routes/suggestion.routes.js`,
+`app/validation/suggestions.schemas.js`, `blog-front/src/pages/Blog/Suggestions.jsx` (`/sugestoes`),
+`blog-front/src/pages/Admin/Suggestions.jsx` (`/admin/sugestoes`).
+Testes: `tests/suggestions/suggestions.test.mjs` e `blog-front/src/pages/Blog/Suggestions.test.jsx`.
+
+O leitor sugere um tema (`topic`), pede para participar de um conteúdo (`participate`) ou
+manda outra ideia (`other`), sempre com um assunto (uma das categorias), o texto (10–1500
+caracteres) e o email. Nome é opcional. O link "Sugira um tema" fica no rodapé do blog e
+leva a página de origem em `?de=`; `?assunto=<categoria>` já deixa o assunto escolhido.
+
+Status no painel: `new` (Novas) → `planned` (Vão virar post) → `done` (Atendidas, ligada a
+um post) ou `archived` (Arquivadas). Dá para voltar qualquer uma para Novas.
+
+- **R-SUG-01** A caixinha liga e desliga em **Recursos** (`suggestions`). Desligada: a página
+  mostra "caixinha fechada", o link some do rodapé e a API recusa o envio (403). As já
+  recebidas continuam no painel.
+- **R-SUG-02** **Assinar é escolha, nunca condição.** O formulário tem a caixa "Também quero
+  receber os próximos artigos", desmarcada. Marcada: inscreve com todos os temas
+  (`source.location = "suggestion"`) pelas mesmas regras da newsletter (R-SUB-02/03: quem já
+  assina não é alterado). Motivo: consentimento casado não vale pela LGPD, e quem é inscrito
+  sem querer marca spam, o que derruba a entrega dos outros envios. A resposta é a mesma
+  para todo mundo (não revela quem assina). Sugestão de quem já assina aparece ligada ao
+  cadastro ("já é assinante").
+- **R-SUG-03** Limite: 3 sugestões por IP por hora. Campo escondido (`website`) pega robô:
+  preenchido, a API responde sucesso e não guarda nada.
+- **R-SUG-04** Atendida precisa do post que a atendeu (post fora da lixeira).
+- **R-SUG-05** **Privada por padrão.** No blog (`/sugestoes`, "Vocês pediram, saiu") só aparece
+  sugestão atendida, ligada a post **publicado**, com **texto público** escrito pelo admin (até
+  300 caracteres) e com "Mostrar no blog" ligado. O texto original e o email nunca saem da
+  API pública; o primeiro nome só aparece se a pessoa marcou a autorização no formulário.
+  Voltar de atendida, tirar o post ou apagar o texto público tira do blog sozinho; post
+  despublicado ou na lixeira some da vitrine sem mexer na sugestão.
+- **R-SUG-06** Excluir sugestão é definitivo (pedido de exclusão da LGPD). A inscrição na
+  newsletter, se a pessoa pediu, continua (sai pelo link do email ou em Assinantes). Excluir
+  o assinante só desfaz o vínculo com as sugestões dele.
+- **R-SUG-07** Ao marcar como atendida, o admin pode avisar a pessoa por email com o link do
+  post ("Sua sugestão virou post"). Só com o post publicado e **uma vez só** (`notifiedAt`).
+- **R-SUG-08** O autor do blog recebe email a cada sugestão nova; a sidebar mostra quantas
+  estão em Novas.
+
+---
+
+## 20. Mapa de conteúdo
+
+Arquivos: `app/services/contentMap.service.js`, rota `GET /api/dashboard/content-map`
+(`app/routes/dashboard.routes.js`), `blog-front/src/pages/Admin/ContentMap.jsx` (`/admin/mapa`),
+`blog-front/src/utils/graphLayout.js`.
+Testes: `tests/dashboard/content-map.test.mjs` e `blog-front/src/utils/graphLayout.test.js`.
+
+Grafo no estilo do Obsidian: cada post é uma bolinha (cor = categoria, tamanho = leituras,
+borda tracejada = rascunho/agendado), tags são bolinhas cinza, seasons são losangos. Ligações:
+
+| Tipo | De onde vem | Desenho |
+|---|---|---|
+| `link` | link no texto do post para outro post do blog (`/blog/<slug>`, relativo ou com o domínio) | linha cheia com seta |
+| `related` | leituras sugeridas escolhidas à mão | linha pontilhada com seta |
+| `tag` | post → tag | linha fraca |
+| `season` | post → season | linha fraca |
+
+Passar o mouse destaca os vizinhos; clicar abre o painel com o que chega e o que sai do post;
+arrastar reorganiza; a roda do mouse dá zoom. Nomes dos posts aparecem com zoom ou no post em
+foco e nos vizinhos dele. Filtros: tags, seasons, leituras sugeridas, rascunhos/agendados
+(desligado por padrão) e **temas**: clicar numa categoria da legenda mostra só ela; dá para
+somar várias; "Todos os temas" limpa. A cor de cada categoria não muda com o filtro. Tags e
+seasons ficam só as usadas pelos posts visíveis. "Ver como lista" traz o mesmo conteúdo em tabela.
+
+- **R-MAP-01** **Órfão** = post publicado que nenhum **outro post publicado** aponta, nem no
+  texto nem nas leituras sugeridas. Link vindo de rascunho não conta (o leitor não vê).
+- **R-MAP-02** **Link interno com problema**: para post que não existe (`missing`), está na
+  lixeira (`trash`), ainda não foi publicado (`unpublished`) ou por um **endereço antigo**
+  (`old-slug`: funciona pelo 301 de R-POST-17, mas é um salto a mais; o painel diz o endereço
+  novo). Vale para links em qualquer post fora da lixeira, inclusive rascunho (corrige antes
+  de publicar).
+- **R-MAP-03** **Tag usada uma vez**: não liga nada a nada; o painel sugere reaproveitar uma
+  tag existente.
+- **R-MAP-04** A rota lê o texto de todos os posts para achar os links, mas não devolve o
+  texto: só títulos, slugs, status, categoria, leituras e as ligações. Só o admin acessa.
+- **R-MAP-05** O desenho é calculado no navegador, sem biblioteca (`graphLayout.js`): os
+  mesmos dados dão sempre o mesmo desenho inicial. A conta é de todos contra todos, o que
+  serve para centenas de posts; passando de ~1500 nós, trocar por d3-force (Barnes-Hut).

@@ -370,6 +370,26 @@ consultar o Google, e os dados ficam num lugar só.
 
 ---
 
+## Fase 6 — Leitores e organização do conteúdo
+
+- [x] **SUG-01 · Caixinha de sugestões dos leitores** · `blog-backend` + `blog-front` · M — feito em 24/11/2026 (branch `feat/sugestoes-e-mapa`)
+  - `/sugestoes` (tema, participar, outra ideia; assunto = categoria), painel `/admin/sugestoes`
+    com Novas / Vão virar post / Atendidas / Arquivadas, vitrine "Vocês pediram, saiu" e aviso
+    por email quando vira post. Regras R-SUG-01 a R-SUG-08 (SISTEMA.md, seção 19).
+  - ⚠️ **Deploy: backend antes do front** (o front chama `/api/suggestions`).
+- [x] **MAP-01 · Mapa de conteúdo no painel** · `blog-backend` + `blog-front` · M — feito em 24/11/2026 (mesma branch)
+  - `/admin/mapa`: grafo de posts, tags e seasons + órfãos, links internos com problema e tags
+    usadas uma vez. Regras R-MAP-01 a R-MAP-05 (SISTEMA.md, seção 20).
+- [ ] **SUG-02 · Contador de sugestões no resumo diário** · `blog-backend` · P
+  - O email "[Blog] N pendência(s)" (`alerts.service`) passa a citar sugestões em Novas há mais
+    de 7 dias. **Pronto quando:** sugestão parada aparece no resumo com o link do painel.
+- [ ] **MAP-02 · Sugestão de link interno no editor** · `blog-front` · M
+  - No editor do post, listar posts com tags em comum que ainda não recebem link dele (usa
+    `contentMap.service`). **Pronto quando:** o editor mostra até 5 sugestões e um clique
+    insere o link no texto.
+
+---
+
 ## Resumo
 
 | Fase | Tarefas | Tamanho estimado |
@@ -381,5 +401,6 @@ consultar o Google, e os dados ficam num lugar só.
 | 4 · Regras de negócio | BIZ-01 a BIZ-06 | ~6–8 dias |
 | Operação | OPS-01 a OPS-04 | ~2 dias |
 | 5 · Desempenho no painel | PERF-01 a PERF-05 | ~5–7 dias |
+| 6 · Leitores e organização | SUG-01, MAP-01 (feitas), SUG-02, MAP-02 | ~2 dias restantes |
 
 Estimativas para uma pessoa, com teste incluído em cada tarefa.

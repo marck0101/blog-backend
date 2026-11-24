@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const connectDB = require("../config/db.config");
 const Subscriber = require("../models/subscriber.model");
 const Campaign = require("../models/campaign.model");
+const Suggestion = require("../models/suggestion.model");
 
 // O que fica no lugar do email de quem foi excluído, no histórico dos envios
 const REMOVED_EMAIL = "(removido)";
@@ -12,6 +13,7 @@ const limiter = require("../services/ratelimit.service");
 const { FRONTEND_URL } = require("../config/urls");
 const { dayRangeFilter } = require("../utils/dates");
 const { categoriesError } = require("../utils/validators");
+const { subscribeEmail } = require("../services/subscription.service");
 
 // Rota pública sem login: 5 inscrições por IP a cada 30 min. Barra script
 // cadastrando emails de terceiros em massa (que depois receberiam os envios).
@@ -37,27 +39,8 @@ exports.subscribe = async (req, res, next) => {
     const categoryError = categoriesError(categories);
     if (categoryError) return res.status(422).json({ error: categoryError });
 
-    const existing = await Subscriber.findOne({
-      email: email.toLowerCase().trim(),
-    });
-
-    if (existing) {
-      if (existing.status === "active") {
-        // Não altera nada de quem já é assinante (nem categorias) e não revela que existe
-        return res.status(201).json(SUBSCRIBED);
-      }
-      existing.status = "active";
-      existing.categories = categories;
-      if (name) existing.name = name;
-      existing.confirmedAt = new Date();
-      existing.unsubscribedAt = null;
-      existing.unsubscribeCampaign = null;
-      if (source) existing.source = source;
-      await existing.save();
-      return res.status(201).json(SUBSCRIBED);
-    }
-
-    await Subscriber.create({ email, name, categories, source });
+    // Novo, reativado ou já ativo (não alterado): a resposta é sempre a mesma
+    await subscribeEmail({ email, name, categories, source });
     res.status(201).json(SUBSCRIBED);
   } catch (err) {
     next(err);
@@ -288,6 +271,9 @@ exports.remove = async (req, res, next) => {
       { $set: { "recipients.$[person].email": REMOVED_EMAIL } },
       { arrayFilters: [{ "person.subscriber": subscriber._id }], timestamps: false }
     );
+    // Sugestões da pessoa perdem o vínculo com o cadastro (elas têm o próprio
+    // "Excluir" na caixinha, R-SUG-06)
+    await Suggestion.updateMany({ subscriber: subscriber._id }, { $set: { subscriber: null } });
 
     res.json({ message: "Assinante removido com sucesso" });
   } catch (err) {
