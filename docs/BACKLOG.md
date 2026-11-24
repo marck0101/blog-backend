@@ -60,7 +60,7 @@ testes** (pequena, sem escrever a suíte inteira). A partir dela, **toda tarefa 
   - **Pronto quando:** teste prova que `<script>`, `onerror=`, `javascript:` e `<iframe>`
     são removidos e que a formatação normal (negrito, link, imagem, tabela) continua.
 
-- [ ] **SEC-02 · CSP com `script-src` no site** · `blog-front` · M · depende de SEC-01 — 🔎 **em observação desde 09/11/2026** (dia em que foi para produção; branches `fix/sec-02-csp`): política completa em modo só-relatório, dados do prerender viraram blocos JSON (sem script inline) e relatórios chegam aos logs do backend como `[CSP]` e ficam agrupados no banco (coleção `cspreports`, 30 dias; os logs do plano Hobby somem em ~1h). **Passo que falta:** a partir de 16/11/2026, ler `GET /api/csp-report` (logado no painel) ou a coleção no Atlas, ajustar domínios se preciso e trocar `Content-Security-Policy-Report-Only` por `Content-Security-Policy`, mantendo o `report-uri`
+- [ ] **SEC-02 · CSP com `script-src` no site** · `blog-front` · M · depende de SEC-01 — ⏳ **pronta para deploy em 17/11/2026** (branches `fix/sec-02-csp-ativa`): `Content-Security-Policy-Report-Only` virou `Content-Security-Policy` (uma política só, com `report-uri`) e o `connect-src` ganhou `*.google.com`, `*.google.com.br` e `*.g.doubleclick.net`. Achado da observação: o GA4 manda parte das batidas para `www.google.com/g/collect` (sinais do Google), que a política bloquearia em todas as páginas; GA4, Clarity e Pixel no resto passaram limpos. Conferido com navegador automatizado no site no ar (13 posts, season, home, `/blog`, `/favoritos`, `/privacidade`, login; 390 e 1366 px) e com a CSP **valendo** num build local logado (17 telas do painel, editor incluído): só a violação do `google.com`, e nenhuma depois da correção. Teste novo: `api/csp.test.js`. **Relatórios de produção lidos em 17/11/2026** (09–17/11, 13 no total): 2× `connect-src www.google.com` (o achado acima) e 11× `script-src-elem` inline num único minuto (10/11 23:04), em 4 páginas seguidas, o rastro de uma visita só. O HTML de hoje dessas páginas não tem script inline (só `theme-init.js`, o bundle e blocos JSON) e a varredura não reproduz: tratado como extensão do navegador do visitante. **Passos que faltam:** (1) deploy do front; (2) uns dias depois, ler `GET /api/csp-report` de novo (ruído de extensão é esperado; script inline de página nossa, não) e marcar `[x]`
   - Hoje a CSP só tem `frame-ancestors`, `object-src` e `base-uri`. Liberar só os domínios
     usados: próprio site, GA4, Clarity, Meta Pixel, Firebase.
   - Começar com `Content-Security-Policy-Report-Only` por 1 semana, ler o console, depois
@@ -243,10 +243,23 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
   - **Decisão:** continuar no Gmail enquanto a base de assinantes for pequena; não vale o
     investimento agora. **Gatilho para retomar:** a base se aproximar do limite diário do
     Gmail (~500 emails/dia), ou falhas de entrega aparecerem no alerta diário (SEC-07).
-  - **Quando trocar:** o remetente passa a ser o email do próprio domínio,
-    **marcos@marck0101.com.br**. Isso exige configurar SPF, DKIM e DMARC no DNS de
-    `marck0101.com.br` (sem eles os emails caem no spam), e trocar `config/mailer.js`
-    e o `from` em `services/campaign.service.js` / `services/alerts.service.js`.
+  - **Email do domínio já existe (17/11/2026):** **marck.mhc@marck0101.com.br**, no
+    **Zoho Mail** (MX `mx.zoho.com`). DNS conferido em 17/11/2026: SPF
+    `v=spf1 include:zohomail.com ~all` ok; **sem DKIM** (nenhum seletor `zmail`
+    publicado) e **sem DMARC**. Até a troca, os envios continuam saindo do Gmail
+    (`GMAIL_USER`), e isso não é afetado pelo SPF do domínio, porque o remetente é o
+    próprio Gmail.
+  - **Passos que já dá para fazer sem mexer no código:** ativar o DKIM no painel do Zoho
+    (Domínios › Autenticação de email) e publicar o TXT; publicar
+    `_dmarc.marck0101.com.br` com `v=DMARC1; p=none; rua=mailto:marck.mhc@marck0101.com.br`
+    e subir para `quarantine` depois de algumas semanas de relatórios limpos.
+  - **Quando trocar:** remetente `"marck0101" <marck.mhc@marck0101.com.br>` com
+    `Reply-To` caindo no Zoho. O envio em si vai por um **provedor de envio**
+    (Resend, Brevo ou SES), e não pelo SMTP do Zoho: o Zoho limita o volume diário, exige
+    plano pago para SMTP e não aceita envio em massa. O provedor escolhido entra no SPF
+    (`include:` dele) e ganha DKIM próprio. No código: trocar `app/config/mailer.js` e
+    o `from` em `services/campaign.service.js`, `services/alerts.service.js`,
+    `routes/comment.routes.js` e `routes/auth.routes.js` (hoje todos usam `GMAIL_USER`).
   - Ganha também relatório de entrega e bounce.
 
 - [x] **BIZ-06 · Excluir assinante = anonimizar** · `blog-backend` · P — concluída em 03/11/2026 (branches `feat/biz-06-excluir-dados`; achado: excluir apagava o cadastro mas o email continuava no histórico de cada envio; agora sai de tudo e os números dos envios ficam iguais; R-SUB-07)
