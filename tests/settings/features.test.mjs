@@ -9,7 +9,7 @@ const { forgetPublic } = require("../../app/routes/settings.routes");
 // O banco é limpo entre testes; a memória de 30 s da leitura pública também
 beforeEach(() => forgetPublic());
 
-const ALL_ON = { skins: true, terminalOffer: true, toc: true, readingProgress: true, readingHistory: true };
+const ALL_ON = { skins: true, terminalOffer: true, toc: true, readingProgress: true, readingHistory: true, suggestions: true };
 
 // Recursos do blog ligados/desligados pelo painel
 describe("recursos do blog", () => {

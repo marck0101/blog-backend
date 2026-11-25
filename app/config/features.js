@@ -7,6 +7,7 @@ const FEATURES = {
   toc: true, // Sumário "Neste post"
   readingProgress: true, // Barra de leitura no topo do post
   readingHistory: true, // Posts lidos e % de leitura (só no navegador do leitor)
+  suggestions: true, // Caixinha de sugestões dos leitores (/sugestoes e o link no rodapé)
 };
 
 const FEATURE_NAMES = Object.keys(FEATURES);

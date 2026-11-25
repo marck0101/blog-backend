@@ -8,10 +8,30 @@ const SearchQuery = require("../models/searchquery.model");
 const { isMeaningfulSearch } = require("../utils/sanitize");
 const { monthRange } = require("../utils/dates");
 const { unsentPostNotices } = require("../services/campaign.service");
+const Season = require("../models/season.model");
+const { buildContentMap } = require("../services/contentMap.service");
 
 const DAY = 24 * 60 * 60 * 1000;
 // Rascunho sem mexer há mais que isso aparece como "parado" no dashboard
 const STALE_DRAFT_DAYS = 30;
+
+// Mapa de conteúdo: posts, tags e seasons ligados, com o diagnóstico de links
+// (órfãos, quebrados, tags soltas). Lê o texto de todos os posts: só no painel.
+router.get("/content-map", auth, async (req, res, next) => {
+  try {
+    await connectDB();
+    const [posts, seasons] = await Promise.all([
+      BlogPost.find({})
+        .select("title slug previousSlugs status published category tags relatedPosts season content views deletedAt")
+        .lean(),
+      Season.find({}).select("slug title").lean(),
+    ]);
+    res.set("Cache-Control", "no-store");
+    res.json(buildContentMap({ posts, seasons }));
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get("/stats", auth, async (req, res, next) => {
   try {

@@ -17,6 +17,7 @@ export const models = {
   PostRevision: require("../app/models/postRevision.model"),
   Season: require("../app/models/season.model"),
   Subscriber: require("../app/models/subscriber.model"),
+  Suggestion: require("../app/models/suggestion.model"),
   User: require("../app/models/user.model"),
   SiteSettings: require("../app/models/siteSettings.model"),
 };
