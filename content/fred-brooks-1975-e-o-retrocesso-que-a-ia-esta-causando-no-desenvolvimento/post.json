@@ -1,0 +1,14 @@
+{
+  "slug": "fred-brooks-1975-e-o-retrocesso-que-a-ia-esta-causando-no-desenvolvimento",
+  "status": "published",
+  "cluster": "engenharia-no-marketing",
+  "isPillar": false,
+  "tags": [
+    "fred brooks",
+    "inteligencia artificial",
+    "engenharia de software",
+    "gestao de projetos"
+  ],
+  "directAnswer": "A lei de Brooks (1975) diz que pôr mais gente num projeto atrasado o atrasa ainda mais, porque as linhas de comunicação crescem mais rápido que o time: 2 pessoas têm 1 linha, 10 têm 45. Com IA o problema se inverte: uma pessoa faz tudo, rápido, mas sem a experiência para ver as falhas de backend, segurança, banco e testes que o código gerado deixa.",
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer."
+}

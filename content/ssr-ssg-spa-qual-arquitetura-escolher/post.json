@@ -1,0 +1,15 @@
+{
+  "slug": "ssr-ssg-spa-qual-arquitetura-escolher",
+  "status": "published",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "ssr",
+    "ssg",
+    "spa",
+    "arquitetura web",
+    "seo tecnico"
+  ],
+  "directAnswer": "SSG gera as páginas uma vez, no deploy, e é o mais rápido e barato para conteúdo que muda pouco. SSR monta cada página no servidor a cada visita e serve conteúdo dinâmico que precisa ranquear. SPA monta tudo no navegador e é ótima para painéis atrás de login. Não há vencedora: a escolha depende de SEO, volume de acesso e risco dos dados.",
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer."
+}

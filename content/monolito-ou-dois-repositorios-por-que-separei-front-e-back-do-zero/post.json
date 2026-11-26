@@ -1,0 +1,15 @@
+{
+  "slug": "monolito-ou-dois-repositorios-por-que-separei-front-e-back-do-zero",
+  "status": "published",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "arquitetura",
+    "monolito",
+    "api",
+    "frontend",
+    "backend"
+  ],
+  "directAnswer": "Num projeto de uma pessoa só, separar frontend e backend em dois repositórios compensa quando as fronteiras já são claras: cada parte publica sozinha e a API vira um contrato estável. O custo é configurar CORS, dois deploys e manter o contrato. Quando as fronteiras ainda são incertas, começar com um monólito costuma ser mais seguro.",
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer."
+}

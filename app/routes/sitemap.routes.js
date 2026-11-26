@@ -4,6 +4,7 @@ const connectDB = require("../config/db.config");
 const BlogPost = require("../models/blogpost.model");
 const Season = require("../models/season.model");
 const CATEGORIES = require("../config/categories");
+const CLUSTERS = require("../config/clusters");
 const { indexNowKey } = require("../services/indexnow.service");
 
 const SITE_URL = "https://blog.marck0101.com.br";
@@ -11,6 +12,8 @@ const SITE_URL = "https://blog.marck0101.com.br";
 // "/" redireciona para "/blog" — só URLs canônicas entram no sitemap.
 // changefreq/priority são ignorados pelo Google; lastmod é o que importa.
 const STATIC_PAGES = [{ loc: `${SITE_URL}/blog` }];
+// Sobre o autor: página fixa (muda só com deploy do front), sem lastmod
+const ABOUT_URL = `${SITE_URL}/sobre`;
 
 function escapeXml(str) {
   return String(str)
@@ -39,7 +42,7 @@ router.get("/sitemap.xml", async (req, res) => {
 
     const posts = await BlogPost.find(
       { published: true, deletedAt: null },
-      { slug: 1, updatedAt: 1, publishedAt: 1, season: 1 }
+      { slug: 1, updatedAt: 1, publishedAt: 1, season: 1, cluster: 1 }
     ).sort({ publishedAt: -1 });
 
     // Seasons entram só se têm episódio publicado; lastmod = episódio mais recente
@@ -52,6 +55,15 @@ router.get("/sitemap.xml", async (req, res) => {
       ? urlEntry(`${SITE_URL}/seasons`, toW3CDate(Math.max(...seasons.map((x) => new Date(seasonLastmod.get(x.slug))))) ) +
         seasons.map((x) => urlEntry(`${SITE_URL}/seasons/${x.slug}`, toW3CDate(seasonLastmod.get(x.slug)))).join("")
       : "";
+
+    // Temas (R-CLU-03): só os que têm post publicado; lastmod = post mais recente do tema
+    const clusterLastmod = new Map();
+    for (const p of posts) {
+      if (p.cluster && !clusterLastmod.has(p.cluster)) clusterLastmod.set(p.cluster, p.updatedAt || p.publishedAt);
+    }
+    const clusterEntries = CLUSTERS.filter((c) => clusterLastmod.has(c.slug))
+      .map((c) => urlEntry(`${SITE_URL}/temas/${c.slug}`, toW3CDate(clusterLastmod.get(c.slug))))
+      .join("");
 
     const latest = posts[0]
       ? toW3CDate(posts[0].updatedAt || posts[0].publishedAt)
@@ -69,7 +81,7 @@ router.get("/sitemap.xml", async (req, res) => {
       .join("");
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticEntries}${seasonEntries}${postEntries}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticEntries}${urlEntry(ABOUT_URL)}${clusterEntries}${seasonEntries}${postEntries}
 </urlset>`;
 
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
@@ -184,14 +196,21 @@ function sendText(res, txt) {
 router.get("/llms.txt", async (req, res) => {
   try {
     await connectDB();
-    const [posts, total, seasons] = await Promise.all([
+    const { publishedCounts } = require("../controllers/cluster.controller");
+    const [posts, total, seasons, clusterCounts] = await Promise.all([
       BlogPost.find(PUBLISHED, { slug: 1, title: 1, excerpt: 1, seo: 1, category: 1, publishedAt: 1 })
         .sort({ publishedAt: -1, _id: -1 })
         .limit(LLMS_RECENT)
         .lean(),
       BlogPost.countDocuments(PUBLISHED),
       publicSeasons(),
+      publishedCounts(),
     ]);
+
+    // Temas primeiro: é o mapa do que o blog cobre em profundidade (R-CLU-03)
+    const clusterItems = CLUSTERS.filter((c) => clusterCounts.has(c.slug)).map(
+      (c) => `- [${linkText(c.title)}](${SITE_URL}/temas/${c.slug}): ${clusterCounts.get(c.slug)} artigo(s). ${oneLine(c.description)}`
+    );
 
     const recent = posts.map((p) => {
       const summary = oneLine(p.seo?.description || p.excerpt);
@@ -209,7 +228,8 @@ ${LLMS_SUMMARY}
 - Conteúdo completo de todos os ${total} artigos, em Markdown: ${SITE_URL}/llms-full.txt
 - Lista completa e datas: ${SITE_URL}/sitemap.xml
 - Últimos artigos (RSS): ${SITE_URL}/rss.xml
-
+- Quem escreve e onde atua: ${ABOUT_URL}
+${clusterItems.length ? `\n## Temas (cada um com um artigo principal e os relacionados)\n\n${clusterItems.join("\n")}\n` : ""}
 ## Artigos mais recentes
 
 ${recent.join("\n")}
@@ -282,7 +302,7 @@ router.get("/llms-full.txt", async (req, res) => {
     const [posts, seasons] = await Promise.all([
       BlogPost.find(PUBLISHED, {
         slug: 1, title: 1, excerpt: 1, directAnswer: 1, content: 1, category: 1, tags: 1,
-        season: 1, seasonOrder: 1, faq: 1, readingMinutes: 1, publishedAt: 1, updatedAt: 1, seo: 1,
+        season: 1, seasonOrder: 1, cluster: 1, isPillar: 1, faq: 1, readingMinutes: 1, publishedAt: 1, updatedAt: 1, seo: 1,
       })
         .sort({ publishedAt: -1, _id: -1 })
         .lean(),
@@ -299,6 +319,9 @@ router.get("/llms-full.txt", async (req, res) => {
         `- Categoria: ${categoryLabel(p.category)}`,
         p.season && seasonTitle.has(p.season)
           ? `- Season: ${seasonTitle.get(p.season)}${p.seasonOrder ? ` (episódio ${p.seasonOrder})` : ""}`
+          : "",
+        p.cluster && CLUSTERS.some((c) => c.slug === p.cluster)
+          ? `- Tema: ${CLUSTERS.find((c) => c.slug === p.cluster).title}${p.isPillar ? " (artigo principal do tema)" : ""}`
           : "",
         p.tags?.length ? `- Tags: ${p.tags.map((t) => t.replace(/-/g, " ")).join(", ")}` : "",
         p.readingMinutes ? `- Leitura: ${p.readingMinutes} min` : "",
@@ -319,7 +342,7 @@ router.get("/llms-full.txt", async (req, res) => {
 
     // Mesmo FAQ visível na home e em /seasons
     const qa = (items) => items.map((f) => `**${oneLine(f.question)}**\n\n${f.answer.trim()}`).join("\n\n");
-    const about = `## Sobre o blog\n\n- Autor: Marcos Henrique Corrêa (https://marck0101.com.br/)\n- Site: ${SITE_URL}/blog\n\n${qa(BLOG_FAQ)}\n\n### Sobre as seasons\n\n${qa(SEASONS_FAQ)}`;
+    const about = `## Sobre o blog\n\n- Autor: Marcos Henrique Corrêa (https://marck0101.com.br/), gestor de tráfego e desenvolvedor no noroeste do RS. Página do autor: ${ABOUT_URL}\n- Site: ${SITE_URL}/blog\n\n${qa(BLOG_FAQ)}\n\n### Sobre as seasons\n\n${qa(SEASONS_FAQ)}`;
 
     const txt = `${LLMS_TITLE} — conteúdo completo
 

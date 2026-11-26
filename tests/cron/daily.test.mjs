@@ -126,6 +126,26 @@ describe("alertas (SEC-07)", () => {
     expect(alertMails[0].html).not.toContain("<img src=x");
   });
 
+  it("fila de agendados curta: menos de 2 nos próximos 14 dias", async () => {
+    // Blog sem post publicado ainda: não alerta
+    expect(titles(await collectAlerts())).not.toContain("Fila de posts curta");
+
+    await createPost({ status: "published", published: true });
+    const empty = (await collectAlerts()).find((a) => a.title === "Fila de posts curta");
+    expect(empty.detail).toMatch(/^Nenhum post agendado/);
+
+    // Fora da janela (15 dias), na lixeira ou rascunho com data não contam
+    await createPost({ status: "planned", plannedAt: new Date(Date.now() + 15 * DAY) });
+    await createPost({ status: "planned", plannedAt: new Date(Date.now() + 3 * DAY), deletedAt: new Date() });
+    await createPost({ status: "draft", plannedAt: new Date(Date.now() + 4 * DAY) });
+    await createPost({ status: "planned", plannedAt: new Date(Date.now() + 5 * DAY) });
+    const one = (await collectAlerts()).find((a) => a.title === "Fila de posts curta");
+    expect(one.detail).toMatch(/^Só 1 post agendado/);
+
+    await createPost({ status: "planned", plannedAt: new Date(Date.now() + 12 * DAY) });
+    expect(titles(await collectAlerts())).not.toContain("Fila de posts curta");
+  });
+
   it("sem email configurado: a rotina segue, só não manda", async () => {
     Object.assign(process.env, { GMAIL_USER: "", GMAIL_APP_PASSWORD: "" });
     await Campaign.create({ subject: "Lote", status: "sending" });

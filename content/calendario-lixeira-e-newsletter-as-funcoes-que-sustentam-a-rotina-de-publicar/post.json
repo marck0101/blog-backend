@@ -1,0 +1,14 @@
+{
+  "slug": "calendario-lixeira-e-newsletter-as-funcoes-que-sustentam-a-rotina-de-publicar",
+  "status": "published",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "calendario editorial",
+    "newsletter",
+    "blog",
+    "produtividade"
+  ],
+  "directAnswer": "O que sustenta a rotina de publicar não é só escrever: um calendário editorial mostra rascunhos e agendados por data, a lixeira evita perder um post excluído por engano e a newsletter por categoria manda para cada assinante só o que ele escolheu, com descadastro em um clique.",
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer."
+}

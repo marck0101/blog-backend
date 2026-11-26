@@ -1,10 +1,19 @@
 {
-  "title": "PageSpeed e Clarity 2: o que deu certo e o que não deu",
+  "title": "PageSpeed e Clarity 2: o que melhorou a nota no celular",
   "slug": "pagespeed-e-clarity-parte-2-o-que-deu-certo-e-o-que-nao-deu",
   "excerpt": "Um mês depois do diagnóstico: o que foi feito no blog, como foi medido, o que melhorou e as hipóteses que não resistiram ao contato com o código.",
   "category": "tecnologia",
+  "cluster": "site-rapido-e-encontravel",
+  "tags": [
+    "pagespeed",
+    "core web vitals",
+    "lcp",
+    "cls",
+    "microsoft clarity"
+  ],
+  "directAnswer": "O que mais melhorou a nota do PageSpeed no celular foi entregar os dados da página já no HTML, sem esperar a API, e reservar o espaço das imagens. Na listagem do blog, a nota de laboratório foi de 57–61 para 88, o LCP de 6,6–7,7 s para 3,8 s e o CLS para zero. O que restou de lentidão vinha das próprias ferramentas de medição: GA4, Meta Pixel e Clarity.",
   "file": "content.html",
-  "plannedAt": "2026-11-02T12:00:00-03:00",
+  "plannedAt": "2026-11-30T12:00:00-03:00",
   "faq": [
     {
       "question": "O que mais melhorou o desempenho do blog?",

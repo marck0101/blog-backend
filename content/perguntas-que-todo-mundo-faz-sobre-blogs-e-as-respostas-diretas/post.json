@@ -1,0 +1,32 @@
+{
+  "slug": "perguntas-que-todo-mundo-faz-sobre-blogs-e-as-respostas-diretas",
+  "status": "published",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "robots txt",
+    "faq",
+    "seo",
+    "blog"
+  ],
+  "directAnswer": "O robots.txt fica na raiz do domínio e diz aos robôs o que rastrear, mas não protege nada nem tira páginas da busca: para isso servem o login e a diretiva noindex. Ferramentas como o PageSpeed fazem poucas requisições e não derrubam o site. E um FAQ bem escrito responde o leitor e deixa claro para buscadores e IAs do que a página trata.",
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer. A FAQ muda: a última resposta prometia demais (o Google tirou o resultado de FAQ da busca em maio de 2026).",
+  "faq": [
+    {
+      "question": "Onde fica o robots.txt de um site?",
+      "answer": "Na raiz do domínio, como blog.marck0101.com.br/robots.txt. É o primeiro arquivo que robôs de busca e ferramentas de auditoria procuram."
+    },
+    {
+      "question": "O robots.txt impede que um robô acesse a área administrativa?",
+      "answer": "Ele avisa os robôs bem-comportados para não entrar, mas não é uma barreira. Quem protege a área administrativa é o login e o controle de acesso."
+    },
+    {
+      "question": "Uma ferramenta de benchmarking pode derrubar meu site?",
+      "answer": "Não. Ferramentas como o PageSpeed fazem poucas requisições, medem e vão embora. Só um crawler malicioso, com milhares de requisições por segundo, vira problema, e aí entram rate limiting e monitoramento."
+    },
+    {
+      "question": "Um FAQ ajuda o site a aparecer no Google e nas IAs?",
+      "answer": "Ajuda o leitor e deixa as respostas claras para buscadores e assistentes de IA. Mas desde maio de 2026 o Google não mostra mais o resultado destacado de FAQ na busca, então o ganho está na clareza do conteúdo, não num destaque garantido."
+    }
+  ]
+}

@@ -11,7 +11,7 @@ const { COLLATION_PT, pickSort, sortedFind } = require("../../utils/listSort");
 const { calendarRange } = require("../../utils/calendarRange");
 const { dayKey, startOfDay, endOfDay, yearRange, dayRangeFilter } = require("../../utils/dates");
 const {
-  RELATED_EDITOR_FIELDS, sanitizeContent, pickLinkedIn, normalizeSlug, normalizeSeason, normalizeLinks,
+  RELATED_EDITOR_FIELDS, sanitizeContent, pickLinkedIn, normalizeSlug, normalizeSeason, normalizeCluster, keepSinglePillar, normalizeLinks,
   normalizePlannedAt, validatePost, syncPublished, announcePost, withRelatedForEditor, revisionAuthor,
 } = require("./post.rules");
 require("../../models/subscriber.model"); // para o populate de emailAudience.subscribers
@@ -49,6 +49,7 @@ exports.create = async (req, res, next) => {
     sanitizeContent(data);
     normalizeSlug(data);
     normalizeSeason(data);
+    normalizeCluster(data);
     normalizeLinks(data);
 
     const validationError = validatePost(data, true);
@@ -65,6 +66,7 @@ exports.create = async (req, res, next) => {
     syncPublished(data);
 
     const post = await BlogPost.create(data);
+    await keepSinglePillar(post);
     await revisions.safeRecordRevision(post, { reason: "create", author: revisionAuthor(req) });
 
     if (post.status === "published") {
@@ -168,10 +170,11 @@ exports.update = async (req, res, next) => {
     sanitizeContent(data);
     normalizeSlug(data);
     normalizeSeason(data);
+    normalizeCluster(data);
     normalizeLinks(data, req.params.id);
 
     const existing = await BlogPost.findById(req.params.id)
-      .select("status publishedAt plannedAt content slug")
+      .select("status publishedAt plannedAt content slug cluster")
       .lean();
 
     const validationError = validatePost(data, false, existing);
@@ -207,6 +210,7 @@ exports.update = async (req, res, next) => {
       return res.status(404).json({ error: "Post não encontrado" });
     }
 
+    await keepSinglePillar(post);
     await rememberOldSlug(post._id, existing?.slug, post.slug);
     await revisions.safeRecordRevision(post, { author: revisionAuthor(req) });
 

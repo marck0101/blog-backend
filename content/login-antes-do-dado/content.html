@@ -1,0 +1,55 @@
+<p><strong>[A COMPLETAR antes de agendar: capa, sua revisão e conferir a ordem na season (o caso Binance está com seasonOrder 11; este ficou com 12). Apagar este aviso.]</strong></p>
+
+<p><em>Episódio da série Segurança é pauta de diretoria. Para quem aprova o orçamento e assina o contrato com a agência ou o fornecedor do painel.</em></p>
+
+<p>Um dashboard com dados de clientes é um cofre com vitrine: mostra números para decidir, mas guarda nomes, e-mails, telefones e valores de venda. A regra que protege a empresa é simples de dizer e fácil de esquecer: ninguém vê dado nenhum antes de provar quem é, e cada pessoa vê só o que precisa. Login antes do dado não é detalhe técnico; é a primeira linha de uma obrigação legal que recai sobre a empresa, não sobre o fornecedor.</p>
+
+<h2>Por que isso é assunto da diretoria</h2>
+
+<p>A Lei Geral de Proteção de Dados exige que quem trata dados pessoais adote medidas de segurança capazes de protegê-los de acessos não autorizados (Brasil, 2018, art. 46). Se houver um incidente que possa trazer risco ou dano relevante, a empresa precisa comunicar a Autoridade Nacional de Proteção de Dados e as pessoas afetadas (Brasil, 2018, art. 48), e o regulamento da ANPD fixa o prazo de três dias úteis para isso (Brasil, 2024).</p>
+
+<p>O caminho mais comum de entrada não é sofisticado. Na pesquisa da Verizon sobre vazamentos de 2025, o uso de senhas roubadas foi a porta de entrada em 22% dos casos analisados (Verizon, 2025). Um painel aberto, ou protegido só por uma senha fraca e compartilhada entre a equipe, está exatamente nesse caminho. O episódio anterior desta série, sobre o <a href="/blog/caso-binance-falsa-sensacao-de-seguranca">caso Binance</a>, mostra até onde isso pode ir numa empresa com muito mais estrutura.</p>
+
+<h2>O que "login antes do dado" quer dizer na prática</h2>
+
+<ul>
+  <li><strong>Nenhum dado sem login.</strong> Nem "só o resumo", nem um link "secreto" mandado por e-mail. Link sem senha é link público esperando ser encaminhado.</li>
+  <li><strong>Login individual.</strong> Cada pessoa com o próprio acesso, para saber quem viu o quê e para cortar o acesso de quem saiu da empresa ou da agência.</li>
+  <li><strong>Segundo fator.</strong> Um código no celular além da senha. A diretriz do NIST, referência mundial em autenticação, aceita senhas mais curtas (mínimo de 8 caracteres) só quando há segundo fator; sem ele, pede no mínimo 15 (National Institute of Standards and Technology, 2025).</li>
+  <li><strong>Cada um vê o seu.</strong> O cliente vê só os próprios números; o analista, só os clientes que atende; quem gerencia acessos é uma pessoa definida.</li>
+  <li><strong>A regra mora no servidor.</strong> Esconder um botão na tela não protege nada. O sistema precisa recusar o dado na origem para quem não tem permissão. Como isso foi feito no painel deste blog, com limite de tentativas de login, está em <a href="/blog/blog-rapido-e-seguro-auditoria-e-roteiro-de-monitoramento">Blog rápido e seguro</a>.</li>
+</ul>
+
+<h2>Cinco perguntas para fazer ao fornecedor ou à agência</h2>
+
+<ol>
+  <li>Quem consegue ver os dados dos nossos clientes hoje, nominalmente?</li>
+  <li>O login tem segundo fator obrigatório? Para todos, inclusive para a nossa equipe?</li>
+  <li>Se eu abrir o painel com o login de um cliente, consigo ver dados de outro cliente?</li>
+  <li>Quando alguém sai da equipe, em quanto tempo o acesso é cortado, e quem faz isso?</li>
+  <li>Se houver um vazamento, quem avisa a empresa, em quanto tempo, e quem comunica a ANPD?</li>
+</ol>
+
+<p>Resposta vaga em qualquer uma delas é sinal para pedir mais detalhe antes de renovar o contrato. O checklist técnico completo, para quem vai construir ou revisar o painel, está em <a href="/blog/dashboards-com-ia-checklist-seguranca-ux">Dashboards com IA: funcionar não é estar pronto</a>.</p>
+
+<h2>O mínimo que precisa estar publicado</h2>
+
+<ul>
+  <li><strong>Política de privacidade</strong> dizendo que dados são coletados, para quê, por quanto tempo e quem é o encarregado (DPO).</li>
+  <li><strong>Canal de contato</strong> para quem quiser saber quais dados a empresa tem sobre si ou pedir a exclusão, direitos garantidos pela LGPD.</li>
+  <li><strong>Um plano escrito para incidentes</strong>, com quem decide, quem comunica e em que prazo. Na hora do problema, ninguém tem tempo de inventar o processo.</li>
+</ul>
+
+<h2>O que levar para a próxima reunião</h2>
+
+<p>Segurança vira pauta de diretoria quando entra na agenda com a mesma frequência que as metas. Uma vez por trimestre, quinze minutos bastam: quem tem acesso ao quê, se o segundo fator está ligado para todos e se o plano de incidentes ainda está certo. Para empresas e agências do noroeste do Rio Grande do Sul que usam dashboards com dados de clientes, é a conversa que costumo propor antes de qualquer projeto novo.</p>
+
+<h2>Referências</h2>
+
+<p>BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais (LGPD). Brasília, DF: Presidência da República, 2018. Disponível em: <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer">https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm</a>. Acesso em: 27 nov. 2026.</p>
+
+<p>BRASIL. Autoridade Nacional de Proteção de Dados. Resolução CD/ANPD nº 15, de 24 de abril de 2024. Aprova o Regulamento de Comunicação de Incidente de Segurança. <strong>Diário Oficial da União</strong>: seção 1, Brasília, DF, 26 abr. 2024.</p>
+
+<p>NATIONAL INSTITUTE OF STANDARDS AND TECHNOLOGY (Estados Unidos). <strong>Digital identity guidelines</strong>: authentication and authenticator management. Gaithersburg: NIST, 2025. (NIST Special Publication 800-63B-4). Disponível em: <a href="https://pages.nist.gov/800-63-4/sp800-63b.html" target="_blank" rel="noopener noreferrer">https://pages.nist.gov/800-63-4/sp800-63b.html</a>. Acesso em: 27 nov. 2026.</p>
+
+<p>VERIZON. Additional 2025 DBIR research on credential stuffing. [<em>S. l.</em>]: Verizon Business, 2025. Disponível em: <a href="https://www.verizon.com/business/resources/articles/credential-stuffing-attacks-2025-dbir-research/" target="_blank" rel="noopener noreferrer">https://www.verizon.com/business/resources/articles/credential-stuffing-attacks-2025-dbir-research/</a>. Acesso em: 27 nov. 2026.</p>

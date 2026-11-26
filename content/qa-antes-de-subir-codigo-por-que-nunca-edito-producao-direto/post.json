@@ -1,0 +1,14 @@
+{
+  "slug": "qa-antes-de-subir-codigo-por-que-nunca-edito-producao-direto",
+  "status": "published",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "qa",
+    "testes",
+    "deploy",
+    "boas praticas"
+  ],
+  "directAnswer": "QA num projeto de uma pessoa só é a rotina de gerar a versão final localmente, testar a funcionalidade nova e as antigas que ela pode afetar, num banco separado do de produção, e só então subir o código. Não exige testador dedicado; exige nunca assumir que uma mudança funciona só porque parece certa no código.",
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer."
+}

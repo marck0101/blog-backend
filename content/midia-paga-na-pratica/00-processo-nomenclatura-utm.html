@@ -1,71 +1,114 @@
-<p><strong>[RASCUNHO — ESTRUTURA]</strong> Notas para virar texto final depois do feedback do piloto.</p>
+<p><strong>[A COMPLETAR antes de agendar: subir a Figura 1 (figura-00-nome-vira-utm.webp, nesta pasta) e os 2 prints da lista no fim. Apagar este aviso.]</strong></p>
 
-<p><em>Para quem roda campanhas e quer um processo que não dependa da memória de ninguém. Abre a season e explica a nomenclatura usada em todos os episódios.</em></p>
+<p><em>Para quem roda campanhas e quer um processo que não dependa da memória de ninguém. Este episódio abre a série Mídia paga na prática e define o padrão de nomes usado em todos os outros.</em></p>
 
-<h2>1. O que é e quando usar</h2>
+<p>Um padrão de nomenclatura de campanhas é a regra que diz como escrever o nome de cada campanha, conjunto e anúncio, sempre na mesma ordem. Ele resolve um problema que aparece em toda conta com mais de uma pessoa: o resultado mudou e ninguém sabe dizer qual campanha mudou, nem por quê. Com o nome no padrão, o mesmo texto vira a UTM, e o relatório do Google Analytics passa a mostrar exatamente a campanha e o anúncio que trouxeram cada visita.</p>
+
+<h2>Por que documentar o processo de mídia paga</h2>
+
+<p>Esta série nasceu de um plano de desenvolvimento pessoal com três frentes: comunicação, atenção e organização. A entrega da frente de atenção foi transformar o que eu fazia de cabeça em checklists, por canal e por objetivo, para que outra pessoa conseguisse repetir sem me perguntar.</p>
+
+<p>São dois tipos de checklist:</p>
 
 <ul>
-  <li>História do PDI sem nomes: três pilares (comunicação, atenção/foco, organização). A entrega de atenção/foco foi documentar o processo de mídia.</li>
-  <li>Dois tipos de checklist: execução (como criar) e otimização (o que olhar e o que mudar), por canal e por objetivo.</li>
-  <li>Regra que adotamos: o material de processo diz "como fazer"; a tarefa registra "o que foi feito".</li>
-  <li>Formato de cada seção: Onde ver > O que é > Como otimizar > print com "O que observar".</li>
+  <li><strong>Execução:</strong> como criar a campanha, tela por tela, e o que desmarcar antes de publicar.</li>
+  <li><strong>Otimização:</strong> o que olhar depois que a campanha roda e o que mudar em cada caso.</li>
 </ul>
 
-<h2>2. Antes de começar</h2>
+<p>Uma regra simples separa os dois mundos: o material de processo diz <strong>como fazer</strong>; a tarefa ou a planilha registra <strong>o que foi feito</strong>. Misturar os dois faz o processo virar um diário que ninguém consegue seguir.</p>
+
+<p>Cada episódio da série segue a mesma ordem: onde ver na plataforma, o que é, como configurar, como otimizar e o que observar no print.</p>
+
+<h2>O padrão de nomenclatura de campanhas</h2>
+
+<p>Dois separadores fazem o padrão funcionar: o sublinhado (<code>_</code>) separa os blocos, e o hífen (<code>-</code>) fica dentro de um bloco. Nada de acento, cedilha, espaço ou caractere especial, porque o nome vai parar na URL.</p>
+
+<h3>Campanha</h3>
+
+<p><code>[SIGLA]_Plataforma-Canal_Etapa-do-Funil_Objetivo_Produto</code></p>
 
 <ul>
-  <li>Uma planilha ou ferramenta de tarefas para registrar alterações.</li>
-  <li>Combinar com a equipe quem valida o quê (analista mais sênior da conta).</li>
+  <li><code>[SIGLA]_G-Search_Fundo_Conv_Esteiras</code>: Google, rede de pesquisa, fundo do funil, conversão, linha de esteiras.</li>
+  <li><code>[SIGLA]_G-Ytb_Topo_Alcance_Bikes</code>: Google, YouTube, topo do funil, alcance, linha de bicicletas.</li>
+  <li><code>[SIGLA]_Meta_Meio_Whats_Sandalias</code>: Meta, meio do funil, conversa no WhatsApp, linha de sandálias.</li>
 </ul>
 
-<h2>3. Passo a passo de criação</h2>
+<p>A sigla é a do cliente ou da unidade. Em agência, ela permite filtrar todas as campanhas de um cliente com uma busca só.</p>
+
+<h3>Conjunto de anúncios ou grupo de anúncios</h3>
+
+<p><code>Adset01_Publico_Localizacao</code>. Exemplo: <code>Adset03_Interesses-Produtor_RS-SC-PR</code>, o terceiro conjunto, com público de interesses ligados a produtor rural, nos três estados do Sul.</p>
+
+<h3>Anúncio</h3>
+
+<p><code>Ad01_Formato_Produto_dd-mm-aa</code>. Exemplo: <code>Ad03_Motion_Bicicleta_24-02-26</code>, o terceiro anúncio, em vídeo curto animado, da bicicleta, publicado em 24/02/2026. A data no nome mostra a idade do criativo sem abrir o anúncio, o que ajuda a decidir quando trocar.</p>
+
+<h2>Como o nome vira UTM</h2>
+
+<p>UTM são os parâmetros colocados no fim do link do anúncio para o Google Analytics saber de onde veio a visita. Os principais são cinco (Google, 2026a):</p>
 
 <ul>
-  <li>Campanha: <code>[SIGLA]_Plataforma-Canal_Etapa-do-Funil_Objetivo_Produto</code>. Ex.: <code>[SIGLA]_G-Search_Fundo_Conv_Esteiras</code>, <code>[SIGLA]_G-Ytb_Topo_Alcance_Bikes</code>, <code>[SIGLA]_Meta_Meio_Whats_Sandalias</code>.</li>
-  <li>Conjunto/grupo: <code>Adset01_Publico_Localizacao</code>. Ex.: <code>Adset03_Interesses-Produtor_RS-SC-PR</code>.</li>
-  <li>Anúncio: <code>Ad01_Formato_Produto_dd-mm-aa</code>. Ex.: <code>Ad03_Motion_Bicicleta_24-02-26</code>.</li>
-  <li><code>_</code> separa blocos; <code>-</code> fica dentro do bloco. Sem acento nem caractere especial, porque o nome vira UTM.</li>
-  <li>UTM: mostrar como o nome da campanha vira <code>utm_campaign</code> e o do anúncio vira <code>utm_content</code>. Explicar utm_source/utm_medium.</li>
+  <li><code>utm_source</code>: a origem, como <code>google</code>, <code>facebook</code> ou <code>newsletter</code>.</li>
+  <li><code>utm_medium</code>: o tipo de mídia, como <code>cpc</code> ou <code>email</code>.</li>
+  <li><code>utm_campaign</code>: a campanha. Aqui entra o nome da campanha no padrão.</li>
+  <li><code>utm_content</code>: diferencia criativos. Aqui entra o nome do anúncio.</li>
+  <li><code>utm_term</code>: a palavra-chave paga.</li>
 </ul>
 
-<blockquote><p><strong>[PRINT: planilha de alterações com colunas data, campanha, o que mudou, por quê, quem validou (dados fictícios)]</strong></p></blockquote>
+<p>Com o padrão, o link de um anúncio fica assim:</p>
 
-<h2>4. O que vem configurado por padrão e você deve revisar</h2>
+<p><code>https://site.com.br/sandalias?utm_source=facebook&amp;utm_medium=cpc&amp;utm_campaign=SIGLA_Meta_Meio_Whats_Sandalias&amp;utm_content=Ad03_Motion_Sandalia_24-02-26</code></p>
+
+<p><strong>[A COMPLETAR: Figura 1 – o nome da campanha e do anúncio virando utm_campaign e utm_content (figura-00-nome-vira-utm.webp).]</strong></p>
+
+<p>A própria ajuda do Google Analytics recomenda um valor único de origem por plataforma e de mídia por canal, sempre escritos do mesmo jeito, para o tráfego não se espalhar em linhas diferentes no relatório (Google, 2026a). É o mesmo princípio do padrão de nomes, aplicado à URL.</p>
+
+<h3>E no Google Ads?</h3>
+
+<p>No Google Ads, a codificação automática (o parâmetro <code>gclid</code>) já leva campanha, grupo e palavra-chave para o Google Analytics 4 quando as duas contas estão vinculadas. Ela vem ativada nas contas novas e, no GA4, tem prioridade sobre a UTM manual (Google, 2026b). Por isso, no Google Ads o padrão de nomes vale pelo próprio nome da campanha, que aparece no relatório; a UTM manual faz diferença na Meta, no LinkedIn, no e-mail e em qualquer link fora do Google.</p>
+
+<h2>O que vem por padrão e você deve trocar</h2>
 
 <ul>
-  <li>As plataformas sugerem nomes automáticos (ex.: "Pesquisa-1"). Troque sempre.</li>
+  <li>As plataformas sugerem nomes automáticos, como "Pesquisa-1" ou "Nova campanha de Vendas". Troque sempre, antes de publicar.</li>
+  <li>O link final costuma ir sem nenhum parâmetro. Na Meta e no LinkedIn, preencha os parâmetros de URL do anúncio a partir dos nomes.</li>
 </ul>
 
-<h2>5. Como otimizar depois de publicada</h2>
+<h2>Como manter o padrão depois de publicado</h2>
 
 <ul>
-  <li>Revisar mensalmente se os nomes continuam no padrão (filtro por texto na lista de campanhas).</li>
-  <li>Toda alteração: validar com o analista mais sênior da conta e anotar na planilha.</li>
+  <li>Uma vez por mês, filtre a lista de campanhas pela sigla do cliente e procure nomes fora do padrão.</li>
+  <li>Toda alteração em campanha ativa é validada com o analista mais sênior da conta e anotada numa planilha com data, campanha, o que mudou, por quê e quem validou.</li>
 </ul>
 
-<h2>6. Checklist para copiar</h2>
+<p>Essa planilha é o que responde, três semanas depois, por que o custo por lead subiu. Sem ela, a conta depende da memória de quem mexeu. O mesmo raciocínio de medir antes de escalar aparece em <a href="/blog/de-dev-a-gestor-de-trafego-como-o-codigo-virou-minha-maior-vantagem-no-marketing">de dev a gestor de tráfego</a>.</p>
+
+<h2>Erros comuns</h2>
 
 <ul>
-  <li>Nome segue o padrão em campanha, conjunto e anúncio.</li>
-  <li>Sem acento e sem espaço.</li>
-  <li>UTM montada a partir do nome.</li>
+  <li><strong>Cada pessoa nomear de um jeito.</strong> O filtro por sigla para de funcionar e o relatório mistura campanhas.</li>
+  <li><strong>Acento e espaço no nome.</strong> Viram códigos estranhos na URL (<code>%C3%A1</code>, <code>%20</code>) e quebram a leitura no relatório.</li>
+  <li><strong>Origem escrita de dois jeitos</strong> (<code>Facebook</code> e <code>facebook</code>). O GA4 trata como duas origens diferentes.</li>
+  <li><strong>Mudar campanha sem registrar.</strong> O resultado muda e ninguém sabe dizer por quê.</li>
+</ul>
+
+<h2>Checklist para copiar</h2>
+
+<ul>
+  <li>Nome no padrão em campanha, conjunto e anúncio.</li>
+  <li>Sem acento, sem espaço, sem caractere especial.</li>
+  <li>UTM montada a partir dos nomes, com origem e mídia sempre escritas do mesmo jeito.</li>
+  <li>No Google Ads, codificação automática ativa e conta vinculada ao GA4.</li>
   <li>Alteração registrada com data, motivo e quem validou.</li>
 </ul>
 
-<h2>7. Erros comuns</h2>
+<p>Próximo episódio: <a href="/blog/como-criar-campanha-google-ads-do-zero">como criar uma campanha no Google Ads do zero</a>.</p>
 
-<ul>
-  <li>Cada pessoa nomear de um jeito.</li>
-  <li>Usar acento e quebrar a UTM.</li>
-  <li>Mudar campanha sem registrar e ninguém saber por que o resultado mudou.</li>
-</ul>
+<h2>Referências</h2>
 
-<h2>8. Referências oficiais</h2>
+<p>GOOGLE. Criadores de URLs: coletar dados da campanha com URLs personalizados. <strong>Ajuda do Google Analytics</strong>, [<em>s. l.</em>], 2026a. Disponível em: <a href="https://support.google.com/analytics/answer/10917952?hl=pt-BR" target="_blank" rel="noopener noreferrer">https://support.google.com/analytics/answer/10917952?hl=pt-BR</a>. Acesso em: 27 nov. 2026.</p>
 
-<ul>
-  <li><a href="https://support.google.com/analytics/answer/10917952?hl=pt-BR">Criadores de URLs: coletar dados da campanha com URLs personalizados (Google Analytics)</a></li>
-  <li><a href="https://support.google.com/google-ads/answer/7684791?hl=pt-BR">Anúncios responsivos de pesquisa (exemplo de onde a URL final entra)</a></li>
-</ul>
+<p>GOOGLE. Sobre a codificação automática. <strong>Ajuda do Google Ads</strong>, [<em>s. l.</em>], 2026b. Disponível em: <a href="https://support.google.com/google-ads/answer/3095550?hl=pt-BR" target="_blank" rel="noopener noreferrer">https://support.google.com/google-ads/answer/3095550?hl=pt-BR</a>. Acesso em: 27 nov. 2026.</p>
 
 <hr>
 
@@ -73,5 +116,5 @@
 
 <ol>
   <li>planilha de alterações com colunas data, campanha, o que mudou, por quê, quem validou (dados fictícios)</li>
-  <li>lista de campanhas na conta mostrando nomes no padrão</li>
+  <li>lista de campanhas na conta mostrando nomes no padrão (sem nome de cliente)</li>
 </ol>

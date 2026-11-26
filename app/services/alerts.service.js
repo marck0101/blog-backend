@@ -15,6 +15,9 @@ const { FRONTEND_URL } = require("../config/urls");
 const DAY_MS = 24 * 60 * 60 * 1000;
 // Reconectar o LinkedIn antes de expirar (a conexão dura 60 dias, sem renovação)
 const LINKEDIN_WARN_DAYS = 7;
+// Calendário editorial: pelo menos 2 agendados nas próximas 2 semanas (1 por semana)
+const QUEUE_DAYS = 14;
+const QUEUE_MIN = 2;
 
 const panel = (path) => `${FRONTEND_URL}${path}`;
 
@@ -78,6 +81,25 @@ async function collectAlerts(summary = {}, now = new Date()) {
     }
   }
 
+  // 8. Fila de agendados curta: a meta é um post por semana (calendário editorial).
+  // Só depois do primeiro post publicado, para um blog novo não alertar todo dia.
+  const [queued, hasPublished] = await Promise.all([
+    BlogPost.countDocuments({
+      status: "planned",
+      deletedAt: null,
+      plannedAt: { $gt: now, $lte: new Date(now.getTime() + QUEUE_DAYS * DAY_MS) },
+    }),
+    BlogPost.exists({ published: true, deletedAt: null }),
+  ]);
+  if (hasPublished && queued < QUEUE_MIN) {
+    add(
+      "atenção",
+      "Fila de posts curta",
+      `${queued === 0 ? "Nenhum post agendado" : "Só 1 post agendado"} para os próximos ${QUEUE_DAYS} dias. A meta é um por semana: revise e agende os próximos rascunhos.`,
+      panel("/admin/posts")
+    );
+  }
+
   return alerts;
 }
 
@@ -96,4 +118,4 @@ async function sendAlerts(alerts) {
   return true;
 }
 
-module.exports = { collectAlerts, sendAlerts, LINKEDIN_WARN_DAYS };
+module.exports = { collectAlerts, sendAlerts, LINKEDIN_WARN_DAYS, QUEUE_DAYS, QUEUE_MIN };

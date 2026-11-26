@@ -1,0 +1,16 @@
+{
+  "slug": "blog-rapido-e-seguro-auditoria-e-roteiro-de-monitoramento",
+  "status": "published",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "directAnswer": "Nota alta no PageSpeed não garante site seguro. Na auditoria do blog, a nota foi de 53 para 94 no celular mudando a ordem em que a página carrega, e a segurança só apareceu testando por fora: limite de tentativas na newsletter, dependências com falhas corrigidas e cabeçalhos de segurança. Um roteiro semanal e mensal evita que nada disso regrida.",
+  "tags": [
+    "core-web-vitals",
+    "pagespeed",
+    "seguranca-web",
+    "seo-tecnico",
+    "monitoramento",
+    "lgpd"
+  ],
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (atualiza publicado com --dry-run). Só content, cluster e directAnswer mudam."
+}

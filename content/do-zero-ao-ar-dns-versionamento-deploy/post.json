@@ -1,0 +1,15 @@
+{
+  "slug": "do-zero-ao-ar-dns-versionamento-deploy",
+  "status": "published",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "dns",
+    "deploy",
+    "dominio",
+    "git",
+    "infraestrutura"
+  ],
+  "directAnswer": "Colocar um projeto no ar é uma sequência de cinco etapas: registrar o domínio no nome da empresa, apontar o DNS, versionar o código no Git, separar o banco de desenvolvimento do de produção e fazer o deploy. Resolvidas em ordem, elas dão controle sobre o projeto sem exigir que você seja especialista em infraestrutura.",
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer."
+}

@@ -86,9 +86,11 @@ app.get("/api/categories", (req, res) => {
   res.json(CATEGORIES);
 });
 
+
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", blogpostRoutes);
 app.use("/api/seasons", require("./routes/season.routes"));
+app.use("/api/clusters", require("./routes/cluster.routes"));
 app.use("/api/upload", uploadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/subscribers", subscriberRoutes);

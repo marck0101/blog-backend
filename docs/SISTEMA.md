@@ -122,6 +122,10 @@ públicas filtram por `published: true` e `deletedAt: null`.
   e **não** gera novo email nem novo LinkedIn ao republicar (um aviso por post, ver
   R-EMAIL-01; LinkedIn já fica como `posted`).
 - **R-POST-11** Season é opcional (ver seção 4). Se informada, precisa existir.
+- **R-CLU-01** Tema (cluster) é opcional e vem de uma lista fechada em
+  `app/config/clusters.js` (servida em `/api/clusters`). Tema novo = uma linha nela.
+- **R-CLU-02** No máximo um post **pilar** por tema (`isPillar`): marcar um post como pilar
+  tira a marca do pilar anterior do mesmo tema. Pilar exige tema; tirar o tema tira o pilar.
 - **R-POST-12** Campos que as rotas públicas devolvem estão numa **lista de permitidos**
   (`PUBLIC_FIELDS`). Campo novo de admin (email, LinkedIn, views) nunca vaza por padrão.
 - **R-POST-13** Resumo (`excerpt`) até 160 caracteres (limite no editor). SEO title e
@@ -621,6 +625,7 @@ está abaixo, com link direto para o painel. Sem email = sem pendência conhecid
 | Aviso de post em **rascunho** | Envios, seção Email do post | Público vazio ou Gmail sem credencial (R-EMAIL-03). Enviar manualmente. |
 | LinkedIn "falhou" | Seção LinkedIn do editor | Ler o erro, conferir no perfil, tentar de novo. |
 | LinkedIn perto de expirar | Seção LinkedIn do editor (dias restantes) | Reconectar. |
+| Fila de posts curta | Calendário | Menos de 2 agendados nos próximos 14 dias (meta: 1 post por semana). Revisar um rascunho com `content/_modelo/CHECKLIST.md` e agendar. |
 | Comentários pendentes | Menu Comentários (contador) | Aprovar/recusar. |
 | Rascunhos parados | Dashboard | Decidir o destino. |
 | "Erro interno do servidor" | Painel | Falha do servidor (5xx): em produção o detalhe não aparece na tela, ver **Logs da Vercel** do backend (stack completa). Recusas (4xx) mostram o motivo na tela e aparecem no log numa linha `[HTTP 4xx]`, sem stack. |

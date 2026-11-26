@@ -1,0 +1,79 @@
+<p><strong>[A COMPLETAR antes de agendar: capa e revisão do autor; conferir se o post "PageSpeed e Clarity 2" já foi publicado e, se sim, trocar o texto da seção 2 pelo link dele. Apagar este aviso.]</strong></p>
+
+<p>Site lento perde venda, site inseguro perde a confiança do cliente e site que ninguém encontra não existe para quem procura. Para uma pequena ou média empresa, essas três coisas valem mais do que qualquer efeito visual: um site rápido, seguro e encontrável no Google e nas IAs é o que transforma a visita paga ou orgânica em contato. Este guia junta o que o blog já mostrou, com números medidos e fontes abertas, e indica por onde começar.</p>
+
+<h2>Por que site lento perde venda</h2>
+
+<p>Velocidade não é vaidade técnica. Num estudo da Deloitte encomendado pelo Google, com 37 marcas, melhorar em 0,1 segundo o carregamento no celular aumentou as conversões em 8,4% no varejo e 10,1% em viagens (Deloitte; Google, 2020). E, segundo dados do próprio Google, a chance de alguém desistir antes de a página abrir sobe 123% quando o carregamento passa de 1 para 10 segundos no celular (An, 2018).</p>
+
+<p>Para saber se o seu site está bem, o Google usa três medidas, as Core Web Vitals (Walton, 2020):</p>
+
+<ul>
+  <li><strong>LCP</strong>, o tempo até o maior conteúdo aparecer: bom até 2,5 segundos;</li>
+  <li><strong>INP</strong>, a demora para a página reagir a um toque ou clique: bom até 200 milissegundos;</li>
+  <li><strong>CLS</strong>, o quanto a página "pula" enquanto carrega: bom até 0,1.</li>
+</ul>
+
+<p>Como transformar o relatório do PageSpeed em uma lista de prioridades, sem tentar consertar tudo de uma vez, está em <a href="/blog/pagespeed-e-clarity-como-decido-o-que-otimizar-primeiro">PageSpeed e Clarity: como decido o que otimizar primeiro</a>.</p>
+
+<h2>O que funcionou neste blog</h2>
+
+<p>Este blog serviu de laboratório. A página inicial no celular saiu de nota 53 para 94 no PageSpeed, e o tempo até o maior conteúdo aparecer caiu de 7,6 para 2,4 segundos (medições do autor no PageSpeed Insights, 27 out. e 9 nov. 2026). A maior parte do ganho não veio de comprimir arquivos, e sim de mudar a ordem das coisas: entregar a página já montada, avisar cedo o navegador sobre a imagem principal e tirar as ferramentas de medição da frente da página. O passo a passo, com o que deu certo e o que não deu, está em <a href="/blog/blog-rapido-e-seguro-auditoria-e-roteiro-de-monitoramento">Blog rápido e seguro: auditoria e roteiro de monitoramento</a>.</p>
+
+<h2>A arquitetura certa para o tipo de site</h2>
+
+<p>Muito da velocidade e do SEO se decide antes da primeira linha de código: como as páginas são montadas. Site institucional e blog costumam ir bem com páginas geradas antes (SSG) ou montadas no servidor com cache (SSR); painel atrás de login pode ser uma aplicação no navegador (SPA). A comparação completa, com casos reais, está em <a href="/blog/ssr-ssg-spa-qual-arquitetura-escolher">SSR, SSG ou SPA: qual arquitetura escolher</a>. Por que este blog separou site e API em dois projetos está em <a href="/blog/monolito-ou-dois-repositorios-por-que-separei-front-e-back-do-zero">Monólito ou dois repositórios</a>.</p>
+
+<h2>Seguro: o que nenhuma nota verde mostra</h2>
+
+<p>O PageSpeed dava nota 100 em "práticas recomendadas" ao blog enquanto o servidor tinha duas vulnerabilidades críticas em bibliotecas. Nota de desempenho não mede segurança. O básico para qualquer site de empresa, usando como referência as categorias do OWASP Top 10 (OWASP Foundation, 2021):</p>
+
+<ul>
+  <li>painel administrativo atrás de login, com limite de tentativas;</li>
+  <li>formulários protegidos contra envio em massa;</li>
+  <li>bibliotecas atualizadas e conferidas;</li>
+  <li>cabeçalhos de segurança no site;</li>
+  <li>teste antes de publicar, nunca em produção (<a href="/blog/qa-antes-de-subir-codigo-por-que-nunca-edito-producao-direto">QA antes de subir código</a>).</li>
+</ul>
+
+<p>Se a empresa guarda dados de clientes, segurança também é obrigação legal: a LGPD exige medidas para proteger dados pessoais (Brasil, 2018).</p>
+
+<h2>Encontrável no Google e nas IAs</h2>
+
+<p>Ser encontrado depende de três camadas:</p>
+
+<ul>
+  <li><strong>A base técnica:</strong> domínio próprio, sitemap enviado ao Search Console, título e descrição únicos por página. O caminho do domínio ao site no ar está em <a href="/blog/do-zero-ao-ar-dns-versionamento-deploy">Do zero ao ar: DNS, versionamento e deploy</a>.</li>
+  <li><strong>O que não deve aparecer:</strong> o robots.txt controla o que os robôs visitam, mas não tira página da busca; para isso existe a diretiva noindex (Google, 2026a). As dúvidas mais comuns estão em <a href="/blog/perguntas-que-todo-mundo-faz-sobre-blogs-e-as-respostas-diretas">Perguntas que todo mundo faz sobre blogs</a>.</li>
+  <li><strong>Conteúdo que responde:</strong> cada página com uma resposta direta para a pergunta de quem busca, e uma rotina de publicação que não para (<a href="/blog/calendario-lixeira-e-newsletter-as-funcoes-que-sustentam-a-rotina-de-publicar">Calendário, lixeira e newsletter</a>).</li>
+</ul>
+
+<p>Dois cuidados com promessas comuns de "SEO para IA". O arquivo /llms.txt ajuda alguns assistentes a entender o site, mas o Google informou em junho de 2026 que não o usa na busca e que ele não melhora nem piora a posição (Google, 2026b). E o destaque de perguntas frequentes (FAQ) deixou de aparecer na busca do Google em maio de 2026 (Google, 2026b). O bloco de perguntas continua útil para o leitor, só não é mais atalho para a primeira página.</p>
+
+<h2>Por onde começar</h2>
+
+<ol>
+  <li>Rode o PageSpeed no celular na página que mais recebe visitas pagas e anote LCP, INP e CLS.</li>
+  <li>Abra o Clarity ou outra ferramenta de gravação e veja onde as pessoas travam.</li>
+  <li>Confira se o painel tem login forte e se as bibliotecas estão atualizadas.</li>
+  <li>Envie o sitemap ao Search Console e veja quais páginas estão indexadas.</li>
+  <li>Escolha uma ação por semana e meça de novo.</li>
+</ol>
+
+<p>Para empresas do noroeste do Rio Grande do Sul que investem em tráfego pago, esse é o primeiro diagnóstico que faço: antes de aumentar a verba, garantir que a página que recebe o clique carrega rápido, é segura e aparece para quem procura.</p>
+
+<h2>Referências</h2>
+
+<p>AN, Daniel. Find out how you stack up to new industry benchmarks for mobile page speed. <strong>Think with Google</strong>, [<em>s. l.</em>], fev. 2018. Disponível em: <a href="https://web.archive.org/web/20251226035614/https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/" target="_blank" rel="noopener noreferrer">https://web.archive.org/web/20251226035614/https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/mobile-page-speed-new-industry-benchmarks/</a>. Acesso em: 26 nov. 2026.</p>
+
+<p>BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais (LGPD). Brasília, DF: Presidência da República, 2018. Disponível em: <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer">https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm</a>. Acesso em: 27 nov. 2026.</p>
+
+<p>DELOITTE; GOOGLE. <strong>Milliseconds make millions</strong>: a study on how improvements in mobile site speed positively affect a brand's bottom line. Dublin: Deloitte, 2020. Disponível em: <a href="https://web.archive.org/web/20241110040856/https://www.deloitte.com/content/dam/Deloitte/ie/Documents/Consulting/Milliseconds_Make_Millions_report.pdf" target="_blank" rel="noopener noreferrer">https://web.archive.org/web/20241110040856/https://www.deloitte.com/content/dam/Deloitte/ie/Documents/Consulting/Milliseconds_Make_Millions_report.pdf</a>. Acesso em: 27 nov. 2026.</p>
+
+<p>GOOGLE. Robots.txt introduction and guide. <strong>Google Search Central</strong>, [<em>s. l.</em>], 2026a. Disponível em: <a href="https://developers.google.com/search/docs/crawling-indexing/robots/intro" target="_blank" rel="noopener noreferrer">https://developers.google.com/search/docs/crawling-indexing/robots/intro</a>. Acesso em: 27 nov. 2026.</p>
+
+<p>GOOGLE. Latest Google Search documentation updates. <strong>Google Search Central</strong>, [<em>s. l.</em>], 2026b. Disponível em: <a href="https://developers.google.com/search/updates" target="_blank" rel="noopener noreferrer">https://developers.google.com/search/updates</a>. Acesso em: 27 nov. 2026.</p>
+
+<p>OWASP FOUNDATION. <strong>OWASP Top 10</strong>: 2021. [<em>S. l.</em>]: OWASP, 2021. Disponível em: <a href="https://owasp.org/Top10/" target="_blank" rel="noopener noreferrer">https://owasp.org/Top10/</a>. Acesso em: 27 nov. 2026.</p>
+
+<p>WALTON, Philip. Web Vitals. <strong>web.dev</strong>, [<em>s. l.</em>], 2020. Disponível em: <a href="https://web.dev/articles/vitals" target="_blank" rel="noopener noreferrer">https://web.dev/articles/vitals</a>. Acesso em: 27 nov. 2026.</p>

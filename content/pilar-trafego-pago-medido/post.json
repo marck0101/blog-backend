@@ -1,0 +1,36 @@
+{
+  "title": "Tráfego pago para pequenas empresas: medir antes de escalar",
+  "slug": "trafego-pago-pequenas-empresas-medir-antes-de-escalar",
+  "excerpt": "Quanto custou cada venda que veio do anúncio? O que medir, qual canal escolher e a rotina que mantém o tráfego pago no lucro, para PMEs do interior.",
+  "category": "trafego",
+  "cluster": "trafego-pago-medido",
+  "isPillar": true,
+  "tags": [
+    "trafego pago",
+    "pequenas empresas",
+    "google ads",
+    "rastreamento",
+    "noroeste do rs"
+  ],
+  "directAnswer": "Tráfego pago só vale para uma pequena empresa quando ela sabe quanto custou cada venda ou contato. Antes de investir: conversão configurada, Google Ads ligado ao GA4, padrão de UTM e registro de alterações. Depois, escolha o canal pelo tipo de demanda (Pesquisa para quem já procura) e acompanhe custo por resultado, não cliques.",
+  "file": "content.html",
+  "plannedAt": "2026-12-21T12:00:00-03:00",
+  "faq": [
+    {
+      "question": "Quanto investir em tráfego pago para começar?",
+      "answer": "O valor que o negócio aguenta pagar por um lead ou uma venda, multiplicado pelo número de resultados que você quer testar. Antes de aumentar, espere o custo por resultado ficar estável por algumas semanas."
+    },
+    {
+      "question": "Google Ads ou Meta Ads para pequena empresa?",
+      "answer": "Depende da demanda. Quem já procura o que você vende está no Google: a Pesquisa captura essa demanda. Para criar interesse em quem ainda não procura, Instagram, Facebook e YouTube."
+    },
+    {
+      "question": "Quais métricas acompanhar no tráfego pago?",
+      "answer": "Custo por lead ou por venda, ROAS (receita por real investido), CAC e taxa de conversão da página. Cliques e CTR ajudam a diagnosticar, mas não dizem se houve lucro."
+    },
+    {
+      "question": "Preciso de UTM nas campanhas do Google Ads?",
+      "answer": "Com o Google Ads ligado ao GA4 e a codificação automática ativa, não. A UTM manual importa para Meta, LinkedIn, e-mail e outros links."
+    }
+  ]
+}

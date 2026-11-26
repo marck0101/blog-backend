@@ -1,0 +1,15 @@
+{
+  "slug": "pagespeed-e-clarity-como-decido-o-que-otimizar-primeiro",
+  "file": "content.html",
+  "status": "published",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "pagespeed",
+    "microsoft clarity",
+    "core web vitals",
+    "cro"
+  ],
+  "directAnswer": "Para decidir o que otimizar primeiro, cruze o PageSpeed (o que está lento e por quê) com o Clarity (onde o visitante trava, clica sem resposta ou desiste) e priorize o que afeta todas as páginas e todos os leitores. No blog, a nota no celular era 53, com o maior elemento da página levando mais de 7 segundos para aparecer.",
+  "note": "Correção de post existente; aplicar pelo scripts/update-published.js."
+}

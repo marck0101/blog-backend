@@ -1,0 +1,14 @@
+{
+  "slug": "de-dev-a-gestor-de-trafego-como-o-codigo-virou-minha-maior-vantagem-no-marketing",
+  "status": "published",
+  "cluster": "trafego-pago-medido",
+  "isPillar": false,
+  "tags": [
+    "gestor de trafego",
+    "rastreamento",
+    "google tag manager",
+    "carreira"
+  ],
+  "directAnswer": "Saber programar dá ao gestor de tráfego autonomia para medir antes de escalar: configurar GTM, API de Conversões e Data Layer sem depender de outro time, montar dashboards com os dados das plataformas e explicar ROAS, CAC e CPL de um jeito que o cliente entende. O código vira vantagem quando encurta o caminho entre o dado e a decisão.",
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run) SÓ depois de resolver os números (ver AUDITORIA.md)."
+}
