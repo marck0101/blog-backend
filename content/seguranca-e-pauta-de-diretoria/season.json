@@ -10,8 +10,13 @@
       "category": "negocios",
       "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439635895.webp",
       "coverImageAlt": "Capa do episódio 01 da season Segurança é pauta de diretoria: Hacker não é o vilão, com ícone de chapéu ao centro",
-      "tags": [],
-      "directAnswer": "",
+      "tags": [
+        "seguranca-da-informacao",
+        "hacker",
+        "ameacas",
+        "diretoria"
+      ],
+      "directAnswer": "O \"hacker\" não é necessariamente o inimigo. O adversário real da empresa é quem explora falhas com intenção criminosa, e ele escolhe alvos pela facilidade, não pelo tamanho. Entender quem ataca e por quê é o primeiro passo para a diretoria decidir onde investir.",
       "faq": [
         {
           "question": "Qual a diferença entre hacker e cracker?",
@@ -25,7 +30,9 @@
           "question": "O que motiva um ataque hacker contra empresas?",
           "answer": "Dinheiro (o motivo mais comum), ideologia, espionagem corporativa e ameaças internas de colaboradores, ex-colaboradores ou parceiros com acesso excessivo."
         }
-      ]
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
     },
     {
       "seasonOrder": 2,
@@ -36,8 +43,13 @@
       "category": "negocios",
       "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439720891.webp",
       "coverImageAlt": "Capa do episódio 02 da season Segurança é pauta de diretoria: Confidencialidade, Integridade e Disponibilidade, com escudo",
-      "tags": [],
-      "directAnswer": "",
+      "tags": [
+        "triade-cid",
+        "gestao-de-riscos",
+        "lgpd",
+        "diretoria"
+      ],
+      "directAnswer": "A tríade CID (Confidencialidade, Integridade e Disponibilidade) é a régua que transforma qualquer incidente de segurança em impacto de negócio: vazamento vira multa e perda de confiança, dado adulterado vira fraude, sistema fora do ar vira faturamento perdido.",
       "faq": [
         {
           "question": "O que é a tríade CID na segurança da informação?",
@@ -51,7 +63,9 @@
           "question": "Como a diretoria prioriza riscos de segurança?",
           "answer": "Dando uma nota de 1 a 5 para cada sistema crítico em três perguntas: se vazar, se for alterado sem ninguém perceber e se parar por um dia. O resultado é um mapa de prioridades."
         }
-      ]
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
     },
     {
       "seasonOrder": 3,
@@ -62,8 +76,13 @@
       "category": "negocios",
       "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439783198.webp",
       "coverImageAlt": "Capa do episódio 03 da season Segurança é pauta de diretoria: O alvo preferido é a diretoria, com ícone de alvo",
-      "tags": [],
-      "directAnswer": "",
+      "tags": [
+        "phishing",
+        "whaling",
+        "deepfake",
+        "fraude"
+      ],
+      "directAnswer": "Quem aprova pagamentos e tem acesso a tudo é exatamente quem o atacante mais quer enganar. Golpes de phishing direcionados à alta gestão (whaling) exploram autoridade, urgência e sigilo, e hoje usam até voz e vídeo falsos gerados por IA. A defesa mais eficaz é simples: a regra do segundo canal.",
       "faq": [
         {
           "question": "O que é whaling?",
@@ -77,7 +96,9 @@
           "question": "Como se proteger de golpes que imitam executivos?",
           "answer": "Com a regra do segundo canal: todo pedido de pagamento ou troca de conta é confirmado por outro meio independente, como um número já cadastrado, uma conversa presencial ou uma palavra-chave combinada."
         }
-      ]
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
     },
     {
       "seasonOrder": 4,
@@ -88,8 +109,13 @@
       "category": "negocios",
       "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439844744.webp",
       "coverImageAlt": "Capa do episódio 04 da season Segurança é pauta de diretoria: O ataque que entra pela recepção, com ícone de porta",
-      "tags": [],
-      "directAnswer": "",
+      "tags": [
+        "engenharia-social",
+        "pretexting",
+        "baiting",
+        "tailgating"
+      ],
+      "directAnswer": "Nem todo ataque começa por um e-mail. Uma história bem contada ao telefone, um pendrive \"perdido\" ou uma porta segurada por educação também abrem a empresa. A engenharia social explora a vontade de ajudar e a curiosidade, e alcança colaboradores e parceiros da mesma forma.",
       "faq": [
         {
           "question": "O que é pretexting?",
@@ -107,7 +133,9 @@
           "question": "Como evitar engenharia social no suporte de TI?",
           "answer": "Só redefinir senha ou MFA com validação por um canal independente, como a confirmação do gestor ou presencial, e deixar claro que nenhum setor pede senha, nunca."
         }
-      ]
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
     },
     {
       "seasonOrder": 5,
@@ -118,8 +146,13 @@
       "category": "negocios",
       "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439917025.webp",
       "coverImageAlt": "Capa do episódio 05 da season Segurança é pauta de diretoria: Senha fraca custa caro, com ícone de chave",
-      "tags": [],
-      "directAnswer": "",
+      "tags": [
+        "senhas",
+        "mfa",
+        "credential-stuffing",
+        "nist"
+      ],
+      "directAnswer": "Atacantes não adivinham senhas, eles testam milhões de combinações e reaproveitam senhas que já vazaram em outros sites. Senha \"complexa\" não resolve sozinha. Gerenciador de senhas e autenticação multifator (MFA) precisam ser política da empresa, começando pela diretoria.",
       "faq": [
         {
           "question": "O que é credential stuffing?",
@@ -133,7 +166,9 @@
           "question": "Qual o melhor tipo de autenticação multifator?",
           "answer": "Aplicativos autenticadores ou chaves físicas. O SMS pode ser interceptado ou desviado por troca de chip e deve ser a última opção."
         }
-      ]
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
     },
     {
       "seasonOrder": 6,
@@ -144,8 +179,13 @@
       "category": "negocios",
       "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439974628.webp",
       "coverImageAlt": "Capa do episódio 06 da season Segurança é pauta de diretoria: O que sua empresa expõe sem saber, com ícone de lupa",
-      "tags": [],
-      "directAnswer": "",
+      "tags": [
+        "superficie-de-ataque",
+        "fuzzing",
+        "vazamento-de-dados",
+        "fornecedores"
+      ],
+      "directAnswer": "Antes de atacar, o atacante faz um inventário de tudo o que a empresa deixa visível na internet. Arquivos de configuração com senhas, códigos publicados por engano, backups e painéis esquecidos costumam estar lá. A diretoria não precisa saber rodar as ferramentas, mas precisa garantir que alguém olhe a empresa como um atacante olharia.",
       "faq": [
         {
           "question": "O que é superfície de ataque?",
@@ -159,7 +199,9 @@
           "question": "Como reduzir o que a empresa expõe sem saber?",
           "answer": "Mantendo um inventário atualizado, fazendo varreduras periódicas, desligando ambientes de projetos encerrados e exigindo requisitos de segurança nos contratos com agências e fornecedores."
         }
-      ]
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
     },
     {
       "seasonOrder": 7,
@@ -170,8 +212,13 @@
       "category": "negocios",
       "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792440036985.webp",
       "coverImageAlt": "Capa do episódio 07 da season Segurança é pauta de diretoria: Quando o negócio para, com ícone de cadeado",
-      "tags": [],
-      "directAnswer": "",
+      "tags": [
+        "ransomware",
+        "backup",
+        "plano-de-resposta",
+        "continuidade"
+      ],
+      "directAnswer": "Ransomware não é problema de TI, é parada de operação. O resgate é o último passo de um ataque que começa semanas antes, com um trojan ou uma senha vazada. As decisões que mais importam (plano de resposta, backup, posição sobre resgate) precisam ser tomadas pela diretoria antes do ataque, e não no meio dele.",
       "faq": [
         {
           "question": "Como começa um ataque de ransomware?",
@@ -189,7 +236,9 @@
           "question": "O que a diretoria deve decidir antes de um ataque?",
           "answer": "O plano de resposta a incidentes, um backup isolado e testado, a posição sobre resgate e o que o seguro cibernético cobre."
         }
-      ]
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
     },
     {
       "seasonOrder": 8,
@@ -200,8 +249,13 @@
       "category": "negocios",
       "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792440111988.webp",
       "coverImageAlt": "Capa do episódio 08 da season Segurança é pauta de diretoria: Ver para crer, com ícone de terminal",
-      "tags": [],
-      "directAnswer": "",
+      "tags": [
+        "pentest",
+        "teste-de-seguranca",
+        "phishing-simulado",
+        "vulnerabilidades"
+      ],
+      "directAnswer": "As ferramentas usadas por atacantes são gratuitas, conhecidas e rápidas. Por isso mesmo a empresa deveria usá-las primeiro, com autorização e escopo definido. Pentest e simulações transformam riscos abstratos em evidências concretas, e dão à diretoria um critério objetivo para priorizar.",
       "faq": [
         {
           "question": "O que é um pentest?",
@@ -215,7 +269,9 @@
           "question": "É legal testar a segurança de sistemas de terceiros?",
           "answer": "Não sem permissão. Testes só devem acontecer com autorização por escrito e escopo claro, e isso inclui sistemas de parceiros conectados aos seus."
         }
-      ]
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
     },
     {
       "seasonOrder": 9,
@@ -226,8 +282,13 @@
       "category": "negocios",
       "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792440186232.webp",
       "coverImageAlt": "Capa do episódio 09 da season Segurança é pauta de diretoria: O mínimo que a diretoria deve exigir, com escudo",
-      "tags": [],
-      "directAnswer": "",
+      "tags": [
+        "zero-trust",
+        "menor-privilegio",
+        "mfa",
+        "controle-de-acesso"
+      ],
+      "directAnswer": "Três princípios resumem o que a diretoria deve exigir de qualquer decisão de tecnologia: confiar menos por padrão (Zero Trust), dar só o acesso necessário (menor privilégio) e exigir um segundo fator em tudo que importa (MFA). Juntos, eles limitam o estrago quando, e não se, uma conta for comprometida.",
       "faq": [
         {
           "question": "O que é Zero Trust?",
@@ -241,7 +302,9 @@
           "question": "Todo MFA protege da mesma forma?",
           "answer": "Não. Chaves físicas e passkeys são as mais resistentes a phishing, aplicativos autenticadores são um bom padrão e SMS só deve ser usado sem alternativa."
         }
-      ]
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
     },
     {
       "seasonOrder": 10,
@@ -252,8 +315,13 @@
       "category": "negocios",
       "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792440253319.webp",
       "coverImageAlt": "Capa do episódio 10 da season Segurança é pauta de diretoria: Segurança é cultura, com ícone de pessoas",
-      "tags": [],
-      "directAnswer": "",
+      "tags": [
+        "cultura-de-seguranca",
+        "treinamento",
+        "fornecedores",
+        "diretoria"
+      ],
+      "directAnswer": "Quase todo ataque desta season passou por uma pessoa: alguém clicou, reaproveitou a senha, segurou a porta ou aprovou uma notificação. Por isso a defesa mais duradoura não é uma ferramenta, é uma cultura em que colaboradores e parceiros sabem reconhecer, questionar e reportar. E essa cultura começa na diretoria.",
       "faq": [
         {
           "question": "O que é cultura de segurança?",
@@ -267,7 +335,9 @@
           "question": "Por que incluir parceiros no programa de segurança?",
           "answer": "Porque eles fazem parte do perímetro. Segundo o Verizon DBIR 2025, terceiros participaram de cerca de 30% das violações analisadas."
         }
-      ]
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
     }
   ]
 }

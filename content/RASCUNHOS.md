@@ -15,7 +15,8 @@ Agendados no banco de produção com `scripts/schedule-post.js` (status planned,
 | 14/12 | Onde o funil perde mais: do clique à venda com UTM | linka o ep. 0 (no ar desde 30/11) |
 | 21/12 | Automação de marketing com código (pilar) | tirei a menção ao alerta de fila curta, que ainda não está no ar |
 | 28/12 | Login antes do dado | season Segurança, episódio 12 |
-| 04/01 | **livre**: ep. 1 (Google Ads do zero) entra quando os 3 prints existirem; depois pilar de Tráfego e ep. 2 | o script recusa texto com [A COMPLETAR] |
+| 04/01 a 25/01 | Segurança é pauta de diretoria, episódios 1 a 4 (revisados, com capa) | episódios 5 a 10 prontos como rascunho para fevereiro e março |
+| livre | ep. 1 da Mídia paga (Google Ads do zero) entra quando os 3 prints existirem; depois pilar de Tráfego e ep. 2 | o script recusa texto com [A COMPLETAR] |
 
 Os 18 episódios da Mídia paga e os 4 posts acima também estão como rascunho/agendados no painel de produção. PageSpeed e Clarity 2 saiu da agenda até os dados de 30 dias existirem. A tabela abaixo é o inventário anterior (as datas dela valem só como ordem).
 
