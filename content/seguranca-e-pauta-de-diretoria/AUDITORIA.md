@@ -9,4 +9,6 @@ Padrão aplicado em cada episódio: fontes abertas e conferidas, referências no
 | 1 | revisado | Caso Lapsus$/ConecteSUS conferido (Poder360, Tecnoblog, relatório do CSRB de 2023). "Nvidia e Samsung" saíram: as fontes citam Microsoft e Uber. Links para Binance e Dashboards com IA |
 | 2 | revisado | Caso C&M: "ataque ao PIX" corrigido (o PIX não foi invadido, segundo a ESET); "BC suspendeu" virou "bloqueou preventivamente as comunicações", como diz a fonte; LGPD art. 52 citada. Link para Dashboards com IA |
 | 3 | revisado | Caso Arup conferido na CNN (HK$ 200 mi ≈ US$ 25,6 mi, 15 transferências); fonte trocada do espelho abc17news (403) para a CNN; "etapa 4/etapa 2" explicado pela Figura 2. Link para Binance |
-| 4–10 | a revisar | |
+| 4 | revisado | Caso MGM conferido (Baguete: LinkedIn + help desk, US$ 100 mi + US$ 10 mi); "10 minutos" saiu do título (nenhuma fonte aberta confirma); fonte de fornecedor (Adaptive) removida; estudo dos pendrives conferido (48%, menos de 6 min). Link para Dashboards com IA |
+| 5 | revisado | Colonial Pipeline conferido (Dark Reading, TechRadar: senha complexa, mas reaproveitada); BankInfoSecurity removido (bloqueia acesso); DBIR genérico trocado pelo dado de 22% da Verizon 2025; NIST 800-63B-4 acrescentado. Links para Blog rápido e Binance |
+| 6–10 | a revisar | |
