@@ -1,6 +1,6 @@
 # Auditoria: Fred Brooks 1975 (publicado)
 
-Revisão de 27/11/2026. Base: o HTML publicado. O `content.html` desta pasta é o publicado com as correções; vai para o banco pelo script da Sprint 3 (`--dry-run` primeiro).
+Revisão de 26/11/2026. Base: o HTML publicado. O `content.html` desta pasta é o publicado com as correções; vai para o banco pelo script da Sprint 3 (`--dry-run` primeiro).
 
 **Achado principal:** o post não tinha referência nem link, e cita um livro como base.
 

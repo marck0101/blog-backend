@@ -13,7 +13,7 @@
   ],
   "directAnswer": "O que mais melhorou a nota do PageSpeed no celular foi entregar os dados da página já no HTML, sem esperar a API, e reservar o espaço das imagens. Na listagem do blog, a nota de laboratório foi de 57–61 para 88, o LCP de 6,6–7,7 s para 3,8 s e o CLS para zero. O que restou de lentidão vinha das próprias ferramentas de medição: GA4, Meta Pixel e Clarity.",
   "file": "content.html",
-  "plannedAt": "2026-11-30T12:00:00-03:00",
+  "plannedAt": null,
   "faq": [
     {
       "question": "O que mais melhorou o desempenho do blog?",

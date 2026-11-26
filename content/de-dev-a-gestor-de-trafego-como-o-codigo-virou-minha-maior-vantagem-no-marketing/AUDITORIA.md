@@ -1,6 +1,6 @@
 # Auditoria: De dev a gestor de tráfego (publicado)
 
-Revisão de 27/11/2026. Base: o HTML publicado. O `content.html` desta pasta é o publicado com links e SEO; **os números não foram mexidos** porque dependem de você.
+Revisão de 26/11/2026. Base: o HTML publicado. O `content.html` desta pasta é o publicado com links e SEO; **os números não foram mexidos** porque dependem de você.
 
 ## Números: precisam de período e fonte (regra 4 do BRAND.md)
 

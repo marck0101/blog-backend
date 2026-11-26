@@ -1,6 +1,6 @@
 # Auditoria: Dashboards com IA (publicado)
 
-Revisão de 27/11/2026. Base: o HTML publicado (API pública). O `content.html` desta pasta é o publicado com as correções; vai para o banco pelo script da Sprint 3 (`--dry-run` primeiro).
+Revisão de 26/11/2026. Base: o HTML publicado (API pública). O `content.html` desta pasta é o publicado com as correções; vai para o banco pelo script da Sprint 3 (`--dry-run` primeiro).
 
 **Achado principal:** o post não tinha **nenhuma referência nem link**, e fazia 8 afirmações técnicas e legais que pedem fonte. Também não tinha tags nem resposta direta.
 

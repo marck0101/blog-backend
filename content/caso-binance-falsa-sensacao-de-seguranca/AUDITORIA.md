@@ -1,6 +1,6 @@
 # Auditoria: Caso Binance (publicado, season Segurança é pauta de diretoria)
 
-Revisão de 27/11/2026. Base: o HTML publicado (API pública). O `content.html` desta pasta é o publicado com as correções abaixo; vai para o banco pelo script da Sprint 3 (`--dry-run` primeiro).
+Revisão de 26/11/2026. Base: o HTML publicado (API pública). O `content.html` desta pasta é o publicado com as correções abaixo; vai para o banco pelo script da Sprint 3 (`--dry-run` primeiro).
 
 **Resultado:** post bem fundamentado. Os 11 números conferidos batem com as fontes; os 20 links externos respondem (inclusive o The Block, que antes dava 403 para robôs: com navegador comum abre). As correções são de forma.
 

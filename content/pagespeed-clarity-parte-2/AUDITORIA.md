@@ -1,6 +1,6 @@
 # Auditoria: PageSpeed e Clarity 2 (rascunho)
 
-Revisão de 27/11/2026 pelo [checklist](../_modelo/CHECKLIST.md). Post agendado no calendário para **30/11/2026**.
+Revisão de 26/11/2026 pelo [checklist](../_modelo/CHECKLIST.md). Post agendado no calendário para **30/11/2026**.
 O original antes da revisão não foi versionado aqui; as mudanças estão listadas abaixo.
 
 ## Afirmações e fontes

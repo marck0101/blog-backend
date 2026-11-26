@@ -1,6 +1,6 @@
 # Auditoria: Cliente não compra tecnologia (publicado em 16/11/2026)
 
-Revisão de 27/11/2026. Base: o HTML publicado (API pública).
+Revisão de 26/11/2026. Base: o HTML publicado (API pública).
 
 **Atenção:** o `content.html` desta pasta era o rascunho de antes da publicação e foi substituído pelo HTML publicado com as correções abaixo. O texto publicado continua no banco; a versão de rascunho antiga não tinha cópia. O `post.json` ganhou `cluster: dashboards-e-bi`.
 

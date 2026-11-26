@@ -1,4 +1,4 @@
-# Auditoria: os 6 posts restantes (27/11/2026)
+# Auditoria: os 6 posts restantes (26/11/2026)
 
 Último item da Sprint 2. Base: o HTML publicado de cada post. Cada pasta `content/<slug>/` tem agora o `content.html` publicado com as correções abaixo; vão para o banco pelo script da Sprint 3 (`--dry-run` primeiro). Tags e resposta direta, que **nenhum dos 6 tem**, ficam para a Sprint 3 ("resposta direta e tags nos 9 posts").
 

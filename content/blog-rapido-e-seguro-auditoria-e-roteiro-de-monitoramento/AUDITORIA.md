@@ -1,6 +1,6 @@
 # Auditoria: Blog rápido e seguro (publicado em 09/11/2026)
 
-Revisão de 27/11/2026. Base: o HTML publicado (API pública), não o rascunho antigo em `content/seguranca-seo-monitoramento-parte-3/`.
+Revisão de 26/11/2026. Base: o HTML publicado (API pública), não o rascunho antigo em `content/seguranca-seo-monitoramento-parte-3/`.
 O `content.html` desta pasta é o publicado com as correções abaixo; vai para o banco pelo script da Sprint 3 (`--dry-run` primeiro).
 
 ## Citações × referências
@@ -46,7 +46,7 @@ Em 15/06/2026 o Google acrescentou ao guia de otimização para IA que o /llms.t
 
 `cluster: site-rapido-e-encontravel` e `directAnswer` (o post não tinha) no post.json. Tags e FAQ já existiam.
 
-## Achado de 27/11: placeholder no ar
+## Achado de 26/11: placeholder no ar
 
 O post **publicado** tem um trecho a completar visível para o leitor, na seção 9.1: "um monitor externo gratuito verifica a cada 5 minutos (...) **[A COMPLETAR: ferramenta escolhida.]**". O `scripts/update-published.js` recusa esta pasta até o trecho ser preenchido com o nome da ferramenta (ou a frase ser reescrita sem ela).
 
