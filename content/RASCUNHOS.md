@@ -4,6 +4,21 @@ Atualizado em 26/11/2026. Fonte: os arquivos desta pasta. Os rascunhos que só e
 
 Meta: um post por segunda (rotina das 9h), sempre 3 agendados à frente. Calendário completo no plano (Claude Doc "Plano SEO, GEO e clusters", seção Calendário editorial).
 
+## Agenda em produção (26/11/2026)
+
+Agendados no banco de produção com `scripts/schedule-post.js` (status planned, 08:50 de Brasília; a rotina das 9h publica). Para mudar, use o painel (calendário) ou rode o script de novo.
+
+| Data | Post | Observação |
+|---|---|---|
+| 30/11 | Nomenclatura de campanhas e UTM (ep. 0 da Mídia paga na prática) | sem a Figura 1: o Firebase não tem credencial no .env local; dá para subir `figura-00-nome-vira-utm.webp` pelo painel |
+| 07/12 | Site rápido, seguro e encontrável (pilar) | só linka posts já publicados |
+| 14/12 | Onde o funil perde mais: do clique à venda com UTM | linka o ep. 0 (no ar desde 30/11) |
+| 21/12 | Automação de marketing com código (pilar) | tirei a menção ao alerta de fila curta, que ainda não está no ar |
+| 28/12 | Login antes do dado | season Segurança, episódio 12 |
+| 04/01 | **livre**: ep. 1 (Google Ads do zero) entra quando os 3 prints existirem; depois pilar de Tráfego e ep. 2 | o script recusa texto com [A COMPLETAR] |
+
+Os 18 episódios da Mídia paga e os 4 posts acima também estão como rascunho/agendados no painel de produção. PageSpeed e Clarity 2 saiu da agenda até os dados de 30 dias existirem. A tabela abaixo é o inventário anterior (as datas dela valem só como ordem).
+
 Colunas: **palavras** (texto sem HTML) · **img** (imagens/figuras no corpo) · **links ext.** (links externos) · **links int.** (links para outros posts) · **FAQ / tags / resposta direta / capa** no post.json ou season.json.
 
 | Semana | Arquivo | Tema | Palavra-chave principal | Palavras | Img | Links ext. | Links int. | FAQ | Tags | Resp. direta | Capa | O que falta |
