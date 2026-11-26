@@ -9,6 +9,7 @@
  * Regras de segurança:
  * - Só agenda post que está como rascunho (nunca mexe em publicado).
  * - Recusa texto com aviso interno ([A COMPLETAR, [RASCUNHO, [INTERNO).
+ * - Recusa link interno para post que ainda não estará no ar nessa data.
  * - A data vira 08:50 de Brasília: a rotina diária roda às 9h (12:00 UTC) e publica o que já venceu.
  */
 require("dotenv").config({ quiet: true });
@@ -21,6 +22,22 @@ const MARKERS = /\[(A COMPLETAR|RASCUNHO|INTERNO)/;
 function plannedDate(day) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day || "")) throw new Error("Data no formato AAAA-MM-DD");
   return new Date(`${day}T08:50:00-03:00`);
+}
+
+/**
+ * Links internos (/blog/<slug>) que dariam 404 no dia da publicação:
+ * post inexistente, rascunho ou agendado para depois deste.
+ * `targets` = { slug: { status, plannedAt } }.
+ */
+function linkProblems(content, targets, plannedAt) {
+  const problems = [];
+  for (const [, slug] of (content || "").matchAll(/href="\/blog\/([\w-]+)"/g)) {
+    const t = targets[slug];
+    if (!t) problems.push(`${slug} (não existe)`);
+    else if (t.status === "published") continue;
+    else if (t.status !== "planned" || !t.plannedAt || t.plannedAt > plannedAt) problems.push(`${slug} (${t.status}${t.plannedAt ? " " + t.plannedAt.toISOString().slice(0, 10) : ""})`);
+  }
+  return [...new Set(problems)];
 }
 
 function option(args, name) {
@@ -47,6 +64,10 @@ async function main(args = process.argv.slice(2)) {
     if (post.status === "published") throw new Error(`Já publicado: ${slug}`);
     const marker = (post.content || "").match(MARKERS);
     if (marker) throw new Error(`Texto ainda tem "${marker[0]}": revise antes de agendar`);
+    const linked = [...(post.content || "").matchAll(/href="\/blog\/([\w-]+)"/g)].map((m) => m[1]);
+    const docs = linked.length ? await BlogPost.find({ slug: { $in: linked }, deletedAt: null }).select("slug status plannedAt") : [];
+    const problems = linkProblems(post.content, Object.fromEntries(docs.map((d) => [d.slug, d])), plannedAt);
+    if (problems.length) throw new Error(`Links que dariam 404 nessa data: ${problems.join(", ")}`);
     if (season && !(await seasonExists(season))) throw new Error(`Season não existe: ${season}`);
 
     const set = { status: "planned", published: false, plannedAt };
@@ -67,4 +88,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { main, plannedDate, MARKERS };
+module.exports = { main, plannedDate, linkProblems, MARKERS };

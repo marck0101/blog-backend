@@ -10,3 +10,8 @@ Exportados de produção para `content/painel-*` (content.html + post.json). "Pr
 | Como construí o marck0101 | Link quebrado para o "Do zero ao ar" corrigido (slug mudou); "2FA em teste" corrigido; link para o pilar de Site |
 
 Agendados de 01/02 a 22/02/2027, na ordem da série original, depois dos posts que eles linkam.
+
+## 26/11/2026, rodada 4
+
+- **Como construí o marck0101:** o diagrama em SVG era removido pelo sanitizador do painel, e o texto das etiquetas ficava solto no post agendado para 22/02 ("TOPO — geral", "MEIO — específico"...). Troquei o SVG por uma lista com links para os posts de cada etapa. Corrigido em produção, versão anterior no histórico.
+- **schedule-post.js:** agora recusa agendar post com link interno para post que não estará no ar na data (inexistente, rascunho ou agendado para depois).

@@ -2,27 +2,13 @@
 
 <p>Esse post é o mapa completo do marck0101: da arquitetura ao detalhe que ninguém vê. Não é um tutorial genérico — é a decisão real que tomei, com o trade-off que aceitei, em cada camada do sistema. Cada bloco abaixo já foi aprofundado num post dedicado, linkado ao longo do texto — esse aqui é o fechamento da série, não a abertura.</p>
 
-<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 my-8">
-<svg viewBox="0 0 640 240" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
-  <polygon points="20,20 160,20 135,80 45,80" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-width="1" opacity="0.8" />
-  <polygon points="45,84 135,84 115,140 65,140" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-width="1" opacity="0.8" />
-  <polygon points="65,144 115,144 100,192 80,192" fill="currentColor" fill-opacity="0.20" stroke="currentColor" stroke-width="1" opacity="0.8" />
-  <polygon points="80,196 100,196 90,230" fill="#3b82f6" opacity="0.9" />
-
-  <text x="185" y="46" font-size="13" font-weight="700" fill="currentColor">TOPO — geral</text>
-  <text x="185" y="64" font-size="11.5" fill="currentColor" opacity="0.8">FAQ sobre blogs · Do zero ao ar · Fred Brooks e a IA</text>
-
-  <text x="185" y="108" font-size="13" font-weight="700" fill="currentColor">MEIO — específico</text>
-  <text x="185" y="126" font-size="11.5" fill="currentColor" opacity="0.8">Arquitetura · Segurança · Performance · Features · QA</text>
-
-  <text x="185" y="164" font-size="13" font-weight="700" fill="currentColor">FUNDO — cruzamento de dados</text>
-  <text x="185" y="182" font-size="11.5" fill="currentColor" opacity="0.8">SEO/GEO · Como eu sei se um post funciona</text>
-
-  <text x="185" y="214" font-size="13" font-weight="700" fill="#3b82f6">FECHAMENTO</text>
-  <text x="185" y="232" font-size="11.5" fill="currentColor" opacity="0.8">Este post — amarra os 9 anteriores num mapa só</text>
-</svg>
-</div>
-<p class="text-sm text-center text-gray-500 dark:text-gray-400 mt-2">A série inteira, organizada do assunto mais geral ao mais específico, até o fechamento.</p>
+<p><strong>A série inteira, do assunto mais geral ao mais específico:</strong></p>
+<ol>
+<li><strong>Topo, geral:</strong> <a href="/blog/perguntas-que-todo-mundo-faz-sobre-blogs-e-as-respostas-diretas">FAQ sobre blogs</a>, <a href="/blog/do-zero-ao-ar-dns-versionamento-deploy">Do zero ao ar</a> e <a href="/blog/fred-brooks-1975-e-o-retrocesso-que-a-ia-esta-causando-no-desenvolvimento">Fred Brooks e a IA</a>.</li>
+<li><strong>Meio, específico:</strong> arquitetura, segurança, performance, funcionalidades e QA.</li>
+<li><strong>Fundo, cruzamento de dados:</strong> <a href="/blog/seo-geo-e-os-detalhes-invisiveis-que-fazem-um-blog-ser-encontrado">SEO e GEO</a> e <a href="/blog/como-eu-sei-se-um-post-esta-funcionando-dados-proprios-clarity-e-search-console">como eu sei se um post está funcionando</a>.</li>
+<li><strong>Fechamento:</strong> este post, que amarra os anteriores num mapa só.</li>
+</ol>
 
 <h2>1. Desenho da estrutura</h2>
 <p>O marck0101 é dois projetos separados que conversam por API, não um único sistema:</p>
