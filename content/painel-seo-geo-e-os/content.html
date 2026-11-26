@@ -1,0 +1,23 @@
+<p>Um post pode ser ótimo e nunca ser lido — não por falta de qualidade, mas porque a parte invisível (a que o leitor nunca vê, mas o buscador e o algoritmo veem) não foi cuidada. É onde decisões de camadas diferentes (arquitetura, performance, conteúdo) se cruzam num resultado só: o que faz um conteúdo ser encontrado.</p>
+
+<h2>SEO técnico, não só palavra-chave</h2>
+<p>Cada post carrega dados invisíveis que dizem ao Google, de forma explícita, "isto é um artigo, publicado nesta data, por este autor" — os chamados dados estruturados (Google, 2026a). O site também gera, automaticamente, um mapa completo de páginas e um feed de atualizações, sempre refletindo os posts publicados de verdade, sem manutenção manual. E as páginas de post já chegam prontas pro robô de busca (o "crawler"), em vez de uma tela em branco esperando o JavaScript rodar. Por que este blog é uma aplicação React com as páginas públicas pré-renderizadas, e não um site estático, está em <a href="/blog/ssr-ssg-spa-qual-arquitetura-escolher">SSR, SSG ou SPA: qual arquitetura escolher</a>.</p>
+
+<h2>GEO: otimizar para quem busca via IA</h2>
+<p>GEO (Generative Engine Optimization) é o nome que o mercado deu a estruturar o conteúdo para que assistentes como ChatGPT e Perplexity consigam entender, resumir e citar o artigo corretamente, e não só para o Google ranquear. Não existe atalho técnico para isso: o arquivo /llms.txt, por exemplo, não é usado pela busca do Google, que informou em junho de 2026 que ele não melhora nem piora a posição (Google, 2026b). Na prática, isso significa títulos e subtítulos que resumem o argumento sozinhos, parágrafos que respondem uma pergunta específica sem depender de contexto anterior, e dados estruturados que já contam a "história" do conteúdo de um jeito que uma máquina consegue ler.</p>
+
+<h2>Tagueamento: saber o que está funcionando</h2>
+<p>Instalei o Google Tag Manager — uma ferramenta que centraliza, num só lugar, todo o rastreamento de anúncio e analytics que uso no meu portfólio: Google Ads, Facebook Pixel e Google Analytics. A parte interessante não foi só instalar a ferramenta. Foi perceber que uma regra já configurada — que só contava como lead quem passava por uma página específica de confirmação — não fazia sentido pro blog, porque essa página nem existe aqui. Ajustei o código pra avisar diretamente quando alguém se inscreve na newsletter. Assim, essa inscrição passa a contar como lead de verdade no Ads e no Analytics, em vez de ficar invisível.</p>
+
+<h2>Os detalhes menores que também contam</h2>
+<ul>
+<li><strong>Imagens em WebP</strong>, convertidas automaticamente no upload — página mais leve, sem trabalho manual.</li>
+<li><strong>Recuperação de senha</strong> do admin, que elimina um ponto de fricção (e risco) de segurança.</li>
+<li><strong>Autenticação de dois fatores</strong> obrigatória no painel, com aplicativo autenticador e códigos de recuperação.</li>
+<li><strong>Filtros de busca e categoria</strong> refletidos na URL: um link filtrado é compartilhável, e todas as combinações apontam para a mesma página principal (canonical), para o buscador não ver conteúdo duplicado.</li>
+<li><strong>Modo dark</strong>, com contraste de texto revisado manualmente — acessibilidade também é parte de ser "encontrável e usável".</li>
+</ul>
+
+<p>Nenhum desses itens, sozinho, muda o jogo. Juntos, são a diferença entre um blog que existe e um blog que é encontrado — um bom exemplo de como decisões de camadas diferentes se cruzam num resultado só. As dúvidas mais comuns sobre robots.txt, FAQ e o que de fato aparece no Google estão em <a href="/blog/perguntas-que-todo-mundo-faz-sobre-blogs-e-as-respostas-diretas">Perguntas que todo mundo faz sobre blogs</a>, e o guia completo, para sites de empresa, está em <a href="/blog/site-rapido-seguro-encontravel-guia-pequenas-empresas">Site rápido, seguro e encontrável</a>. Falta medir se esse cruzamento funciona de verdade, e é o que entra no próximo post.</p>
+
+<h2>Referências</h2><p>GOOGLE. Introduction to structured data markup in Google Search. <strong>Google Search Central</strong>, [<em>s. l.</em>], 2026a. Disponível em: <a href="https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data" target="_blank" rel="noopener noreferrer">https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data</a>. Acesso em: 26 nov. 2026.</p><p>GOOGLE. Latest Google Search documentation updates. <strong>Google Search Central</strong>, [<em>s. l.</em>], 2026b. Disponível em: <a href="https://developers.google.com/search/updates" target="_blank" rel="noopener noreferrer">https://developers.google.com/search/updates</a>. Acesso em: 26 nov. 2026.</p>

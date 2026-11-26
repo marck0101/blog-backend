@@ -1,0 +1,58 @@
+<p>"É só um blog pessoal" não é desculpa para tratar segurança como opcional. Um blog tem painel administrativo, lista de assinantes e o nome de quem escreve em cada página: se alguém entra no painel, publica em seu nome. Este post mostra, sem floreio, o que o marck0101 tem implementado no login, na recuperação de senha e nos cookies, e por que cada escolha foi feita.</p>
+
+<h2>Login: Google primeiro, senha como reserva</h2>
+
+<p>O painel aceita duas formas de entrar. A principal é o login com a conta Google, que já vem com as proteções do próprio Google. A reserva é e-mail e senha, para o dia em que o Google estiver fora do ar ou a conta der problema.</p>
+
+<p>A senha nunca fica salva como texto. Ela passa pelo bcrypt, um algoritmo feito para guardar senhas, antes de ir para o banco: mesmo quem tivesse acesso direto ao banco não conseguiria ler a senha original. No login, o sistema compara a versão guardada, nunca o valor real. E o login tem limite: depois de 10 tentativas erradas em 15 minutos, o mesmo endereço de rede precisa esperar. Isso segue a recomendação do NIST de limitar tentativas para frear ataques de força bruta (National Institute of Standards and Technology, 2025).</p>
+
+<h2>Segundo fator obrigatório</h2>
+
+<p>Senha certa ou conta Google certa não bastam. Depois do primeiro passo, o painel pede o código de seis dígitos de um aplicativo autenticador (o padrão TOTP, o mesmo do Google Authenticator e similares). Sem o código, o primeiro passo vale só 10 minutos e não abre nada.</p>
+
+<ul>
+  <li><strong>Códigos de recuperação:</strong> ao ativar o segundo fator, o painel gera 10 códigos de uso único, guardados no banco só como resumo criptográfico. Se o celular sumir, um deles libera o acesso, e some depois de usado.</li>
+  <li><strong>Sem exceção em produção:</strong> a opção de pular o segundo fator existe só no ambiente de desenvolvimento e é bloqueada no servidor de produção, para que nenhum erro de configuração desligue a proteção.</li>
+  <li><strong>Por que aplicativo e não SMS:</strong> mensagens de texto podem ser desviadas com a troca fraudulenta do chip do celular. Aplicativo autenticador é o padrão recomendado para a maioria dos casos.</li>
+</ul>
+
+<p>A série <a href="/blog/caso-binance-falsa-sensacao-de-seguranca">Segurança é pauta de diretoria</a> mostra por que isso importa: credenciais roubadas foram a porta de entrada em 22% dos vazamentos analisados pela Verizon em 2025 (Verizon, 2025).</p>
+
+<h2>A sessão: cookie protegido e saída de todos os aparelhos</h2>
+
+<p>Depois do login, a sessão fica num cookie que o JavaScript da página não consegue ler (httpOnly), só trafega por HTTPS em produção e vale 7 dias. Se um script malicioso rodasse na página, ele não teria como copiar a sessão.</p>
+
+<p>Cada sessão carrega um número de versão. Clicar em "sair" sobe esse número, e todas as sessões abertas, em qualquer aparelho, deixam de valer na hora. Redefinir a senha faz o mesmo. É o que permite cortar um acesso suspeito sem esperar o prazo do cookie vencer.</p>
+
+<h2>Recuperação de senha sem atalho inseguro</h2>
+
+<p>Sistema sem caminho de recuperação acaba incentivando gambiarra: senha anotada num papel, reaproveitada "porque é mais fácil de lembrar" ou trocada direto no banco. O fluxo do blog é o padrão:</p>
+
+<ol>
+  <li>O admin pede a redefinição e recebe por e-mail um link com um código aleatório.</li>
+  <li>O código vale 1 hora e fica no banco só como resumo criptográfico, como a senha.</li>
+  <li>Depois de usado, o código some, e todas as sessões abertas são encerradas.</li>
+  <li>O pedido também tem limite: 5 por hora por endereço de rede, para ninguém usar o formulário para lotar a caixa de e-mail.</li>
+</ol>
+
+<p>O OWASP, referência aberta em segurança de aplicações, lista as falhas de autenticação entre os riscos mais comuns da web, e recuperação de senha mal feita é uma das mais exploradas (OWASP Foundation, 2025).</p>
+
+<h2>Cookies e LGPD sem teatro de consentimento</h2>
+
+<p>O banner de cookies dá duas opções reais: "Apenas essenciais" ou "Aceitar todos". Não é um botão único de "ok" fingindo que você concordou com tudo. As ferramentas de medição só carregam depois da escolha, e a <a href="/privacidade">Política de Privacidade</a> explica o que é coletado, para quê e como pedir a exclusão, como pede a LGPD (Brasil, 2018).</p>
+
+<h2>O que o PageSpeed não mostra</h2>
+
+<p>Nada disso aparece numa nota de desempenho. O PageSpeed dava 100 em boas práticas ao blog enquanto o servidor tinha duas bibliotecas com falha crítica conhecida. Como a auditoria de fora encontrou isso e o roteiro mensal que evita a repetição estão em <a href="/blog/blog-rapido-e-seguro-auditoria-e-roteiro-de-monitoramento">Blog rápido e seguro: auditoria e roteiro de monitoramento</a>. Se você contrata um painel ou dashboard para a sua empresa, a mesma lista vale como checklist de cobrança: está em <a href="/blog/dashboards-com-ia-checklist-seguranca-ux">Dashboards com IA: funcionar não é estar pronto</a>.</p>
+
+<p>Segurança não é um projeto que termina: é uma lista que nunca sai de vista. É o mesmo padrão que aplico em sites e painéis de empresas e agências do noroeste do Rio Grande do Sul.</p>
+
+<h2>Referências</h2>
+
+<p>BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais (LGPD). Brasília, DF: Presidência da República, 2018. Disponível em: <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer">https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm</a>. Acesso em: 26 nov. 2026.</p>
+
+<p>NATIONAL INSTITUTE OF STANDARDS AND TECHNOLOGY (Estados Unidos). <strong>Digital identity guidelines</strong>: authentication and authenticator management. Gaithersburg: NIST, 2025. (NIST Special Publication 800-63B-4). Disponível em: <a href="https://pages.nist.gov/800-63-4/sp800-63b.html" target="_blank" rel="noopener noreferrer">https://pages.nist.gov/800-63-4/sp800-63b.html</a>. Acesso em: 26 nov. 2026.</p>
+
+<p>OWASP FOUNDATION. <strong>OWASP Top 10</strong>: 2025. [<em>S. l.</em>]: OWASP, 2025. Disponível em: <a href="https://owasp.org/Top10/2025/" target="_blank" rel="noopener noreferrer">https://owasp.org/Top10/2025/</a>. Acesso em: 26 nov. 2026.</p>
+
+<p>VERIZON. Additional 2025 DBIR research on credential stuffing. [<em>S. l.</em>]: Verizon Business, 2025. Disponível em: <a href="https://www.verizon.com/business/resources/articles/credential-stuffing-attacks-2025-dbir-research/" target="_blank" rel="noopener noreferrer">https://www.verizon.com/business/resources/articles/credential-stuffing-attacks-2025-dbir-research/</a>. Acesso em: 26 nov. 2026.</p>

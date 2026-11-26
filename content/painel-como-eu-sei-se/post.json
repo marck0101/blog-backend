@@ -1,0 +1,34 @@
+{
+  "title": "Como eu sei se um post está funcionando: dados próprios, Clarity e Search Console",
+  "slug": "como-eu-sei-se-um-post-esta-funcionando-dados-proprios-clarity-e-search-console",
+  "excerpt": "Publicar não é o fim, é o início da medição. O que rastreio em cada post, por que nenhuma ferramenta sozinha basta e como isso define o próximo assunto.",
+  "category": "marketing",
+  "status": "draft",
+  "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1791401164676.webp",
+  "faq": [
+    {
+      "question": "Como saber se um post do blog está funcionando?",
+      "answer": "Respondendo três perguntas: as pessoas estão chegando (Search Console), estão lendo de verdade (Clarity) e o que procuram no site e ainda não encontram (busca interna)."
+    },
+    {
+      "question": "Por que registrar a busca interna do blog?",
+      "answer": "Porque ela mostra o que o leitor queria encontrar no seu site e você ainda não escreveu. É demanda validada antes da primeira palavra do próximo post."
+    },
+    {
+      "question": "A busca interna guarda quem pesquisou cada termo?",
+      "answer": "Não. O painel mostra só os termos mais buscados dos últimos 30 dias, de forma agregada."
+    }
+  ],
+  "file": "content.html",
+  "note": "exportado do painel de produção em 26/11/2026",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "metricas",
+    "microsoft-clarity",
+    "search-console",
+    "busca-interna",
+    "blog"
+  ],
+  "directAnswer": "Para saber se um post funciona, cada ferramenta responde uma pergunta: o Search Console mostra como as pessoas chegam pela busca, o Clarity mostra se elas leem de verdade e a busca interna do blog mostra o que elas procuram e ainda não encontram. O termo que se repete sem post correspondente vira pauta com demanda já validada."
+}

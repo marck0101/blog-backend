@@ -1,0 +1,38 @@
+{
+  "title": "Como construí o marck0101: a estratégia, o código e os bastidores que ninguém vê",
+  "slug": "como-construi-o-marck0101-a-estrategia-o-codigo-e-os-bastidores-que-ninguem-ve",
+  "excerpt": "Arquitetura, segurança, deploy, performance e o que o leitor nunca vê: o mapa completo de como este blog foi pensado e construído, peça por peça.",
+  "category": "tecnologia",
+  "status": "draft",
+  "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1791400961568.webp",
+  "faq": [
+    {
+      "question": "Com quais tecnologias o marck0101 foi construído?",
+      "answer": "Backend em Node.js, Express e MongoDB, e frontend em React, em dois repositórios separados que conversam por API. O site e a API rodam na Vercel, cada um no seu subdomínio."
+    },
+    {
+      "question": "Como o blog protege o painel administrativo?",
+      "answer": "Senha com hash, acesso com prazo de validade, recuperação de senha por código temporário de 1 hora e autenticação de dois fatores, além de um banner de cookies e política de privacidade alinhados à LGPD."
+    },
+    {
+      "question": "O que o leitor nunca vê, mas faz o blog ser encontrado?",
+      "answer": "Dados estruturados em cada post, sitemap e feed gerados automaticamente, páginas que chegam prontas para o Google, otimização para buscadores de IA (GEO) e imagens convertidas para WebP."
+    },
+    {
+      "question": "Como saber se um post do blog está funcionando?",
+      "answer": "Combinando dados próprios do painel (visualizações e buscas internas) com Microsoft Clarity e Google Search Console, e transformando o que eles mostram em decisões no calendário editorial."
+    }
+  ],
+  "file": "content.html",
+  "note": "exportado do painel de produção em 26/11/2026",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "bastidores",
+    "arquitetura",
+    "seo",
+    "seguranca",
+    "blog"
+  ],
+  "directAnswer": "O marck0101 foi construído como produto, não como template: frontend e backend separados, páginas públicas pré-renderizadas para busca e IA, painel com login de dois fatores, rotinas que publicam e avisam sozinhas e métricas próprias para decidir a pauta. Cada decisão tem um post próprio, e este é o mapa que liga todos."
+}
