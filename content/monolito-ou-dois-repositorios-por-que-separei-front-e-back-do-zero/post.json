@@ -11,5 +11,23 @@
     "backend"
   ],
   "directAnswer": "Num projeto de uma pessoa só, separar frontend e backend em dois repositórios compensa quando as fronteiras já são claras: cada parte publica sozinha e a API vira um contrato estável. O custo é configurar CORS, dois deploys e manter o contrato. Quando as fronteiras ainda são incertas, começar com um monólito costuma ser mais seguro.",
-  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer."
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer.",
+  "faq": [
+    {
+      "question": "Vale a pena separar frontend e backend num projeto de uma pessoa só?",
+      "answer": "No marck0101, valeu: deploys independentes, falhas isoladas e páginas mais leves para o leitor. Funciona quando a fronteira entre as partes é estável, e frontend/backend é uma das mais estáveis que existem."
+    },
+    {
+      "question": "Qual o principal custo de ter dois repositórios?",
+      "answer": "Coordenação. São duas configurações e dois deploys, e mudanças no contrato da API ou erros de CORS só quebram depois de publicados. A solução é documentar o contrato da API desde o primeiro dia."
+    },
+    {
+      "question": "Se a API cair, o blog sai do ar?",
+      "answer": "Parcialmente. O blog ainda mostra o que já está carregado no navegador, mas conteúdo novo, login e painel param. A separação não elimina a falha, ela limita até onde a falha chega."
+    },
+    {
+      "question": "Quando é melhor começar com um monólito?",
+      "answer": "Quando as fronteiras entre as partes ainda não estão claras. Na dúvida, um sistema único bem organizado é a melhor opção."
+    }
+  ]
 }

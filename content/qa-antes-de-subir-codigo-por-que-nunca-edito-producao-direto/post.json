@@ -10,5 +10,23 @@
     "boas praticas"
   ],
   "directAnswer": "QA num projeto de uma pessoa só é a rotina de gerar a versão final localmente, testar a funcionalidade nova e as antigas que ela pode afetar, num banco separado do de produção, e só então subir o código. Não exige testador dedicado; exige nunca assumir que uma mudança funciona só porque parece certa no código.",
-  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer."
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer.",
+  "faq": [
+    {
+      "question": "O que é QA num projeto de uma pessoa só?",
+      "answer": "É a rotina de verificar antes de publicar: gerar a versão final localmente, testar o fluxo manualmente e chamar as rotas novas da API antes de considerar a mudança pronta."
+    },
+    {
+      "question": "Por que não testar direto em produção?",
+      "answer": "Porque cada teste viraria um risco para o conteúdo publicado. Desenvolvimento usa um banco local onde dá para quebrar e recomeçar; produção usa outro banco, na nuvem."
+    },
+    {
+      "question": "Testar só a funcionalidade nova é suficiente?",
+      "answer": "Não. Toda mudança também precisa confirmar que o que já existia continua funcionando, e essa parte costuma ser maior e mais fácil de esquecer."
+    },
+    {
+      "question": "Quando os testes manuais deixam de ser suficientes?",
+      "answer": "Quando o projeto cresce em equipe ou complexidade. A partir daí, a verificação manual precisa virar testes automatizados."
+    }
+  ]
 }

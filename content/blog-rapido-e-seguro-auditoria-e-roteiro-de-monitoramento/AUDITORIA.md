@@ -49,3 +49,7 @@ Em 15/06/2026 o Google acrescentou ao guia de otimização para IA que o /llms.t
 ## Achado de 27/11: placeholder no ar
 
 O post **publicado** tem um trecho a completar visível para o leitor, na seção 9.1: "um monitor externo gratuito verifica a cada 5 minutos (...) **[A COMPLETAR: ferramenta escolhida.]**". O `scripts/update-published.js` recusa esta pasta até o trecho ser preenchido com o nome da ferramenta (ou a frase ser reescrita sem ela).
+
+## Correção aplicada em 26/11/2026 (loop)
+
+O [A COMPLETAR] da seção 9.1 virou: "Serviços como o UptimeRobot fazem essa verificação no plano gratuito." Se você escolher outra ferramenta, troque o nome.

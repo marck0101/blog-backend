@@ -10,5 +10,23 @@
     "carreira"
   ],
   "directAnswer": "Saber programar dá ao gestor de tráfego autonomia para medir antes de escalar: configurar GTM, API de Conversões e Data Layer sem depender de outro time, montar dashboards com os dados das plataformas e explicar ROAS, CAC e CPL de um jeito que o cliente entende. O código vira vantagem quando encurta o caminho entre o dado e a decisão.",
-  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run) SÓ depois de resolver os números (ver AUDITORIA.md)."
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run) SÓ depois de resolver os números (ver AUDITORIA.md).",
+  "faq": [
+    {
+      "question": "Como um desenvolvedor vira gestor de tráfego?",
+      "answer": "No meu caso, a transição foi natural: comecei dando suporte técnico em rastreamento e métricas, passei a explicar ROAS, CAC e CPL para clientes e acabei assumindo a gestão das campanhas, sem parar de programar."
+    },
+    {
+      "question": "Por que saber programar ajuda na gestão de tráfego?",
+      "answer": "Rastreamento avançado é engenharia de software aplicada ao comportamento do usuário. Quem programa implementa GTM, Data Layer, CAPI e eventos customizados sozinho, com mais velocidade e menos ruído nos dados."
+    },
+    {
+      "question": "Que resultados essa combinação de tecnologia e mídia paga já gerou?",
+      "answer": "Entre outros: R$ 956K+ em receita para um cliente de turismo com ROAS de cerca de 35x, R$ 393K de receita em Hotel Ads para um hotel 5 estrelas e dashboards com API que substituíram ferramentas pagas de BI."
+    },
+    {
+      "question": "Sobre o que é o blog marck0101?",
+      "answer": "Sobre a interseção entre tecnologia e performance: como desenvolvimento e marketing digital se alimentam e o que muda quando você para de tratá-los como mundos separados."
+    }
+  ]
 }

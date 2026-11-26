@@ -22,7 +22,7 @@
     },
     {
       "question": "Uma ferramenta de benchmarking pode derrubar meu site?",
-      "answer": "Não. Ferramentas como o PageSpeed fazem poucas requisições, medem e vão embora. Só um crawler malicioso, com milhares de requisições por segundo, vira problema, e aí entram rate limiting e monitoramento."
+      "answer": "Dificilmente. Ferramentas como o PageSpeed fazem poucas requisições, medem e vão embora. O risco vem de robôs maliciosos que disparam milhares de requisições por segundo, e contra eles entram o limite de requisições e o monitoramento."
     },
     {
       "question": "Um FAQ ajuda o site a aparecer no Google e nas IAs?",

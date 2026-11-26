@@ -20,3 +20,7 @@ Revisão de 27/11/2026. Base: o HTML publicado. O `content.html` desta pasta é 
 ## SEO
 
 `cluster: trafego-pago-medido`, 4 tags e resposta direta (o post não tinha). O post tem 461 palavras; quando os números forem confirmados, vale crescer com a história de um caso, já que ele é a porta de entrada do tema Tráfego pago medido.
+
+## Correção aplicada em 26/11/2026 (loop)
+
+O item 3 saiu do ar com a conta errada: a frase virou "R$ 393K de receita em Hotel Ads para hotel 5 estrelas", sem o ROAS e sem o investimento, porque não dá para saber qual dos dois está errado. Quando você confirmar (ROAS 7,4x com R$ 53K, ou ~74x com R$ 5,3K), recoloque a frase completa com o período e a fonte.

@@ -11,5 +11,19 @@
     "cro"
   ],
   "directAnswer": "Para decidir o que otimizar primeiro, cruze o PageSpeed (o que está lento e por quê) com o Clarity (onde o visitante trava, clica sem resposta ou desiste) e priorize o que afeta todas as páginas e todos os leitores. No blog, a nota no celular era 53, com o maior elemento da página levando mais de 7 segundos para aparecer.",
-  "note": "Correção de post existente; aplicar pelo scripts/update-published.js."
+  "note": "Correção de post existente; aplicar pelo scripts/update-published.js.",
+  "faq": [
+    {
+      "question": "O que o PageSpeed Insights mede?",
+      "answer": "Principalmente LCP (tempo até o maior elemento visível carregar), CLS (layout que pula enquanto carrega) e INP (resposta a cliques e toques). O Google considera essas métricas na experiência da página, mas a relevância do conteúdo continua pesando mais."
+    },
+    {
+      "question": "Qual a diferença entre PageSpeed e Microsoft Clarity?",
+      "answer": "O PageSpeed mede performance técnica. O Clarity mostra o comportamento real dos visitantes, com mapa de calor e gravação de sessão, como cliques em algo que não é clicável."
+    },
+    {
+      "question": "Como decidir o que otimizar primeiro?",
+      "answer": "Problemas que afetam todas as páginas, como LCP alto por imagem pesada, têm prioridade alta. Atritos isolados vistos no Clarity entram na fila junto com as outras prioridades de produto."
+    }
+  ]
 }

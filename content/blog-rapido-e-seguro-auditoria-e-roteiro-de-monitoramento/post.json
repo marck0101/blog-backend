@@ -12,5 +12,27 @@
     "monitoramento",
     "lgpd"
   ],
-  "note": "Post publicado: aplicar pelo script da Sprint 3 (atualiza publicado com --dry-run). Só content, cluster e directAnswer mudam."
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (atualiza publicado com --dry-run). Só content, cluster e directAnswer mudam.",
+  "faq": [
+    {
+      "question": "Nota alta no PageSpeed significa que o site é seguro?",
+      "answer": "Não. O blog tinha nota 100 em práticas recomendadas enquanto o servidor usava duas bibliotecas com vulnerabilidade crítica conhecida. O PageSpeed avalia o que chega ao navegador; as dependências do servidor precisam de outra verificação, como o npm audit."
+    },
+    {
+      "question": "Como proteger um formulário de newsletter?",
+      "answer": "Tratar as entradas só como texto, responder igual para e-mail novo e já inscrito, usar um código aleatório no link de cancelamento e limitar quantas inscrições um mesmo endereço de rede pode fazer em um intervalo de tempo."
+    },
+    {
+      "question": "Com que frequência monitorar desempenho, segurança e SEO?",
+      "answer": "Disponibilidade de forma contínua e automática; PageSpeed e Search Console toda semana; dependências, cabeçalhos de segurança e dados estruturados todo mês; e uma checagem rápida a cada post publicado."
+    },
+    {
+      "question": "Por que meu site é lento no celular mesmo com imagens otimizadas?",
+      "answer": "Muitas vezes o problema é a fila de carregamento, e não o peso da imagem. Se o navegador só descobre a imagem principal depois do JavaScript e das chamadas à API, ela começa a baixar tarde. Entregar os dados no HTML e avisar o navegador sobre a imagem logo no início costuma trazer mais ganho do que comprimir arquivos."
+    },
+    {
+      "question": "Ferramentas de análise deixam o site mais lento?",
+      "answer": "Podem deixar, principalmente no celular. No blog marck0101, GA4, Meta Pixel e Clarity somavam cerca de 400 KB e disputavam a rede com a página. Adiá-las para a primeira interação ou 3 segundos após o carregamento levou o LCP para dentro da meta, com o custo de não registrar visitas muito curtas."
+    }
+  ]
 }

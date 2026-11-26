@@ -10,5 +10,19 @@
     "gestao de projetos"
   ],
   "directAnswer": "A lei de Brooks (1975) diz que pôr mais gente num projeto atrasado o atrasa ainda mais, porque as linhas de comunicação crescem mais rápido que o time: 2 pessoas têm 1 linha, 10 têm 45. Com IA o problema se inverte: uma pessoa faz tudo, rápido, mas sem a experiência para ver as falhas de backend, segurança, banco e testes que o código gerado deixa.",
-  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer."
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer.",
+  "faq": [
+    {
+      "question": "O que diz a Lei de Brooks?",
+      "answer": "Que colocar mais gente num projeto atrasado não divide o trabalho proporcionalmente: multiplica as linhas de comunicação. Com 2 pessoas existe 1 linha; com 10, são 45."
+    },
+    {
+      "question": "A IA é um retrocesso no desenvolvimento?",
+      "answer": "Não por si só. O retrocesso acontece quando alguém usa a IA para produzir em camadas que não entende, como segurança, backend, banco e testes, sem saber avaliar o que ela entregou."
+    },
+    {
+      "question": "Por que a IA deixa brechas de segurança e de lógica?",
+      "answer": "Porque ela faz o que é pedido e completa o resto com o caminho mais provável. Se ninguém pede validação no servidor, controle de acesso ou teste de caso de borda, isso fica de fora."
+    }
+  ]
 }

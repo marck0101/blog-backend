@@ -11,5 +11,23 @@
     "infraestrutura"
   ],
   "directAnswer": "Colocar um projeto no ar é uma sequência de cinco etapas: registrar o domínio no nome da empresa, apontar o DNS, versionar o código no Git, separar o banco de desenvolvimento do de produção e fazer o deploy. Resolvidas em ordem, elas dão controle sobre o projeto sem exigir que você seja especialista em infraestrutura.",
-  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer."
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer.",
+  "faq": [
+    {
+      "question": "Quais são as etapas para colocar um projeto no ar?",
+      "answer": "Cinco, nesta ordem: registrar o domínio, configurar o DNS, versionar o código com Git, separar os bancos de desenvolvimento e produção e fazer o deploy."
+    },
+    {
+      "question": "Preciso hospedar o site onde comprei o domínio?",
+      "answer": "Não. Comprar o domínio só reserva o nome. O DNS aponta esse nome para a hospedagem que você escolher, como a Vercel, e trocar de hospedagem vira só uma mudança de configuração."
+    },
+    {
+      "question": "Quanto tempo leva para o DNS propagar?",
+      "answer": "De minutos a algumas horas. Nesse intervalo o domínio pode não resolver, e isso é normal: não refaça a configuração, espere."
+    },
+    {
+      "question": "Por que usar bancos separados para desenvolvimento e produção?",
+      "answer": "Para que nenhum teste encoste nos dados reais. O endereço de conexão fica em variáveis de ambiente, fora do código, e nunca vai para o GitHub."
+    }
+  ]
 }

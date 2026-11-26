@@ -11,5 +11,23 @@
     "lgpd"
   ],
   "directAnswer": "Uma dashboard feita com IA está pronta quando, além de funcionar na tela, tem os dados conferidos com a fonte, estados de carregando, sucesso e erro, perfis de acesso validados no servidor (Row Level Security no Supabase), login com dois fatores, senha com hash, limite de tentativas, política de privacidade publicada e a área logada fora da busca.",
-  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer (o post não tinha tags nem resposta direta)."
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer (o post não tinha tags nem resposta direta).",
+  "faq": [
+    {
+      "question": "Uma dashboard feita com IA está pronta para clientes?",
+      "answer": "Não necessariamente. A IA entrega o que foi pedido, e o risco está no que ninguém pediu: dados expostos na API, falta de controle de acesso, senhas sem hash e ausência de política de privacidade."
+    },
+    {
+      "question": "O que definir antes do primeiro prompt de uma dashboard?",
+      "answer": "Quatro coisas: o público (diretoria ou analista), as métricas que realmente ajudam a decidir, quem pode ver, editar e excluir o quê, e como o usuário interage com a tela."
+    },
+    {
+      "question": "Esconder um botão na interface protege os dados?",
+      "answer": "Não. Controle de acesso precisa estar no servidor e no banco. Em projetos com Supabase, como os do Lovable, isso significa ativar Row Level Security em todas as tabelas."
+    },
+    {
+      "question": "A área logada de uma dashboard deve aparecer no Google?",
+      "answer": "Não. Ela fica fora do sitemap e usa noindex, enquanto landing e blog devem ser indexáveis. Mas robots.txt e noindex não são segurança: quem protege a dashboard é autenticação e controle de acesso."
+    }
+  ]
 }

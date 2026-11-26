@@ -3,5 +3,19 @@
   "status": "published",
   "cluster": "seguranca-na-diretoria",
   "isPillar": false,
-  "note": "Post publicado: aplicar pelo script da Sprint 3 (atualiza publicado com --dry-run). Só content e cluster mudam; tags, FAQ e resposta direta já existem. Pilar do tema: a season Segurança é pauta de diretoria."
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (atualiza publicado com --dry-run). Só content e cluster mudam; tags, FAQ e resposta direta já existem. Pilar do tema: a season Segurança é pauta de diretoria.",
+  "faq": [
+    {
+      "question": "Como saber se meu e-mail está em algum vazamento de dados?",
+      "answer": "Digite seu e-mail no Have I Been Pwned ou no Mozilla Monitor, que são gratuitos e mostram em quais vazamentos conhecidos ele aparece. Ative os alertas para ser avisado de vazamentos futuros."
+    },
+    {
+      "question": "Como o roubo de US$ 6,3 bilhões da Binance aconteceu?",
+      "answer": "Segundo o relatório preliminar da Binance, os atacantes passaram meses usando um anúncio falso e uma entrevista de emprego falsa para infectar computadores de engenheiros. Com esse acesso, controlaram o serviço interno que assina as transações. O FBI atribuiu o ataque à Coreia do Norte."
+    },
+    {
+      "question": "Como um sistema deve obrigar o usuário a usar senhas fortes?",
+      "answer": "Seguindo o NIST: exigir comprimento mínimo (15 caracteres sem MFA, 8 com MFA), bloquear senhas vazadas ou óbvias e oferecer MFA e passkeys. Regras de símbolos obrigatórios e troca periódica sem motivo não são recomendadas."
+    }
+  ]
 }
