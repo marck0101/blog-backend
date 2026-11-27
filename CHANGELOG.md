@@ -2,6 +2,11 @@
 
 Formato livre, mais recente primeiro. Mudança de regra de negócio também vai em `docs/SISTEMA.md`.
 
+## 27/11/2026 · Sprint R5 · Experimentos no site
+
+- Novo: `GET /api/experiments/ativos` (público, cache de 60s) com os experimentos rodando que têm alvo e variantes (`chave`, `alvo`, `variantes`), sem nenhum campo interno.
+- Experimento ganha `chave`, `alvo` (`pre-diagnostico-cta`) e `variantes` (2 a 4 textos); os três juntos, chave única, um rodando por alvo.
+- Testes: validação, só rodando listados, sem vazamento de campos, lista vazia.
 ## 27/11/2026 · Sprints C5 e C3 · Automações e Placar semanal
 
 - Novo: `GET /api/cockpit/automacoes` (estado e 10 últimas execuções por rotina, com `nunca_rodou`).

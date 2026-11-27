@@ -112,6 +112,7 @@ app.use("/api/csp-report", require("./routes/csp.routes"));
 app.use("/api/settings", require("./routes/settings.routes"));
 app.use("/api/suggestions", require("./routes/suggestion.routes"));
 app.use("/api/cockpit", require("./routes/cockpit.routes"));
+app.use("/api/experiments", require("./routes/experiment.routes"));
 app.use("/", sitemapRoutes);
 
 /**

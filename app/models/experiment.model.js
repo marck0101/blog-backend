@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { AREAS, STATUSES, DECISIONS } = require("../config/cockpitExperiments");
+const { AREAS, STATUSES, DECISIONS, ALVOS, SLUG } = require("../config/cockpitExperiments");
 
 const score = { type: Number, required: true, min: 1, max: 5 };
 
@@ -20,6 +20,13 @@ const ExperimentSchema = new mongoose.Schema(
     status: { type: String, enum: STATUSES, default: "ideia" },
     variants: {
       type: [{ _id: false, name: { type: String, required: true, trim: true, maxlength: 60 }, description: { type: String, trim: true, maxlength: 400, default: "" } }],
+      default: [],
+    },
+    // Sorteio no site (R5): `chave` identifica o experimento no GA4; `alvo` é o espaço do site; `variantes` são os textos
+    chave: { type: String, trim: true, lowercase: true, maxlength: 60, match: SLUG, default: null },
+    alvo: { type: String, enum: [...ALVOS, null], default: null },
+    variantes: {
+      type: [{ _id: false, chave: { type: String, required: true, trim: true, lowercase: true, maxlength: 40, match: SLUG }, texto: { type: String, required: true, trim: true, maxlength: 200 } }],
       default: [],
     },
     result: {
@@ -43,5 +50,7 @@ ExperimentSchema.pre("validate", function () {
 });
 
 ExperimentSchema.index({ deletedAt: 1, status: 1, iceScore: -1 });
+// chave única entre os que têm chave (null não conta)
+ExperimentSchema.index({ chave: 1 }, { unique: true, partialFilterExpression: { chave: { $type: "string" } } });
 
 module.exports = mongoose.models.Experiment || mongoose.model("Experiment", ExperimentSchema);

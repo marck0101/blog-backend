@@ -12,6 +12,12 @@ const TRANSITIONS = {
   descartado: ["ideia"],
 };
 
+// Espaços do site que aceitam variante de texto (Sprint R5); cada um precisa de código no front
+const ALVOS = ["pre-diagnostico-cta"];
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const VARIANTES_MIN = 2;
+const VARIANTES_MAX = 4;
+
 const LINK_GROUPS = ["anuncios", "analytics", "sistemas", "documentos", "clientes", "outros"];
 
-module.exports = { AREAS, STATUSES, DECISIONS, TRANSITIONS, LINK_GROUPS };
+module.exports = { AREAS, STATUSES, DECISIONS, TRANSITIONS, LINK_GROUPS, ALVOS, SLUG, VARIANTES_MIN, VARIANTES_MAX };

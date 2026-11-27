@@ -1,7 +1,7 @@
 const { z } = require("zod");
 const { MAX_ITEMS, ALLOWED_KEYS, SOURCES, PLACAR_METRICS, PLACAR_META_MAX } = require("../config/cockpit");
 const { parseDayKey } = require("../utils/dates");
-const { AREAS, STATUSES, DECISIONS, LINK_GROUPS } = require("../config/cockpitExperiments");
+const { AREAS, STATUSES, DECISIONS, LINK_GROUPS, ALVOS, SLUG, VARIANTES_MIN, VARIANTES_MAX } = require("../config/cockpitExperiments");
 
 const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 const WEEK = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/;
@@ -83,6 +83,14 @@ const dateField = z
 const HYPOTHESIS = /\bse\b[\s\S]+\bent[aã]o\b[\s\S]+\bporque\b[\s\S]+/i;
 
 const variant = z.object({ name: text(60).min(1), description: text(400).optional() }).strict();
+const slug = (max) => z.string().trim().toLowerCase().min(1).max(max).regex(SLUG, { error: "Use só letras minúsculas, números e hífen" });
+const variante = z.object({ chave: slug(40), texto: text(200).min(1) }).strict();
+// [] limpa; senão 2 a 4 variantes com chaves diferentes
+const variantes = z
+  .array(variante)
+  .max(VARIANTES_MAX, { error: `No máximo ${VARIANTES_MAX} variantes` })
+  .refine((a) => a.length === 0 || a.length >= VARIANTES_MIN, { error: `Use pelo menos ${VARIANTES_MIN} variantes` })
+  .refine((a) => new Set(a.map((v) => v.chave)).size === a.length, { error: "Chaves de variante repetidas" });
 const resultPatch = z
   .object({
     summary: text(1000),
@@ -95,7 +103,7 @@ const resultPatch = z
   .partial()
   .strict();
 
-const experimentCreateBody = z
+const experimentBase = z
   .object({
     title: text(120).min(3),
     hypothesis: text(600).regex(HYPOTHESIS, { error: 'hypothesis: use o formato "Se … então … porque …"' }),
@@ -107,11 +115,21 @@ const experimentCreateBody = z
     minSample: z.number().int().min(0).nullable().optional(),
     plannedEnd: dateField.nullable().optional(),
     variants: z.array(variant).max(6).optional(),
+    chave: slug(60).nullable().optional(),
+    alvo: z.enum(ALVOS).nullable().optional(),
+    variantes: variantes.optional(),
     result: resultPatch.optional(),
   })
   .strict();
 
-const experimentUpdateBody = experimentCreateBody
+// ao criar: ou nenhum dos três campos do sorteio, ou os três juntos
+const experimentCreateBody = experimentBase.refine(
+  (b) => !(b.variantes?.length || b.alvo || b.chave) || (b.variantes?.length && b.alvo && b.chave),
+  { error: "Sorteio no site pede chave, alvo e variantes juntos" }
+);
+
+// ao editar a regra "juntos" é conferida na rota, sobre o documento já com a mudança
+const experimentUpdateBody = experimentBase
   .partial()
   .refine((b) => Object.keys(b).length > 0, { error: "Nenhum campo informado" });
 

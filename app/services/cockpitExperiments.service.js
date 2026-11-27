@@ -35,6 +35,33 @@ function planTransition(exp, to, resultPatch = {}, now = new Date()) {
   return { set };
 }
 
+/**
+ * Sorteio no site (R5): chave, alvo e variantes andam juntos (os três ou nenhum).
+ * Devolve mensagem de erro ou null.
+ */
+function siteDraftError(exp) {
+  const temVariantes = (exp.variantes || []).length > 0;
+  const preenchidos = [Boolean(exp.chave), Boolean(exp.alvo), temVariantes].filter(Boolean).length;
+  if (preenchidos !== 0 && preenchidos !== 3) return "Sorteio no site pede chave, alvo e variantes juntos";
+  return null;
+}
+
+/** Já existe outro experimento rodando no mesmo espaço do site? (senão dois sorteios brigam pelo mesmo texto) */
+async function alvoOcupado(Experiment, exp) {
+  if (!exp.alvo) return false;
+  const outro = await Experiment.exists({ _id: { $ne: exp._id }, deletedAt: null, status: "rodando", alvo: exp.alvo });
+  return Boolean(outro);
+}
+
+/** Formato público do sorteio: só o que o site precisa, nunca hipótese, métrica, notas ou id */
+function toPublicActive(exp) {
+  return {
+    chave: exp.chave,
+    alvo: exp.alvo,
+    variantes: (exp.variantes || []).map((v) => ({ chave: v.chave, texto: v.texto })),
+  };
+}
+
 // Experimentos rodando que passaram da data prevista (viram item em "precisa de ação")
 async function overdueRunning(Experiment, now = new Date()) {
   return Experiment.find({ deletedAt: null, status: "rodando", plannedEnd: { $lt: now } })
@@ -42,4 +69,4 @@ async function overdueRunning(Experiment, now = new Date()) {
     .lean();
 }
 
-module.exports = { planTransition, overdueRunning };
+module.exports = { planTransition, overdueRunning, siteDraftError, alvoOcupado, toPublicActive };
