@@ -19,7 +19,7 @@ const CLUSTERS = [
     slug: "trafego-pago-medido",
     title: "Tráfego pago medido",
     description:
-      "Google Ads e Meta Ads para pequenas e médias empresas do interior do RS, com tracking configurado antes do primeiro real.",
+      "Google Ads e Meta Ads para negócios locais do interior do RS, com tracking configurado antes do primeiro real.",
   },
   {
     slug: "seguranca-na-diretoria",
