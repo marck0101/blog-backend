@@ -413,6 +413,10 @@ consultar o Google, e os dados ficam num lugar só.
 - [ ] **C1 · Fontes reais** · `prospect0101`, `benchmark0101`, `reports` · M
   - Cada sistema passa a enviar retratos e sinal de vida. **Pronto quando:** os tiles de
     prospecção e as rotinas deixam de aparecer como "sem dados"/"atrasada".
+- [x] **C4 · Experimentos** · `blog-backend` + `blog-front` · M — feito em 27/11/2026 (branch `feat/cockpit-c4-c6`, empilhada no C0)
+  - Registro com hipótese, ICE, variantes e resultado; kanban por status; regras R-COCKPIT-06 e 07.
+- [x] **C6 · Links** · `blog-backend` + `blog-front` · P — feito em 27/11/2026 (mesma branch)
+  - Atalhos agrupados, só https (R-COCKPIT-08). Sub-navegação do Cockpit: Hoje | Experimentos | Links.
 
 ---
 

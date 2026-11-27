@@ -1021,3 +1021,33 @@ reenviar atualiza), `JobRun` (execução de rotina; some sozinha após 90 dias),
   nunca derruba o cron.
 - Blog no Hoje (leituras 7 dias vs 7 anteriores, assinantes ativos, novos no mês) sai direto do
   banco (`PostDailyStat`, `Subscriber`); cada tile devolve `source`, `updatedAt` e `staleAfterSec`.
+
+### Experimentos e Links (Sprints C4 e C6)
+
+Registro de experimentos de crescimento (hipótese, ICE, variantes, resultado) e atalhos do
+painel. Tudo admin (sessão + 2º fator; escrita exige origem do painel). Modelos `Experiment`
+(exclusão lógica por `deletedAt`, como os posts) e `CockpitLink`. Regras em
+`app/services/cockpitExperiments.service.js`; listas fechadas em `app/config/cockpitExperiments.js`.
+
+| Rota | O que faz |
+|---|---|
+| `GET /api/cockpit/experiments?status=&area=` | lista (fora os apagados), maior ICE primeiro |
+| `POST /api/cockpit/experiments` | cria sempre em `ideia` |
+| `PUT /api/cockpit/experiments/:id` | edita campos e resultado; **não** muda status |
+| `POST /api/cockpit/experiments/:id/transition` | `{ status, result? }` muda o status com as regras abaixo |
+| `DELETE /api/cockpit/experiments/:id` | exclusão lógica |
+| `GET/POST /api/cockpit/links`, `PUT/DELETE /api/cockpit/links/:id` | atalhos (grupo, nota, ordem) |
+
+- **R-COCKPIT-06 Experimentos:** hipótese no formato "Se … então … porque …" (422 se faltar uma
+  das palavras). ICE = impacto × confiança × facilidade (cada um 1–5, inteiro), calculado no
+  servidor (1 a 125). Transições: ideia → planejado/descartado; planejado → ideia/rodando/descartado;
+  rodando → planejado/analisando/descartado; analisando → rodando/concluído/descartado;
+  concluído → analisando; descartado → ideia. **Rodando** exige métrica principal, data prevista
+  de fim e pelo menos 2 variantes. **Concluído** exige resumo, decisão (adotar/descartar/repetir) e
+  aprendizado (podem vir na própria transição ou já salvos). `startedAt` grava na 1ª ida a rodando
+  (mantido ao voltar de analisando; limpo em ideia/planejado); `finishedAt` grava em
+  concluído/descartado e é limpo ao reabrir.
+- **R-COCKPIT-07 Experimento vencido:** `rodando` com data prevista no passado vira item
+  "precisa de ação" (`experimentos-vencidos`, com `count`) na página Hoje.
+- **R-COCKPIT-08 Links só https:** `https://` com host, sem usuário/senha na URL; `http:`,
+  `javascript:`, `data:`, endereço sem protocolo e outros esquemas dão 422.

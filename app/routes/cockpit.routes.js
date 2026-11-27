@@ -6,6 +6,10 @@ const MetricSnapshot = require("../models/metricSnapshot.model");
 const JobDefinition = require("../models/jobDefinition.model");
 const CockpitNonce = require("../models/cockpitNonce.model");
 const SiteSettings = require("../models/siteSettings.model");
+const Experiment = require("../models/experiment.model");
+const CockpitLink = require("../models/cockpitLink.model");
+const { LINK_GROUPS } = require("../config/cockpitExperiments");
+const { planTransition } = require("../services/cockpitExperiments.service");
 const { validate } = require("../validation/validate");
 const schemas = require("../validation/cockpit.schemas");
 const { blockedFor, hit, tooMany } = require("../services/ratelimit.service");
@@ -171,6 +175,119 @@ router.put("/meta", auth, validate({ body: schemas.metaBody }), async (req, res,
       { upsert: true, setDefaultsOnInsert: true }
     );
     res.json({ valor: req.body.valor });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ===== Experimentos =====
+
+router.get("/experiments", auth, validate({ query: schemas.experimentListQuery }), async (req, res, next) => {
+  try {
+    await connectDB();
+    res.set("Cache-Control", "no-store");
+    const filter = { deletedAt: null };
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.area) filter.area = req.query.area;
+    const experiments = await Experiment.find(filter).sort({ iceScore: -1, createdAt: -1 }).limit(500).lean();
+    res.json({ experiments });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/experiments", auth, validate({ body: schemas.experimentCreateBody }), async (req, res, next) => {
+  try {
+    await connectDB();
+    const doc = await Experiment.create({ ...req.body, status: "ideia" });
+    res.status(201).json({ experiment: doc });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put("/experiments/:id", auth, validate({ params: schemas.idParams, body: schemas.experimentUpdateBody }), async (req, res, next) => {
+  try {
+    await connectDB();
+    const doc = await Experiment.findOne({ _id: req.params.id, deletedAt: null });
+    if (!doc) return res.status(404).json(errorBody("Experimento não encontrado"));
+    const { result, ...rest } = req.body;
+    doc.set(rest);
+    if (result) doc.set("result", { ...doc.result.toObject(), ...result });
+    await doc.save();
+    res.json({ experiment: doc });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/experiments/:id/transition", auth, validate({ params: schemas.idParams, body: schemas.experimentTransitionBody }), async (req, res, next) => {
+  try {
+    await connectDB();
+    const doc = await Experiment.findOne({ _id: req.params.id, deletedAt: null });
+    if (!doc) return res.status(404).json(errorBody("Experimento não encontrado"));
+    const plan = planTransition(doc, req.body.status, req.body.result);
+    if (plan.error) return res.status(422).json(errorBody(plan.error));
+    doc.set(plan.set);
+    await doc.save();
+    res.json({ experiment: doc });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/experiments/:id", auth, validate({ params: schemas.idParams }), async (req, res, next) => {
+  try {
+    await connectDB();
+    const doc = await Experiment.findOneAndUpdate({ _id: req.params.id, deletedAt: null }, { $set: { deletedAt: new Date() } });
+    if (!doc) return res.status(404).json(errorBody("Experimento não encontrado"));
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ===== Links =====
+
+router.get("/links", auth, async (req, res, next) => {
+  try {
+    await connectDB();
+    res.set("Cache-Control", "no-store");
+    const links = await CockpitLink.find({}).sort({ order: 1, label: 1 }).limit(500).lean();
+    // Grupos na ordem da lista fechada (não alfabética); dentro do grupo, por ordem e nome
+    links.sort((a, b) => LINK_GROUPS.indexOf(a.group) - LINK_GROUPS.indexOf(b.group));
+    res.json({ links });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/links", auth, validate({ body: schemas.linkCreateBody }), async (req, res, next) => {
+  try {
+    await connectDB();
+    res.status(201).json({ link: await CockpitLink.create(req.body) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put("/links/:id", auth, validate({ params: schemas.idParams, body: schemas.linkUpdateBody }), async (req, res, next) => {
+  try {
+    await connectDB();
+    const doc = await CockpitLink.findByIdAndUpdate(req.params.id, { $set: req.body }, { returnDocument: "after", runValidators: true }).lean();
+    if (!doc) return res.status(404).json(errorBody("Link não encontrado"));
+    res.json({ link: doc });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/links/:id", auth, validate({ params: schemas.idParams }), async (req, res, next) => {
+  try {
+    await connectDB();
+    const doc = await CockpitLink.findByIdAndDelete(req.params.id);
+    if (!doc) return res.status(404).json(errorBody("Link não encontrado"));
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }
