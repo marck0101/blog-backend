@@ -1,0 +1,36 @@
+{
+  "title": "Painel de vendas para dono de negócio: 7 números por semana",
+  "slug": "painel-de-vendas-para-dono-de-negocio",
+  "excerpt": "Números em cinco lugares e decisão no feeling? Veja os 7 números, as metas e o ritual de 15 minutos de um painel de vendas para olhar toda segunda.",
+  "category": "negocios",
+  "cluster": "dashboards-e-bi",
+  "isPillar": false,
+  "tags": [
+    "painel de vendas",
+    "dashboard",
+    "ticket médio",
+    "cac",
+    "negócios locais"
+  ],
+  "directAnswer": "Um painel de vendas para dono de negócio cabe numa tela e tem sete números: faturamento, ticket médio, novos contatos por origem, conversão de contato em venda, investimento em anúncios, custo por venda (CAC) e clientes que voltaram. Cada um tem meta e cor (verde, amarelo, vermelho) e é olhado em 15 minutos toda segunda. Comece numa planilha.",
+  "file": "content.html",
+  "plannedAt": null,
+  "faq": [
+    {
+      "question": "Dá para fazer um painel de vendas no Google Sheets?",
+      "answer": "Dá. Uma linha por semana e uma coluna por número bastam. As fórmulas calculam ticket médio, conversão e custo por venda, e o formato condicional pinta as células de verde, amarelo e vermelho. Quando a digitação pesar, conecte a planilha ao Looker Studio."
+    },
+    {
+      "question": "Quanto custa não ter um painel?",
+      "answer": "O custo aparece como atraso: um anúncio sem retorno segue rodando por semanas, um atendimento que perde vendas passa despercebido e o problema só surge no fechamento do mês. Uma conta simples: o que você investe por semana em anúncios multiplicado pelas semanas até perceber o erro."
+    },
+    {
+      "question": "Por onde começo um painel de vendas?",
+      "answer": "Escolha os sete números do texto, abra uma planilha e preencha a última semana com o que você já tem. O que faltar, como a origem dos contatos, vira a primeira coisa a registrar daqui para frente. Defina as metas só depois de quatro semanas de histórico."
+    },
+    {
+      "question": "Quanto tempo por semana dá o painel?",
+      "answer": "O ritual é de 15 minutos na segunda-feira. Atualizar a planilha à mão pode somar alguns minutos no começo; com as fontes conectadas, o tempo cai e o que sobra é decidir o que fazer com cada cor."
+    }
+  ]
+}

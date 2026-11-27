@@ -20,6 +20,51 @@ Agendados no banco de produção com `scripts/schedule-post.js` (status planned,
 | 01/03 a 05/04 | Segurança é pauta de diretoria, episódios 5 a 10 | revisados, com capa |
 | livre | ep. 1 da Mídia paga (Google Ads do zero) entra quando os 3 prints existirem; depois pilar de Tráfego e ep. 2 | o script recusa texto com [A COMPLETAR] |
 
+## R8.3: posts com intenção de compra (27/11/2026)
+
+Decisão do Marcos: alternar. Um post comercial (um por serviço do catálogo servicos.marck0101.com.br) a cada duas segundas, a partir de 14/12. O resto da agenda de produção segue na ordem atual, empurrado para frente.
+
+Rascunhos prontos, sem [A COMPLETAR] e sem data no post.json (`plannedAt: null`), para não criar duas publicações na mesma segunda. A data é dada no painel.
+
+| Pasta | Serviço (pilar) | Tema | Palavra-chave |
+|---|---|---|---|
+| como-aparecer-no-google-maps | gmb | site-rapido-e-encontravel | como aparecer no Google Maps |
+| como-saber-se-o-cliente-veio-do-anuncio-whatsapp | tagueamento | trafego-pago-medido | como saber se o cliente veio do anúncio |
+| painel-de-vendas-para-dono-de-negocio | dashboard | dashboards-e-bi | painel de vendas para dono de negócio |
+
+Faltam 4 (seo-geo, follow-up, verba de anúncios, reativação), escritos na próxima rodada.
+
+**Agenda proposta** (aplicar no painel, no calendário; a ordem relativa dos posts já agendados não muda):
+
+| Data | Post |
+|---|---|
+| 14/12 | Como aparecer no Google Maps (novo) |
+| 21/12 | Onde o funil perde mais: do clique à venda com UTM |
+| 28/12 | Como saber se o cliente veio do anúncio no WhatsApp (novo) |
+| 04/01 | Automação de marketing com código (pilar) |
+| 11/01 | Painel de vendas para dono de negócio (novo) |
+| 18/01 | Login antes do dado |
+| 25/01 | Como aparecer no ChatGPT e na IA do Google (a escrever) |
+| 01/02 | Segurança é pauta de diretoria, ep. 1 |
+| 08/02 | Orçamento sem resposta: follow-up que não incomoda (a escrever) |
+| 15/02 | Segurança é pauta de diretoria, ep. 2 |
+| 22/02 | Quanto investir em anúncios no primeiro mês (a escrever) |
+| 01/03 | Segurança é pauta de diretoria, ep. 3 |
+| 08/03 | Clientes antigos: reativar pelo WhatsApp sem spam (a escrever) |
+| 15/03 | Segurança é pauta de diretoria, ep. 4 |
+| 22/03 a 12/04 | Bastidores do blog (4 posts, na ordem atual) |
+| 19/04 a 24/05 | Segurança é pauta de diretoria, ep. 5 a 10 |
+
+Depois de publicar o post do WhatsApp, vale linkar nele o post do funil por UTM (sai antes, em 21/12).
+
+Importar (o Marcos roda, no PowerShell, simulando antes):
+
+```powershell
+node scripts/import-draft.js content/como-aparecer-no-google-maps --prod
+node scripts/import-draft.js content/como-aparecer-no-google-maps --prod --apply
+```
+
+Repetir para as outras duas pastas. Capa e texto alternativo são colocados no painel.
 Os 18 episódios da Mídia paga e os 4 posts acima também estão como rascunho/agendados no painel de produção. PageSpeed e Clarity 2 saiu da agenda até os dados de 30 dias existirem. A tabela abaixo é o inventário anterior (as datas dela valem só como ordem).
 
 Colunas: **palavras** (texto sem HTML) · **img** (imagens/figuras no corpo) · **links ext.** (links externos) · **links int.** (links para outros posts) · **FAQ / tags / resposta direta / capa** no post.json ou season.json.

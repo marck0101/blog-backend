@@ -1,0 +1,36 @@
+{
+  "title": "Como aparecer no Google Maps: guia para negócios locais",
+  "slug": "como-aparecer-no-google-maps",
+  "excerpt": "O cliente busca “perto de mim” e o concorrente aparece no mapa. O que o Google diz que conta, o que não funciona e como medir.",
+  "category": "marketing",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "google maps",
+    "perfil da empresa no google",
+    "seo local",
+    "avaliações",
+    "negócios locais"
+  ],
+  "directAnswer": "Para aparecer no Google Maps, verifique o Perfil da Empresa e trabalhe os três fatores que o Google publica: relevância, distância e destaque. Preencha tudo, escolha a categoria certa, mantenha nome, endereço e telefone iguais em todo lugar, peça e responda avaliações reais e use link com UTM para medir.",
+  "file": "content.html",
+  "plannedAt": null,
+  "faq": [
+    {
+      "question": "O que o Google considera para ranquear um negócio no Maps?",
+      "answer": "A Central de Ajuda do Google diz que os resultados locais se baseiam principalmente em relevância (quanto o perfil combina com a busca), distância (quão perto o negócio está de quem busca) e destaque (quão conhecido ele é, o que inclui avaliações e links). Não há como pagar por uma posição melhor."
+    },
+    {
+      "question": "Quanto custa não ter o perfil do meu negócio no Google Maps?",
+      "answer": "Criar e verificar o perfil não tem custo financeiro. O custo de não ter é o cliente que busca “perto de mim”, vê só os concorrentes no mapa e liga para eles. Essa perda não avisa: aparece depois, como movimento abaixo do esperado, mesmo com site e anúncios funcionando."
+    },
+    {
+      "question": "Por onde começo para aparecer no Google Maps?",
+      "answer": "Busque seu negócio no Maps, reivindique e verifique o perfil, confira nome, endereço, telefone e horário, escolha a categoria principal mais específica e suba fotos reais. Depois responda às avaliações e troque o link do site por um com UTM para medir as visitas vindas do mapa."
+    },
+    {
+      "question": "Quanto tempo leva para aparecer no Google Maps?",
+      "answer": "O prazo da verificação depende do método que o Google oferecer para o seu negócio. Já a posição no mapa não tem prazo prometido pelo Google e depende de relevância, distância e destaque. Acompanhe o relatório de desempenho do perfil mês a mês e compare com o ponto de partida."
+    }
+  ]
+}
