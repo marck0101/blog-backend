@@ -417,6 +417,13 @@ consultar o Google, e os dados ficam num lugar só.
   - Registro com hipótese, ICE, variantes e resultado; kanban por status; regras R-COCKPIT-06 e 07.
 - [x] **C6 · Links** · `blog-backend` + `blog-front` · P — feito em 27/11/2026 (mesma branch)
   - Atalhos agrupados, só https (R-COCKPIT-08). Sub-navegação do Cockpit: Hoje | Experimentos | Links.
+- [x] **C5 · Automações** · `blog-backend` + `blog-front` · P — feito em 27/11/2026 (branch `feat/cockpit-c5-c3`)
+  - Página `/admin/cockpit/automacoes` (estado, última execução, 10 últimas execuções com duração);
+    falha e atraso já viram alerta na Hoje (R-COCKPIT-09).
+- [x] **C3 · Placar semanal** · `blog-backend` + `blog-front` · M — feito em 27/11/2026 (mesma branch)
+  - 10 números, metas semanais editáveis, 13 semanas, resumo da manhã no Telegram (R-COCKPIT-10 a 12).
+  - ⚠️ **Deploy: backend antes do front.** Variáveis opcionais: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
+  - Pendências: criar o bot e as variáveis na Vercel; sem webhook por enquanto (o guarda `chatAllowed` já existe para quando houver).
 
 ---
 

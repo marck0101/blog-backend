@@ -1,5 +1,5 @@
 const { z } = require("zod");
-const { MAX_ITEMS, ALLOWED_KEYS, SOURCES } = require("../config/cockpit");
+const { MAX_ITEMS, ALLOWED_KEYS, SOURCES, PLACAR_METRICS, PLACAR_META_MAX } = require("../config/cockpit");
 const { parseDayKey } = require("../utils/dates");
 const { AREAS, STATUSES, DECISIONS, LINK_GROUPS } = require("../config/cockpitExperiments");
 
@@ -55,6 +55,16 @@ const jobUpdateBody = jobCreateBody
   .omit({ job: true })
   .partial()
   .refine((b) => Object.keys(b).length > 0, { error: "Nenhum campo informado" });
+
+const placarKeys = PLACAR_METRICS.map((m) => m.key);
+// Meta semanal por número; null apaga a meta. Chave fora da lista fechada é recusada.
+const placarMetasBody = z
+  .object({
+    metas: z
+      .record(z.string(), z.number().min(0).max(PLACAR_META_MAX).nullable())
+      .refine((o) => Object.keys(o).length > 0 && Object.keys(o).every((k) => placarKeys.includes(k)), { error: "Número desconhecido" }),
+  })
+  .strict();
 
 const metaBody = z.object({ valor: z.number().min(0).max(100000000) }).strict();
 
@@ -146,6 +156,7 @@ module.exports = {
   jobCreateBody,
   jobUpdateBody,
   metaBody,
+  placarMetasBody,
   idParams,
   experimentCreateBody,
   experimentUpdateBody,

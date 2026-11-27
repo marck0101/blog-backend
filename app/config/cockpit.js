@@ -42,3 +42,27 @@ module.exports = {
   DEFAULT_META_MENSAL,
   DEFAULT_JOBS,
 };
+
+// ===== Placar semanal (C3) =====
+// Números do placar. kind: "week" (retrato semanal da fonte), "month" (retrato do mês da
+// semana), "blog" (conta direto no banco do blog). Rótulos fixos: nada vem de dado de pessoa.
+const PLACAR_METRICS = [
+  { key: "receita_mes", label: "Receita do mês (R$)", short: "Receita", unit: "brl", kind: "month", source: "prospect0101" },
+  { key: "contatos_semana", label: "Contatos", short: "Contatos", unit: "n", kind: "week", source: "prospect0101" },
+  { key: "respostas_semana", label: "Respostas", short: "Respostas", unit: "n", kind: "week", source: "prospect0101" },
+  { key: "reunioes_semana", label: "Reuniões", short: "Reuniões", unit: "n", kind: "week", source: "prospect0101" },
+  { key: "propostas_semana", label: "Propostas", short: "Propostas", unit: "n", kind: "week", source: "prospect0101" },
+  { key: "fechamentos_mes", label: "Fechamentos do mês", short: "Fechamentos", unit: "n", kind: "month", source: "prospect0101" },
+  { key: "analises_semana", label: "Análises do benchmark", short: "Análises", unit: "n", kind: "week", source: "benchmark0101" },
+  { key: "posts_publicados", label: "Posts publicados", short: "Posts", unit: "n", kind: "blog", source: "blog" },
+  { key: "inscritos_novos", label: "Inscritos novos", short: "Inscritos", unit: "n", kind: "blog", source: "blog" },
+  { key: "leituras", label: "Leituras do blog", short: "Leituras", unit: "n", kind: "blog", source: "blog" },
+];
+const PLACAR_ON_TARGET_BAND = 0.1; // de 90% a 110% da meta = "na meta"
+const PLACAR_WEEKS = 13;
+const PLACAR_META_MAX = 100000000;
+
+module.exports.PLACAR_METRICS = PLACAR_METRICS;
+module.exports.PLACAR_ON_TARGET_BAND = PLACAR_ON_TARGET_BAND;
+module.exports.PLACAR_WEEKS = PLACAR_WEEKS;
+module.exports.PLACAR_META_MAX = PLACAR_META_MAX;

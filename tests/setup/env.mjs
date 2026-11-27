@@ -28,6 +28,8 @@ Object.assign(process.env, {
   LINKEDIN_CLIENT_SECRET: "",
   LINKEDIN_REDIRECT_URI: "",
   FIREBASE_SERVICE_ACCOUNT_JSON: "",
+  TELEGRAM_BOT_TOKEN: "",
+  TELEGRAM_CHAT_ID: "",
 });
 delete process.env.VERCEL;
 

@@ -18,6 +18,9 @@ describe("rotas do painel exigem sessão", () => {
   const routes = [
     ["get", "/api/cockpit/hoje"],
     ["get", "/api/cockpit/jobs"],
+    ["get", "/api/cockpit/automacoes"],
+    ["get", "/api/cockpit/placar"],
+    ["put", "/api/cockpit/placar/metas"],
     ["post", "/api/cockpit/jobs"],
     ["put", "/api/cockpit/jobs/blog-cron-daily"],
     ["get", "/api/cockpit/meta"],

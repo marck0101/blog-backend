@@ -1052,6 +1052,32 @@ painel. Tudo admin (sessão + 2º fator; escrita exige origem do painel). Modelo
 - **R-COCKPIT-08 Links só https:** `https://` com host, sem usuário/senha na URL; `http:`,
   `javascript:`, `data:`, endereço sem protocolo e outros esquemas dão 422.
 
+### Automações e Placar semanal (Sprints C5 e C3)
+
+| Rota | Quem | O que faz |
+|---|---|---|
+| `GET /api/cockpit/automacoes` | admin | cada rotina com estado, última execução e as 10 últimas execuções (status, início, fim, duração, itens, erro) |
+| `GET /api/cockpit/placar` | admin | 10 números × 13 semanas, meta semanal e status em texto |
+| `PUT /api/cockpit/placar/metas` | admin | `{ metas: { chave: número \| null } }`; `null` apaga a meta; chave fora da lista = 422 |
+
+- **R-COCKPIT-09 Estado nas Automações:** usa a regra R-COCKPIT-04; rotina sem nenhuma execução
+  aparece como `nunca_rodou`. O prazo é estrito: exatamente em último ok + esperado + folga ainda é
+  `ok`. Falha e atraso entram em "precisa de ação" na Hoje (um item por rotina).
+- **R-COCKPIT-10 Semana do placar:** segunda a domingo em Brasília, mesma conta da semana ISO
+  (`2026-W48`; 1/1/2027 ainda é `2026-W53`). Últimas 13 semanas, a atual (parcial) por último.
+  Código: `app/utils/weeks.js`.
+- **R-COCKPIT-11 Números e metas:** os 10 números estão em `app/config/cockpit.js`
+  (`PLACAR_METRICS`): receita e fechamentos (retrato do mês da semana), contatos, respostas, reuniões,
+  propostas e análises do benchmark (retratos semanais) e, direto do banco, posts publicados, inscritos
+  novos e leituras. Meta semanal por número em `SiteSettings.cockpitPlacarMetas`. Status: `abaixo`
+  (<90% da meta), `na_meta` (90% a 110%), `acima` (>110%); `sem_meta` e `sem_dados` quando faltar.
+- **R-COCKPIT-12 Resumo da manhã (Telegram):** o `/api/cron/daily` monta um texto curto só com números
+  agregados e rótulos fixos (nenhum campo de texto livre entra) e envia pela Bot API para
+  `TELEGRAM_CHAT_ID`. Última barreira: texto com cara de e-mail/telefone/CPF/CNPJ não sai
+  (`bloqueado`). Sem `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`: não envia (`não configurado`). Falha
+  do envio nunca derruba o cron. O bot nunca responde a outro chat: `chatAllowed` recusa chat_id
+  diferente do configurado (a usar quando existir webhook; hoje não há).
+
 ## 22. Capa automática
 
 **R-CAPA-01.** Post publicado sem `coverImage` tem capa gerada em `GET /api/posts/slug/:slug/cover.png`

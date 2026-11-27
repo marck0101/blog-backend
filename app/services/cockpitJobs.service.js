@@ -94,4 +94,22 @@ async function jobStates(now = new Date()) {
   );
 }
 
-module.exports = { ensureDefaultJobs, recordRun, recordRunSafe, evaluateJob, jobStates, RUNNING_MAX_MS };
+// Página Automações: estado + últimas 10 execuções de cada rotina
+const RUNS_SHOWN = 10;
+async function automacoes(now = new Date()) {
+  const states = await jobStates(now);
+  return Promise.all(
+    states.map(async (s) => {
+      const runs = await JobRun.find({ job: s.job }).sort({ startedAt: -1 }).limit(RUNS_SHOWN).lean();
+      return {
+        ...s,
+        // "nunca rodou" tem texto próprio; os demais seguem R-COCKPIT-04
+        status: s.neverRan ? "nunca_rodou" : s.status,
+        runs: runs.map((r) => ({ status: r.status, startedAt: r.startedAt, finishedAt: r.finishedAt, durationMs: r.durationMs, items: r.items, error: r.error })),
+      };
+    })
+  );
+}
+
+module.exports = {
+  automacoes, ensureDefaultJobs, recordRun, recordRunSafe, evaluateJob, jobStates, RUNNING_MAX_MS };

@@ -14,7 +14,8 @@ const { validate } = require("../validation/validate");
 const schemas = require("../validation/cockpit.schemas");
 const { blockedFor, hit, tooMany } = require("../services/ratelimit.service");
 const { buildHoje, readMeta } = require("../services/cockpitHoje.service");
-const { ensureDefaultJobs, recordRun, jobStates } = require("../services/cockpitJobs.service");
+const { buildPlacar, readMetas, saveMetas } = require("../services/cockpitPlacar.service");
+const { ensureDefaultJobs, recordRun, jobStates, automacoes } = require("../services/cockpitJobs.service");
 const { signBody, signatureMatches, timestampInWindow, containsPii } = require("../utils/cockpitSecurity");
 const { errorBody } = require("../utils/http");
 const cfg = require("../config/cockpit");
@@ -120,6 +121,35 @@ router.get("/hoje", auth, async (req, res, next) => {
     await connectDB();
     res.set("Cache-Control", "no-store");
     res.json(await buildHoje());
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/automacoes", auth, async (req, res, next) => {
+  try {
+    await connectDB();
+    res.set("Cache-Control", "no-store");
+    res.json({ generatedAt: new Date(), jobs: await automacoes() });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/placar", auth, async (req, res, next) => {
+  try {
+    await connectDB();
+    res.set("Cache-Control", "no-store");
+    res.json(await buildPlacar());
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put("/placar/metas", auth, validate({ body: schemas.placarMetasBody }), async (req, res, next) => {
+  try {
+    await connectDB();
+    res.json({ metas: await saveMetas(req.body.metas, req.userId) });
   } catch (err) {
     next(err);
   }
