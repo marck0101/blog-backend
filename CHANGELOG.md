@@ -2,6 +2,12 @@
 
 Formato livre, mais recente primeiro. Mudança de regra de negócio também vai em `docs/SISTEMA.md`.
 
+## 27/11/2026 · Sprint R4 · Placar do conteúdo
+
+- Novo: Placar com `aberturas_email` e `cliques_email` (pessoas distintas por envio na semana, sem robôs), meta semanal editável como os demais. Agora são 12 números.
+- Decisão: pedido de pré-diagnóstico não é guardado no backend (WhatsApp/e-mail); a origem vai só como `[ref: blog-<slug>]` na mensagem e `origin_path` no GA4. Ver `docs/SISTEMA.md` §24.
+- Testes: contagem sem robôs/duplicados/fora da semana, metas, 401 sem login.
+
 ## 27/11/2026 · Sprint R5 · Experimentos no site
 
 - Novo: `GET /api/experiments/ativos` (público, cache de 60s) com os experimentos rodando que têm alvo e variantes (`chave`, `alvo`, `variantes`), sem nenhum campo interno.

@@ -57,6 +57,8 @@ const PLACAR_METRICS = [
   { key: "posts_publicados", label: "Posts publicados", short: "Posts", unit: "n", kind: "blog", source: "blog" },
   { key: "inscritos_novos", label: "Inscritos novos", short: "Inscritos", unit: "n", kind: "blog", source: "blog" },
   { key: "leituras", label: "Leituras do blog", short: "Leituras", unit: "n", kind: "blog", source: "blog" },
+  { key: "aberturas_email", label: "Aberturas de e-mail", short: "Aberturas", unit: "n", kind: "blog", source: "blog" },
+  { key: "cliques_email", label: "Cliques de e-mail", short: "Cliques", unit: "n", kind: "blog", source: "blog" },
 ];
 const PLACAR_ON_TARGET_BAND = 0.1; // de 90% a 110% da meta = "na meta"
 const PLACAR_WEEKS = 13;

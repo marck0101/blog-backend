@@ -1,10 +1,24 @@
 const MetricSnapshot = require("../models/metricSnapshot.model");
 const PostDailyStat = require("../models/postDailyStat.model");
 const Subscriber = require("../models/subscriber.model");
+const EmailEvent = require("../models/emailEvent.model");
 const BlogPost = require("../models/blogpost.model");
 const SiteSettings = require("../models/siteSettings.model");
 const { PLACAR_METRICS, PLACAR_ON_TARGET_BAND, PLACAR_WEEKS } = require("../config/cockpit");
 const { lastWeeks } = require("../utils/weeks");
+
+/**
+ * Pessoas distintas (por envio) que abriram ou clicaram na semana. Robôs e pré-carregamento
+ * (automated) ficam de fora; só contagem, nenhum dado de pessoa sai daqui.
+ */
+async function emailReach(type, startAt, endAt) {
+  const rows = await EmailEvent.aggregate([
+    { $match: { type, automated: { $ne: true }, at: { $gte: startAt, $lte: endAt } } },
+    { $group: { _id: { c: "$campaign", s: "$subscriber" } } },
+    { $count: "n" },
+  ]);
+  return rows[0]?.n || 0;
+}
 
 /** abaixo (<90% da meta) · na_meta (90% a 110%) · acima (>110%); sem meta ou sem dado, o motivo */
 function compare(value, meta) {
@@ -48,15 +62,17 @@ async function valuesByWeek(weeks) {
     weeks.map(async (w) => {
       const dayFrom = w.start;
       const dayTo = w.end;
-      const [posts, novos, views] = await Promise.all([
+      const [posts, novos, views, aberturas, cliques] = await Promise.all([
         BlogPost.countDocuments({ published: true, deletedAt: null, publishedAt: { $gte: w.startAt, $lte: w.endAt } }),
         Subscriber.countDocuments({ createdAt: { $gte: w.startAt, $lte: w.endAt } }),
         PostDailyStat.aggregate([
           { $match: { day: { $gte: dayFrom, $lte: dayTo } } },
           { $group: { _id: null, views: { $sum: "$views" } } },
         ]),
+        emailReach("open", w.startAt, w.endAt),
+        emailReach("click", w.startAt, w.endAt),
       ]);
-      return { posts_publicados: posts, inscritos_novos: novos, leituras: views[0]?.views || 0 };
+      return { posts_publicados: posts, inscritos_novos: novos, leituras: views[0]?.views || 0, aberturas_email: aberturas, cliques_email: cliques };
     })
   );
 
@@ -92,4 +108,4 @@ async function buildPlacar(now = new Date()) {
   return { generatedAt: now, tz: "America/Sao_Paulo", weeks: weeks.map(({ key, start, end, current }) => ({ key, start, end, current })), numeros };
 }
 
-module.exports = { buildPlacar, readMetas, saveMetas, compare };
+module.exports = { emailReach, buildPlacar, readMetas, saveMetas, compare };

@@ -1057,7 +1057,7 @@ painel. Tudo admin (sessão + 2º fator; escrita exige origem do painel). Modelo
 | Rota | Quem | O que faz |
 |---|---|---|
 | `GET /api/cockpit/automacoes` | admin | cada rotina com estado, última execução e as 10 últimas execuções (status, início, fim, duração, itens, erro) |
-| `GET /api/cockpit/placar` | admin | 10 números × 13 semanas, meta semanal e status em texto |
+| `GET /api/cockpit/placar` | admin | 12 números × 13 semanas, meta semanal e status em texto |
 | `PUT /api/cockpit/placar/metas` | admin | `{ metas: { chave: número \| null } }`; `null` apaga a meta; chave fora da lista = 422 |
 
 - **R-COCKPIT-09 Estado nas Automações:** usa a regra R-COCKPIT-04; rotina sem nenhuma execução
@@ -1066,7 +1066,7 @@ painel. Tudo admin (sessão + 2º fator; escrita exige origem do painel). Modelo
 - **R-COCKPIT-10 Semana do placar:** segunda a domingo em Brasília, mesma conta da semana ISO
   (`2026-W48`; 1/1/2027 ainda é `2026-W53`). Últimas 13 semanas, a atual (parcial) por último.
   Código: `app/utils/weeks.js`.
-- **R-COCKPIT-11 Números e metas:** os 10 números estão em `app/config/cockpit.js`
+- **R-COCKPIT-11 Números e metas:** os 12 números estão em `app/config/cockpit.js`
   (`PLACAR_METRICS`): receita e fechamentos (retrato do mês da semana), contatos, respostas, reuniões,
   propostas e análises do benchmark (retratos semanais) e, direto do banco, posts publicados, inscritos
   novos e leituras. Meta semanal por número em `SiteSettings.cockpitPlacarMetas`. Status: `abaixo`
@@ -1090,3 +1090,10 @@ painel. Tudo admin (sessão + 2º fator; escrita exige origem do painel). Modelo
 **R-EXP-03.** `GET /api/experiments/ativos` (público, sem login, `Cache-Control: public, max-age=60`) devolve `[{ chave, alvo, variantes: [{ chave, texto }] }]` só dos experimentos rodando, com alvo, chave e 2+ variantes, fora da lixeira. Nunca sai hipótese, métrica, nota, resultado, id ou data. Sem experimento: `[]`. Sem rate limit próprio: é leitura barata e cacheada pela CDN (mesma linha de `/api/categories` e `/api/clusters`).
 
 Fluxo: o site busca a lista uma vez, e **só depois do consentimento de cookies** (`cookiesAccepted === "all"`) sorteia uma variante, guarda no navegador por `chave` e manda ao GA4 `experiment_impression` com `experiment_id` (a `chave`) e `variant_id`; o clique do espaço leva os mesmos dois parâmetros. Sem consentimento (ou se a API falhar) o site mostra o texto padrão, não grava nada e não envia evento. O experimento não tem dados pessoais: o sorteio é local e o evento só carrega as duas chaves. Detalhes do lado do site e da configuração no GA4: README do blog-front.
+
+## 24. Placar do conteúdo (Sprint R4)
+
+**R-PLACAR-01.** O Placar ganhou dois números do blog, com a mesma meta semanal editável da Sprint C3 (`PUT /api/cockpit/placar/metas`): `aberturas_email` e `cliques_email`. Cada um conta **pessoas distintas por envio** (campanha + inscrito) com abertura ou clique registrado na semana (segunda a domingo, Brasília). Eventos `automated` (robôs, antivírus, pré-carregamento) ficam de fora. Só sai contagem; nada de pessoa nem de link.
+**R-PLACAR-02.** Leituras (`PostDailyStat.views`) e inscritos novos já existiam no Placar e não mudaram. A fonte de leituras é a contagem própria do blog, não o GA4.
+**R-PLACAR-03.** Pedidos de pré-diagnóstico **não** são guardados no backend: o pedido acontece por WhatsApp ou e-mail, fora do sistema. A origem (post) viaja só no texto da mensagem (`[ref: blog-<slug>]`) e no evento GA4 `origin_path`; por isso não há "pedidos por post" no Placar (decisão: não inventar armazenamento de dado pessoal). A leitura por post fica no GA4 (evento `pre_diagnostico_cta`, dimensão `origin_path`).
+**R-PLACAR-04.** Números do Search Console (impressões, cliques, posição) aparecem no painel como "Search Console: aguardando acesso", sem valor. Quando houver acesso, entram como retratos semanais pela rota de ingestão do Cockpit (`source` nova + chaves em `app/config/cockpit.js`).
