@@ -11,7 +11,7 @@ const SITE_URL = "https://blog.marck0101.com.br";
 
 // "/" redireciona para "/blog" — só URLs canônicas entram no sitemap.
 // changefreq/priority são ignorados pelo Google; lastmod é o que importa.
-const STATIC_PAGES = [{ loc: `${SITE_URL}/blog` }];
+const STATIC_PAGES = [{ loc: `${SITE_URL}/blog` }, { loc: `${SITE_URL}/pre-diagnostico` }];
 // Sobre o autor: página fixa (muda só com deploy do front), sem lastmod
 const ABOUT_URL = `${SITE_URL}/sobre`;
 
