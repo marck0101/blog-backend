@@ -24,7 +24,7 @@ Meta da fila: um post por segunda e sempre 3 agendados à frente.
 
 - [ ] Uma palavra-chave principal, a da tabela do RASCUNHOS.md, que nenhum outro post usa.
 - [ ] Ela aparece no `title` (no começo), no `slug`, em um H2 e no primeiro parágrafo.
-- [ ] Termo regional quando fizer sentido (noroeste do RS, pequenas e médias empresas, agências), sem forçar.
+- [ ] Termo regional quando fizer sentido (noroeste do RS, negócios locais, agências), sem forçar. Nunca qualificar o tamanho do negócio ("pequeno", "PME"): pode incomodar o público.
 - [ ] `directAnswer` (até 400 caracteres): a resposta para a palavra-chave, que faça sentido fora do artigo.
 - [ ] `tags`: 3 a 5, minúsculas.
 - [ ] `faq`: 3 a 5 perguntas como a pessoa digita na busca.
