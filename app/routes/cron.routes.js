@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const connectDB = require("../config/db.config");
 const { runDailyJobs } = require("../services/scheduler.service");
+const { buildPlacar } = require("../services/cockpitPlacar.service");
+const { buildHoje } = require("../services/cockpitHoje.service");
+const { telegramConfig, buildMorningText, sendMorningSummary } = require("../services/cockpitTelegram.service");
 const { recordRunSafe } = require("../services/cockpitJobs.service");
 
 // A Vercel chama com "Authorization: Bearer <CRON_SECRET>" quando a
@@ -37,6 +40,17 @@ router.get("/daily", cronAuth, async (req, res, next) => {
       items: summary.published?.length || 0,
       error: summary.errors?.[0],
     });
+    // Resumo da manhã no Telegram: só números agregados; qualquer falha fica no resumo, nunca derruba o cron
+    try {
+      if (!telegramConfig()) summary.telegram = await sendMorningSummary("");
+      else {
+        const [placar, hoje] = await Promise.all([buildPlacar(), buildHoje()]);
+        summary.telegram = await sendMorningSummary(buildMorningText({ placar, pendencias: hoje.acoes.items.length }));
+      }
+    } catch (err) {
+      console.error("[cockpit] resumo da manhã:", err.message);
+      summary.telegram = "falhou";
+    }
     res.json(summary);
   } catch (err) {
     next(err);

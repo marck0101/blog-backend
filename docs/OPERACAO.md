@@ -64,6 +64,9 @@ Nomes que o dono cria na Vercel (backend); os valores nunca vão para o reposit�
 - `COCKPIT_INGEST_SECRET_REPORTS` — segredo HMAC do bot de relatórios.
 - `COCKPIT_META_MENSAL` (opcional) — meta mensal padrão em R$ (15000 se faltar; o painel
   pode sobrescrever).
+- `TELEGRAM_BOT_TOKEN` (opcional) — token do bot do resumo da manhã.
+- `TELEGRAM_CHAT_ID` (opcional) — único chat que recebe o resumo. Sem as duas, o cron diário
+  não envia nada e registra "não configurado" (campo `telegram` da resposta de `/api/cron/daily`).
 
 Cada sistema assina `"<timestamp>.<corpo>"` com o próprio segredo (segredos diferentes por
 fonte, para um vazamento não valer para todos). Sem o segredo, a fonte recebe 503. Detalhes e
