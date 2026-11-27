@@ -1,10 +1,9 @@
 {
-  "title": "Cliente não compra tecnologia: compra o problema resolvido",
   "slug": "cliente-nao-compra-tecnologia-compra-o-problema-resolvido",
-  "excerpt": "Comunicação não é o que você fala, é o que o outro entende. Como traduzir tecnologia em resultado e montar dashboards que se explicam sozinhos.",
-  "category": "negocios",
-  "file": "content.html",
-  "plannedAt": "2026-11-16T12:00:00-03:00",
+  "cluster": "dashboards-e-bi",
+  "isPillar": false,
+  "note": "Publicado em 16/11/2026. content.html agora é o HTML publicado com as correções da AUDITORIA.md; aplicar pelo script da Sprint 3 (--dry-run).",
+  "status": "published",
   "faq": [
     {
       "question": "Devo explicar ao cliente qual tecnologia vou usar no projeto?",
@@ -21,6 +20,10 @@
     {
       "question": "Por onde começo um projeto de dashboard?",
       "answer": "Pelas reuniões, não pela ferramenta. Pergunte ao cliente qual decisão ele quer tomar com o painel, confirme com o time de onde vêm os dados e alinhe com o PO o que entra na primeira versão."
+    },
+    {
+      "question": "O que é storytelling com dados?",
+      "answer": "É apresentar dados como uma história com início, meio e fim: o que está acontecendo, por que está acontecendo e o que fazer agora. Em vez de mostrar números soltos, o painel leva quem lê a uma conclusão e a uma ação."
     }
   ]
 }

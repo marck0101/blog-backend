@@ -19,6 +19,7 @@ const mongoose = require("mongoose");
 const BlogPost = require("../app/models/blogpost.model");
 const Season = require("../app/models/season.model");
 const { ensureDefaultSeasons } = require("../app/services/season.service");
+const { seoFields } = require("./post-meta");
 const { sanitizeHtml } = require("../app/utils/sanitizeHtml");
 
 // Trechos que não podem aparecer no conteúdo público (prefixo interno de nomenclatura etc.)
@@ -56,6 +57,7 @@ function loadSeason(seasonDir) {
       content: sanitizeHtml(content),
       season: manifest.season,
       seasonOrder: p.seasonOrder,
+      ...seoFields(p, p.file),
     };
   });
 }

@@ -1,0 +1,75 @@
+
+<p>Para saber onde o funil perde mais, é preciso seguir a mesma pessoa do clique no anúncio até a venda, etapa por etapa, e contar quantas passam de uma para a outra. A UTM marca de onde a pessoa veio, o Google Analytics 4 mostra o que ela fez no site, e o CRM ou a planilha de vendas mostra se ela comprou. Sem ligar os três, cada área olha um pedaço e ninguém vê onde o dinheiro escapa.</p>
+
+<h2>As etapas do funil, do clique à venda</h2>
+
+<ol>
+  <li><strong>Impressão e clique:</strong> o anúncio apareceu e alguém clicou. Medido na plataforma de mídia.</li>
+  <li><strong>Visita:</strong> a página abriu de fato. Medida no GA4. A diferença entre cliques e visitas costuma ser página lenta ou gente que desiste antes de carregar.</li>
+  <li><strong>Contato:</strong> formulário enviado, clique no WhatsApp, ligação. Medido no GA4 como evento de conversão.</li>
+  <li><strong>Oportunidade:</strong> o contato virou conversa real com o comercial. Medida no CRM ou na planilha.</li>
+  <li><strong>Venda:</strong> o contrato ou o pedido fechou. Medida no CRM, no ERP ou na loja.</li>
+</ol>
+
+<p>A pergunta não é só quantos chegaram ao fim. É em qual passagem a queda é maior que o esperado, porque é ali que a próxima ação rende mais.</p>
+
+<h2>Como a UTM liga mídia, site e vendas</h2>
+
+<p>A UTM são os parâmetros no fim do link do anúncio que dizem ao Google Analytics de onde veio a visita: origem, mídia, campanha, conteúdo e termo (Google, 2026a). Com um padrão de nomes, o mesmo texto da campanha aparece na plataforma, no GA4 e no relatório final. O padrão completo está em <a href="/blog/midia-paga-na-pratica-processo-nomenclatura-utm">nomenclatura de campanhas e UTM</a>.</p>
+
+<p>Dois cuidados:</p>
+
+<ul>
+  <li>No Google Ads ligado ao GA4, a codificação automática já faz esse trabalho e tem prioridade sobre a UTM manual (Google, 2026b). A UTM manual é para Meta, LinkedIn, e-mail e outros links.</li>
+  <li>Escreva origem e mídia sempre do mesmo jeito. "Facebook" e "facebook" viram duas linhas diferentes no relatório.</li>
+</ul>
+
+<h2>Levar a UTM até a venda</h2>
+
+<p>O GA4 mostra o caminho até o contato, mas a venda quase sempre acontece fora do site: no WhatsApp, por telefone, numa reunião. Para não perder a origem nessa passagem:</p>
+
+<ul>
+  <li><strong>Formulário:</strong> campos ocultos que guardam a UTM da visita e vão junto com o nome e o telefone para o CRM ou a planilha.</li>
+  <li><strong>WhatsApp:</strong> registrar o clique no botão como evento no GA4 e, se possível, mandar uma mensagem inicial com o nome da campanha, para o atendente saber de onde veio.</li>
+  <li><strong>Venda:</strong> quando o negócio fecha, marcar no CRM a origem que veio do formulário. É essa coluna que permite calcular o custo por venda de cada campanha, e não só o custo por contato.</li>
+</ul>
+
+<h2>Montar o funil no GA4</h2>
+
+<p>A análise de funil do GA4 mostra as etapas que as pessoas percorrem até concluir uma tarefa e em quais delas elas desistem (Google, 2026c). Para um site de geração de contatos, um funil simples:</p>
+
+<ol>
+  <li>visualização da página de destino;</li>
+  <li>rolagem ou clique no botão principal;</li>
+  <li>envio do formulário (o GA4 tem o evento <code>form_submit</code> na medição otimizada; Google, 2026e) ou clique no WhatsApp;</li>
+  <li>o evento de conversão, como <code>generate_lead</code>, um dos eventos recomendados pelo Google (Google, 2026d).</li>
+</ol>
+
+<p>Separe o funil por origem e por campanha. Um canal com muitas visitas e poucos contatos aponta para a página ou para o público; um canal com muitos contatos e poucas vendas aponta para a qualidade do contato ou para o atendimento.</p>
+
+<h2>Onde o funil costuma perder, e o que olhar</h2>
+
+<ul>
+  <li><strong>Muito clique, pouca visita:</strong> página lenta no celular. Veja <a href="/blog/pagespeed-e-clarity-como-decido-o-que-otimizar-primeiro">PageSpeed e Clarity</a>.</li>
+  <li><strong>Muita visita, pouco contato:</strong> a página não responde o que o anúncio prometeu, ou o formulário pede coisa demais.</li>
+  <li><strong>Muito contato, pouca venda:</strong> público errado, demora no atendimento ou contato sem qualificação.</li>
+  <li><strong>Venda que ninguém sabe de onde veio:</strong> a UTM se perdeu no caminho para o CRM.</li>
+</ul>
+
+<h2>Mostrar o funil para quem decide</h2>
+
+<p>O funil só ajuda se o dono do negócio olhar para ele. No painel, a primeira linha é o custo por venda de cada canal; o funil vem logo abaixo, para explicar o número. Como montar esse painel em linguagem de negócio está em <a href="/blog/cliente-nao-compra-tecnologia-compra-o-problema-resolvido">Cliente não compra tecnologia</a>, e o checklist técnico, com login e dados protegidos, está em <a href="/blog/dashboards-com-ia-checklist-seguranca-ux">Dashboards com IA</a>.</p>
+
+<p>É o primeiro relatório que monto para pequenas e médias empresas do noroeste do Rio Grande do Sul antes de mexer na verba: saber onde o funil perde vale mais do que aumentar o investimento no topo.</p>
+
+<h2>Referências</h2>
+
+<p>GOOGLE. Criadores de URLs: coletar dados da campanha com URLs personalizados. <strong>Ajuda do Google Analytics</strong>, [<em>s. l.</em>], 2026a. Disponível em: <a href="https://support.google.com/analytics/answer/10917952?hl=pt-BR" target="_blank" rel="noopener noreferrer">https://support.google.com/analytics/answer/10917952?hl=pt-BR</a>. Acesso em: 26 nov. 2026.</p>
+
+<p>GOOGLE. Sobre a codificação automática. <strong>Ajuda do Google Ads</strong>, [<em>s. l.</em>], 2026b. Disponível em: <a href="https://support.google.com/google-ads/answer/3095550?hl=pt-BR" target="_blank" rel="noopener noreferrer">https://support.google.com/google-ads/answer/3095550?hl=pt-BR</a>. Acesso em: 26 nov. 2026.</p>
+
+<p>GOOGLE. [GA4] Análise detalhada de funil. <strong>Ajuda do Google Analytics</strong>, [<em>s. l.</em>], 2026c. Disponível em: <a href="https://support.google.com/analytics/answer/9327974?hl=pt-BR" target="_blank" rel="noopener noreferrer">https://support.google.com/analytics/answer/9327974?hl=pt-BR</a>. Acesso em: 26 nov. 2026.</p>
+
+<p>GOOGLE. [GA4] Eventos recomendados. <strong>Ajuda do Google Analytics</strong>, [<em>s. l.</em>], 2026d. Disponível em: <a href="https://support.google.com/analytics/answer/9267735?hl=pt-BR" target="_blank" rel="noopener noreferrer">https://support.google.com/analytics/answer/9267735?hl=pt-BR</a>. Acesso em: 26 nov. 2026.</p>
+
+<p>GOOGLE. Eventos de medição otimizada. <strong>Ajuda do Google Analytics</strong>, [<em>s. l.</em>], 2026e. Disponível em: <a href="https://support.google.com/analytics/answer/9216061?hl=pt-BR" target="_blank" rel="noopener noreferrer">https://support.google.com/analytics/answer/9216061?hl=pt-BR</a>. Acesso em: 26 nov. 2026.</p>

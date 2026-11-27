@@ -18,6 +18,7 @@ const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
 const BlogPost = require("../app/models/blogpost.model");
+const { seoFields } = require("./post-meta");
 const { sanitizeHtml } = require("../app/utils/sanitizeHtml");
 
 const args = process.argv.slice(2);
@@ -44,6 +45,7 @@ function loadPost(postDir) {
     excerpt: meta.excerpt,
     category: meta.category,
     faq: meta.faq || [],
+    ...seoFields(meta),
     // Mesma limpeza do painel (SEC-01)
     content: sanitizeHtml(fs.readFileSync(path.join(postDir, meta.file || "content.html"), "utf8")),
     plannedAt,

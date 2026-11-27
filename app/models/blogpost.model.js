@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 const { SLUGS: CATEGORY_SLUGS } = require("../config/categories");
+const { SLUGS: CLUSTER_SLUGS } = require("../config/clusters");
 const { readingMinutes } = require("../utils/readingTime");
 const { normalizeTags } = require("../utils/tags");
 
@@ -99,6 +100,19 @@ const BlogPostSchema = new mongoose.Schema(
         message: `Escolha no máximo ${MAX_RELATED_PICKS} leituras sugeridas`,
       },
     },
+
+    // Tema (cluster) opcional, da lista de app/config/clusters.js (R-CLU-01).
+    // isPillar: post pilar do tema, no máximo um por tema (R-CLU-02)
+    cluster: {
+      type: String,
+      default: null,
+      index: true,
+      enum: {
+        values: [...CLUSTER_SLUGS, null],
+        message: `Tema inválido. Valores permitidos: ${CLUSTER_SLUGS.join(", ")}`,
+      },
+    },
+    isPillar: { type: Boolean, default: false },
 
     // Season (série) opcional: slug de uma Season (gerenciadas no admin)
     season: { type: String, default: null, index: true },

@@ -1,0 +1,33 @@
+{
+  "slug": "ssr-ssg-spa-qual-arquitetura-escolher",
+  "status": "published",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "ssr",
+    "ssg",
+    "spa",
+    "arquitetura web",
+    "seo tecnico"
+  ],
+  "directAnswer": "SSG gera as páginas uma vez, no deploy, e é o mais rápido e barato para conteúdo que muda pouco. SSR monta cada página no servidor a cada visita e serve conteúdo dinâmico que precisa ranquear. SPA monta tudo no navegador e é ótima para painéis atrás de login. Não há vencedora: a escolha depende de SEO, volume de acesso e risco dos dados.",
+  "note": "Post publicado: aplicar pelo script da Sprint 3 (--dry-run). Mudam content, cluster, tags e directAnswer.",
+  "faq": [
+    {
+      "question": "Qual a diferença entre SSR, SSG e SPA?",
+      "answer": "Onde o HTML é montado: no servidor a cada visita (SSR), uma única vez no build (SSG) ou no navegador de quem acessa (SPA)."
+    },
+    {
+      "question": "Qual arquitetura escala melhor?",
+      "answer": "Para leitura, SSG: arquivos estáticos em CDN aguentam picos com custo quase fixo. SPA empurra o peso para a API, e SSR é a que mais custa para escalar sem um cache bem pensado."
+    },
+    {
+      "question": "Uma SPA consegue ranquear no Google?",
+      "answer": "Sim, se as rotas que precisam ser encontradas forem pré-renderizadas. É o que este blog faz: base em React, com o HTML dos posts entregue pronto para buscadores e prévias de link."
+    },
+    {
+      "question": "Qual das três arquiteturas é a mais segura?",
+      "answer": "Nenhuma por si só. A segurança depende de onde ficam os dados e as regras de negócio: tudo que está no front-end é público, e a proteção de verdade fica na API."
+    }
+  ]
+}

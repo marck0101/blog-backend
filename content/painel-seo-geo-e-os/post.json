@@ -1,0 +1,38 @@
+{
+  "title": "SEO, GEO e os detalhes invisíveis que fazem um blog ser encontrado",
+  "slug": "seo-geo-e-os-detalhes-invisiveis-que-fazem-um-blog-ser-encontrado",
+  "excerpt": "Escrever bem não basta se ninguém acha o texto. Dados estruturados, GEO para IA, tagueamento e os detalhes técnicos que fazem um post ser encontrado.",
+  "category": "marketing",
+  "status": "draft",
+  "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1791399167119.webp",
+  "faq": [
+    {
+      "question": "O que é GEO (Generative Engine Optimization)?",
+      "answer": "É estruturar o conteúdo para que ferramentas de IA como ChatGPT e Perplexity consigam entender, resumir e citar o artigo, além de o Google ranqueá-lo."
+    },
+    {
+      "question": "O que são dados estruturados?",
+      "answer": "Informações invisíveis ao leitor que dizem ao buscador, de forma explícita, que a página é um artigo, publicado em tal data, por tal autor."
+    },
+    {
+      "question": "Como escrever um post que a IA consegue citar?",
+      "answer": "Com títulos e subtítulos que resumem o argumento sozinhos e parágrafos que respondem a uma pergunta específica sem depender do contexto anterior."
+    },
+    {
+      "question": "Como contar inscrições na newsletter como lead no Google Ads?",
+      "answer": "No blog, o código passou a avisar o Google Tag Manager no momento da inscrição, em vez de depender de uma página de confirmação que não existe. Assim a inscrição conta como lead no Ads e no Analytics."
+    }
+  ],
+  "file": "content.html",
+  "note": "exportado do painel de produção em 26/11/2026",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "seo",
+    "geo",
+    "dados-estruturados",
+    "google-tag-manager",
+    "blog"
+  ],
+  "directAnswer": "O que faz um blog ser encontrado é a parte que o leitor não vê: dados estruturados que dizem ao Google o que é cada página, sitemap e feed gerados sozinhos, páginas pré-renderizadas para o robô de busca e conteúdo com respostas diretas que assistentes de IA conseguem resumir e citar. Atalhos como o /llms.txt não mudam a posição no Google."
+}

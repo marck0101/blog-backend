@@ -1,0 +1,77 @@
+<p>Todo blog que você lê parece simples: título, texto, botão de assinar. O que não aparece é a pilha de decisões por trás — qual banco de dados, onde hospedar, como proteger a senha do admin, o que fazer quando alguém clica em "excluir" um post, como o Google decide se vale a pena indexar sua página.</p>
+
+<p>Esse post é o mapa completo do marck0101: da arquitetura ao detalhe que ninguém vê. Não é um tutorial genérico — é a decisão real que tomei, com o trade-off que aceitei, em cada camada do sistema. Cada bloco abaixo já foi aprofundado num post dedicado, linkado ao longo do texto — esse aqui é o fechamento da série, não a abertura.</p>
+
+<p><strong>A série inteira, do assunto mais geral ao mais específico:</strong></p>
+<ol>
+<li><strong>Topo, geral:</strong> <a href="/blog/perguntas-que-todo-mundo-faz-sobre-blogs-e-as-respostas-diretas">FAQ sobre blogs</a>, <a href="/blog/do-zero-ao-ar-dns-versionamento-deploy">Do zero ao ar</a> e <a href="/blog/fred-brooks-1975-e-o-retrocesso-que-a-ia-esta-causando-no-desenvolvimento">Fred Brooks e a IA</a>.</li>
+<li><strong>Meio, específico:</strong> arquitetura, segurança, performance, funcionalidades e QA.</li>
+<li><strong>Fundo, cruzamento de dados:</strong> <a href="/blog/seo-geo-e-os-detalhes-invisiveis-que-fazem-um-blog-ser-encontrado">SEO e GEO</a> e <a href="/blog/como-eu-sei-se-um-post-esta-funcionando-dados-proprios-clarity-e-search-console">como eu sei se um post está funcionando</a>.</li>
+<li><strong>Fechamento:</strong> este post, que amarra os anteriores num mapa só.</li>
+</ol>
+
+<h2>1. Desenho da estrutura</h2>
+<p>O marck0101 é dois projetos separados que conversam por API, não um único sistema:</p>
+<ul>
+<li><strong>Backend</strong> — Node.js, Express e MongoDB, com autenticação segura e upload de imagem convertido automaticamente para WebP.</li>
+<li><strong>Frontend</strong> — React, com duas áreas dentro do mesmo site: o blog público e o painel administrativo, este último com acesso restrito por login.</li>
+</ul>
+<p>Separar front e back em repositórios diferentes foi uma escolha deliberada: cada um tem seu próprio ciclo de deploy, pode escalar e versionar de forma independente, e um bug no painel admin nunca derruba o blog que o leitor está lendo.</p>
+<p><em>→ post dedicado: <a href="/blog/monolito-ou-dois-repositorios-por-que-separei-front-e-back-do-zero">"Monólito ou dois repositórios? Por que separei front e back do zero"</a></em></p>
+
+<h2>2. Segurança, cookies e LGPD</h2>
+<p>Senha de admin nunca fica salva como texto comum — passa por criptografia antes de ir pro banco, e o login mantém acesso só por um tempo limitado. Recentemente implementei também recuperação de senha por email, com código temporário de 1 hora, porque "esqueci a senha e não tinha como recuperar" é o tipo de falha de segurança disfarçada de inconveniência.</p>
+<p>No front público, um banner de cookies dá ao visitante a escolha entre "apenas essenciais" e "aceitar todos", com a preferência salva localmente — e uma página de Política de Privacidade explica o que é coletado e por quê, alinhado à LGPD (a Lei Geral de Proteção de Dados).</p>
+<p><em>→ post dedicado: <a href="/blog/seguranca-de-verdade-num-blog-pessoal-jwt-bcrypt-recuperacao-de-senha-e-lgpd-na-pratica">"Segurança de verdade num blog pessoal: JWT, bcrypt, recuperação de senha e LGPD na prática"</a></em></p>
+
+<h2>3. Do domínio ao ar: Git, GitHub e deploy</h2>
+<p>Essa é a parte que todo tutorial pula. A sequência real foi:</p>
+<ol>
+<li><strong>Comprar o domínio</strong> num registrador — e aqui já vem a primeira pegadinha: comprar em um lugar não significa hospedar lá.</li>
+<li><strong>Apontar o domínio para uma plataforma diferente</strong> da que vendeu o domínio, configurando o DNS pra apontar pra hospedagem, separando "dono do nome" de "quem serve o site".</li>
+<li><strong>Versionar com Git</strong>, dois repositórios no GitHub (frontend e backend), cada um com seu próprio histórico de mudanças e deploy automático: toda mudança publicada vai ao ar sozinha.</li>
+<li><strong>Escolher banco de dados</strong>: MongoDB, com um ambiente local pra desenvolver sem medo de quebrar produção, e um banco na nuvem pro site real.</li>
+<li><strong>Publicar</strong>: deploy pros dois projetos, com endereço próprio pra API, separado do site.</li>
+</ol>
+<p>É basicamente o caminho que qualquer projeto pessoal profissional percorre — e detalho cada etapa com decisões reais no post dedicado.</p>
+<p><em>→ post dedicado: <a href="/blog/do-zero-ao-ar-dns-versionamento-deploy">"Do zero ao ar: comprar domínio, apontar DNS, Git, GitHub e deploy — o caminho completo"</a></em></p>
+
+<h2>4. Performance: medir para melhorar</h2>
+<p>Não adianta achar que o site está rápido — tem que medir. Uso PageSpeed Insights pras métricas técnicas de velocidade e Microsoft Clarity pra ver como o visitante real se comporta, não suposição.</p>
+<p>Algumas melhorias que já saíram desse ciclo de medição: conversão automática de imagem pra um formato mais leve, carregamento separado por área (o leitor do blog não baixa as ferramentas do painel administrativo), e páginas de post que já chegam prontas pro Google indexar, sem esperar JavaScript rodar.</p>
+<p><em>→ post dedicado: <a href="/blog/pagespeed-e-clarity-como-decido-o-que-otimizar-primeiro">"PageSpeed e Clarity: como decido o que otimizar primeiro"</a></em></p>
+
+<h2>5. As funcionalidades que o leitor usa (e o admin precisa)</h2>
+<ul>
+<li><strong>Calendário editorial</strong>: visão de posts publicados, planejados, e um mapa de frequência de publicação — ajuda a manter ritmo de conteúdo sem depender de memória.</li>
+<li><strong>Newsletter por categoria</strong>: o leitor escolhe por quais temas quer ser avisado, não é tudo ou nada, com link de descadastro único por assinante.</li>
+<li><strong>Lixeira</strong>: apagar um post nunca é definitivo na hora — vai pra uma lixeira, dá pra recuperar. Exclusão permanente é uma ação separada e deliberada.</li>
+<li><strong>Feedback pra quem usa</strong>: confirmações visuais tanto no admin (publicar, excluir, agendar) quanto no blog público (inscrição na newsletter, erro de carregamento) — ninguém fica sem saber se a ação funcionou.</li>
+</ul>
+<p><em>→ post dedicado: <a href="/blog/calendario-lixeira-e-newsletter-as-funcoes-que-sustentam-a-rotina-de-publicar">"Calendário, lixeira e newsletter: as funções que sustentam a rotina de publicar"</a></em></p>
+
+<h2>6. O que o leitor nunca vê</h2>
+<p>A parte invisível é onde mora a maior parte do trabalho:</p>
+<ul>
+<li><strong>SEO técnico</strong>: dados estruturados em cada post, mapa de páginas e feed de atualizações gerados automaticamente, meta tags por página.</li>
+<li><strong>GEO (otimização para buscadores de IA)</strong>: estruturar conteúdo pra que ferramentas como ChatGPT e Perplexity consigam citar e entender o artigo, não só o Google.</li>
+<li><strong>Imagens em WebP</strong>: toda imagem enviada no upload é convertida automaticamente, sem esforço manual.</li>
+<li><strong>Recuperação de senha</strong>: fluxo completo de "esqueci a senha" com código por email, implementado recentemente.</li>
+<li><strong>Autenticação de dois fatores</strong>: obrigatória no login do admin, com aplicativo autenticador e códigos de recuperação.</li>
+<li><strong>Filtros de busca e categoria</strong>: busca por texto, filtro por categoria com múltipla seleção, tudo refletido na URL.</li>
+<li><strong>Modo dark</strong>: tema persistente, com contraste de texto revisado manualmente.</li>
+</ul>
+<p><em>→ post dedicado: <a href="/blog/seo-geo-e-os-detalhes-invisiveis-que-fazem-um-blog-ser-encontrado">"SEO, GEO e os detalhes invisíveis que fazem um blog ser encontrado"</a></em></p>
+
+<h2>7. O que veio depois do mapa original</h2>
+<p>Publicar não encerra o trabalho — três temas a mais se mostraram necessários pelo caminho:</p>
+<p>Medir se o conteúdo está funcionando de verdade, com dados do próprio blog em vez de depender só de ferramenta externa.</p>
+<p><em>→ post dedicado: <a href="/blog/como-eu-sei-se-um-post-esta-funcionando-dados-proprios-clarity-e-search-console">"Como eu sei se um post está funcionando: dados próprios, Clarity e Search Console"</a></em></p>
+<p>A disciplina de QA que sustenta tudo isso: nunca editar produção direto, sempre testar o que mudou <em>e</em> confirmar que o resto não quebrou.</p>
+<p><em>→ post dedicado: <a href="/blog/qa-antes-de-subir-codigo-por-que-nunca-edito-producao-direto">"QA antes de subir código: por que nunca edito produção direto"</a></em></p>
+<p>E uma reflexão mais ampla: o que Fred Brooks escreveu em 1975 sobre equipes grandes, e por que a IA está devolvendo esse tipo de trabalho pra uma pessoa só outra vez.</p>
+<p><em>→ post dedicado: <a href="/blog/fred-brooks-1975-e-o-retrocesso-que-a-ia-esta-causando-no-desenvolvimento">"Fred Brooks, 1975, e o retrocesso que a IA está causando no desenvolvimento"</a></em></p>
+
+<h2>Fechamento</h2>
+<p>Nenhuma dessas peças importa sozinha. O que faz o marck0101 funcionar é a soma: arquitetura que separa responsabilidades, segurança que não depende de sorte, processo de deploy que não trava com medo, performance medida — não sentida —, funcionalidades pensadas tanto pra quem escreve quanto pra quem lê. E, por cima de tudo isso, a disciplina de medir o que funciona e testar antes de publicar, numa época em que cada vez mais desse trabalho cabe numa pessoa só.</p>
+<p>Essa foi a série inteira, de ponta a ponta — da primeira decisão de arquitetura até a reflexão mais recente sobre como eu mesmo trabalho hoje. Se você chegou até aqui por algum dos posts linkados ao longo do texto, essa é a visão de conjunto. Se chegou direto aqui, agora sabe por onde continuar. Para quem tem site de empresa, o resumo prático de tudo isso está em <a href="/blog/site-rapido-seguro-encontravel-guia-pequenas-empresas">Site rápido, seguro e encontrável: guia para PMEs</a>, o mesmo diagnóstico que faço para empresas do noroeste do Rio Grande do Sul.</p>

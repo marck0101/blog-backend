@@ -1,0 +1,54 @@
+<p>Automação de marketing com código não é sobre trocar pessoas por robôs. É sobre tirar do caminho o trabalho repetitivo que atrasa a decisão: copiar números de uma plataforma para outra, montar o mesmo relatório toda semana, conferir à mão se o pixel disparou. Para agências e pequenas e médias empresas, um pouco de engenharia no marketing encurta a distância entre o dado e a decisão. Este guia mostra onde ela mais ajuda, com exemplos deste blog, e onde ela atrapalha quando vem sem direção.</p>
+
+<h2>Onde a engenharia mais ajuda o marketing</h2>
+
+<h3>1. Rastreamento que não depende de ninguém</h3>
+
+<p>Saber programar permite configurar o Google Tag Manager, a camada de dados (Data Layer) e a API de Conversões sem esperar outro time. O ganho é velocidade e confiança no número: se a conversão está errada, todo o resto está errado. Um exemplo simples: com o Google Ads ligado ao Google Analytics 4, a codificação automática já leva campanha e palavra-chave para o relatório, sem UTM manual (Google, 2026). Saber disso evita horas de configuração desnecessária. A trajetória de quem chegou ao tráfego pelo código está em <a href="/blog/de-dev-a-gestor-de-trafego-como-o-codigo-virou-minha-maior-vantagem-no-marketing">De dev a gestor de tráfego</a>.</p>
+
+<h3>2. Dashboards ligados direto nas plataformas</h3>
+
+<p>Um painel que busca os dados nas APIs do Google, da Meta e do LinkedIn acaba com a planilha copiada à mão e mostra o número no dia, não no fim do mês. Mas painel feito com pressa pode vazar dados de cliente: o checklist de segurança, acesso e validação está em <a href="/blog/dashboards-com-ia-checklist-seguranca-ux">Dashboards com IA: funcionar não é estar pronto</a>.</p>
+
+<h3>3. Rotinas que rodam sozinhas</h3>
+
+<p>Este blog publica posts agendados toda manhã, manda a newsletter para cada assinante só na categoria que ele escolheu e envia um email de alerta quando algo falha. Nenhuma dessas tarefas depende de alguém lembrar. Como funcionam está em <a href="/blog/calendario-lixeira-e-newsletter-as-funcoes-que-sustentam-a-rotina-de-publicar">Calendário, lixeira e newsletter</a>.</p>
+
+<h3>4. Processo de engenharia aplicado à mídia</h3>
+
+<p>Versionar, testar antes de publicar e registrar cada mudança são hábitos de desenvolvimento que funcionam igual em campanha. A regra de nunca testar em produção, explicada em <a href="/blog/qa-antes-de-subir-codigo-por-que-nunca-edito-producao-direto">QA antes de subir código</a>, vira na mídia paga a regra de uma mudança por vez, validada e anotada.</p>
+
+<h2>A IA acelera, mas não decide</h2>
+
+<p>A IA mudou a velocidade de quem constrói. Na pesquisa do Stack Overflow de 2025, 84% dos desenvolvedores disseram usar ou planejar usar ferramentas de IA, e 51% dos profissionais as usam todos os dias (Stack Overflow, 2025). O instituto METR estima que o tamanho das tarefas que os modelos concluem sozinhos dobra a cada cerca de sete meses desde 2019 (METR, 2026).</p>
+
+<p>O risco está no que ninguém pede. Uma automação gerada sem direção funciona na tela e falha onde importa: permissões no navegador, dados sem validação, nenhum teste. Fred Brooks mostrou em 1975 que colocar mais gente num projeto atrasado o atrasa ainda mais (Brooks, 1995); hoje o desafio é o inverso, uma pessoa só fazendo tudo rápido demais. A discussão completa está em <a href="/blog/fred-brooks-1975-e-o-retrocesso-que-a-ia-esta-causando-no-desenvolvimento">Fred Brooks 1975 e o retrocesso que a IA está causando</a>.</p>
+
+<h2>Arquitetura pensada para durar</h2>
+
+<p>Automação boa sobrevive à próxima mudança de plataforma. Separar o que coleta dados do que mostra, ter uma API com contrato claro e cada parte publicando sozinha são decisões que custam um pouco no começo e economizam muito depois. O raciocínio está em <a href="/blog/monolito-ou-dois-repositorios-por-que-separei-front-e-back-do-zero">Monólito ou dois repositórios</a>.</p>
+
+<h2>Ferramentas próprias</h2>
+
+<p>Parte do trabalho de engenharia no marketing vira ferramenta: comparar concorrentes, encontrar e qualificar contatos, manter catálogos de produtos atualizados. Os próximos posts deste tema mostram ferramentas que desenvolvi para isso, como funcionam e que problema resolvem.</p>
+
+<h2>Por onde começar</h2>
+
+<ol>
+  <li>Liste as tarefas que a equipe repete toda semana e quanto tempo cada uma leva.</li>
+  <li>Comece pela que mexe em dado de cliente: rastreamento e relatório.</li>
+  <li>Automatize uma por vez, com teste e registro.</li>
+  <li>Use IA para acelerar, com alguém que saiba revisar o resultado.</li>
+</ol>
+
+<p>É o tipo de projeto que faço para agências e pequenas e médias empresas a partir do noroeste do Rio Grande do Sul: engenharia a serviço da decisão, não da complexidade.</p>
+
+<h2>Referências</h2>
+
+<p>BROOKS, Frederick P. <strong>The mythical man-month</strong>: essays on software engineering. Anniversary ed. Reading: Addison-Wesley, 1995. Primeira edição de 1975.</p>
+
+<p>GOOGLE. Sobre a codificação automática. <strong>Ajuda do Google Ads</strong>, [<em>s. l.</em>], 2026. Disponível em: <a href="https://support.google.com/google-ads/answer/3095550?hl=pt-BR" target="_blank" rel="noopener noreferrer">https://support.google.com/google-ads/answer/3095550?hl=pt-BR</a>. Acesso em: 26 nov. 2026.</p>
+
+<p>METR. Time horizon 1.1. Berkeley: METR, 29 jan. 2026. Disponível em: <a href="https://metr.org/blog/2026-01-29-time-horizon-1-1/" target="_blank" rel="noopener noreferrer">https://metr.org/blog/2026-01-29-time-horizon-1-1/</a>. Acesso em: 26 nov. 2026.</p>
+
+<p>STACK OVERFLOW. <strong>2025 Developer Survey</strong>: AI. [<em>S. l.</em>]: Stack Overflow, 2025. Disponível em: <a href="https://survey.stackoverflow.co/2025/ai" target="_blank" rel="noopener noreferrer">https://survey.stackoverflow.co/2025/ai</a>. Acesso em: 26 nov. 2026.</p>

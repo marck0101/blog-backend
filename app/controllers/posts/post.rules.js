@@ -5,6 +5,7 @@ const { safeShareArticle } = require("../../services/linkedin.service");
 const { pingPost } = require("../../services/indexnow.service");
 const { sanitizeHtml } = require("../../utils/sanitizeHtml");
 const { SLUGS: ALLOWED_CATEGORIES } = require("../../config/categories");
+const { SLUGS: ALLOWED_CLUSTERS } = require("../../config/clusters");
 const { DAILY_JOB_UTC_HOUR } = require("../../config/schedule");
 const { addDays, dayKey, parseDayKey } = require("../../utils/dates");
 const { normalizeTags } = require("../../utils/tags");
@@ -19,10 +20,10 @@ const { normalizeTags } = require("../../utils/tags");
 // Campos que as rotas públicas podem devolver. Lista de permitidos (não de
 // proibidos): campo novo de admin (email, LinkedIn, views…) nunca vaza por padrão.
 const PUBLIC_FIELDS =
-  "_id title slug excerpt directAnswer content category tags coverImage coverImageAlt gallery faq seo season seasonOrder publishedAt createdAt updatedAt commentsCount readingMinutes";
+  "_id title slug excerpt directAnswer content category cluster isPillar tags coverImage coverImageAlt gallery faq seo season seasonOrder publishedAt createdAt updatedAt commentsCount readingMinutes";
 
 // Cards da vitrine (fixados e destaques): sem o conteúdo inteiro
-const CARD_FIELDS = "_id title slug excerpt category coverImage coverImageAlt season publishedAt createdAt commentsCount readingMinutes";
+const CARD_FIELDS = "_id title slug excerpt category cluster isPillar coverImage coverImageAlt season publishedAt createdAt commentsCount readingMinutes";
 
 // Leituras sugeridas no fim do post (manuais + automáticas)
 const RELATED_LIMIT = 3;
@@ -69,6 +70,27 @@ function normalizeLinks(data, selfId = null) {
 }
 
 /** Season vazia vira null (post sem season); ordem vazia também */
+// Tema vazio vira null; sem tema não há pilar (R-CLU-02)
+function normalizeCluster(data) {
+  if (data.cluster !== undefined && !data.cluster) {
+    data.cluster = null;
+    data.isPillar = false;
+  }
+}
+
+/**
+ * Um pilar por tema (R-CLU-02): o post salvo como pilar tira a marca do pilar
+ * anterior do mesmo tema. Chamado depois de gravar.
+ */
+async function keepSinglePillar(post) {
+  if (!post?.isPillar || !post.cluster) return;
+  const BlogPost = mongoose.model("BlogPost");
+  await BlogPost.updateMany(
+    { _id: { $ne: post._id }, cluster: post.cluster, isPillar: true },
+    { $set: { isPillar: false } }
+  );
+}
+
 function normalizeSeason(data) {
   if (data.season !== undefined && !data.season) data.season = null;
   if (data.seasonOrder !== undefined) {
@@ -153,6 +175,13 @@ function validatePost(data, isCreate, existing = null, now = new Date()) {
   if (data.category !== undefined && !ALLOWED_CATEGORIES.includes(data.category)) {
     return `Categoria inválida. Valores permitidos: ${ALLOWED_CATEGORIES.join(", ")}`;
   }
+  if (data.cluster && !ALLOWED_CLUSTERS.includes(data.cluster)) {
+    return `Tema inválido. Valores permitidos: ${ALLOWED_CLUSTERS.join(", ")}`;
+  }
+  const cluster = data.cluster !== undefined ? data.cluster : existing?.cluster;
+  if (data.isPillar === true && !cluster) {
+    return "Escolha o tema antes de marcar o post como pilar";
+  }
   return null;
 }
 
@@ -209,6 +238,8 @@ module.exports = {
   pickLinkedIn,
   normalizeSlug,
   normalizeSeason,
+  normalizeCluster,
+  keepSinglePillar,
   normalizeLinks,
   normalizePlannedAt,
   validatePost,

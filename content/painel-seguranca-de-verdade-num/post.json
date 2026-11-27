@@ -1,0 +1,42 @@
+{
+  "title": "Segurança de verdade num blog pessoal: login, 2FA, senha e LGPD na prática",
+  "slug": "seguranca-de-verdade-num-blog-pessoal-jwt-bcrypt-recuperacao-de-senha-e-lgpd-na-pratica",
+  "excerpt": "Blog pessoal também tem painel, assinantes e o seu nome em cada página. Login, segundo fator, recuperação de senha e cookies: o que implementei e por quê.",
+  "category": "tecnologia",
+  "status": "draft",
+  "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1791400591359.webp",
+  "faq": [
+    {
+      "question": "Blog pessoal precisa se preocupar com segurança?",
+      "answer": "Sim. Quem entra no painel publica em seu nome e acessa a lista de assinantes. Senha vazada e dado mal tratado custam reputação em qualquer escala."
+    },
+    {
+      "question": "Como a senha do admin é guardada?",
+      "answer": "Com hash bcrypt, nunca como texto. Nem quem acessa o banco consegue ler a senha original, e o login tem limite de 10 tentativas a cada 15 minutos."
+    },
+    {
+      "question": "O segundo fator vale a pena num blog?",
+      "answer": "Sim. No marck0101 ele é obrigatório: além da conta Google ou da senha, o painel pede o código de um aplicativo autenticador. Dez códigos de recuperação de uso único resolvem a perda do celular."
+    },
+    {
+      "question": "Por que ter recuperação de senha é uma questão de segurança?",
+      "answer": "Sem um caminho de recuperação, as pessoas recorrem a gambiarras como senha anotada ou reutilizada. O fluxo do blog usa um código de 1 hora, guardado com hash, descartado após o uso, e encerra todas as sessões abertas."
+    },
+    {
+      "question": "Como o banner de cookies respeita a LGPD?",
+      "answer": "Ele oferece duas opções reais, apenas essenciais ou aceitar todos, e as ferramentas de medição só carregam depois da escolha. A política de privacidade explica o que é coletado e como pedir a exclusão."
+    }
+  ],
+  "file": "content.html",
+  "note": "exportado do painel de produção em 26/11/2026",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "seguranca",
+    "autenticacao",
+    "2fa",
+    "lgpd",
+    "blog"
+  ],
+  "directAnswer": "Um painel de blog seguro guarda a senha com hash (bcrypt), limita tentativas de login, exige um segundo fator por aplicativo autenticador, mantém a sessão num cookie que o JavaScript não lê e pode encerrar todas as sessões de uma vez. A recuperação de senha usa código de uso único válido por 1 hora, e o banner de cookies oferece escolha real."
+}

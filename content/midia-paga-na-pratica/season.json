@@ -4,18 +4,70 @@
     {
       "seasonOrder": 0,
       "file": "00-processo-nomenclatura-utm.html",
-      "title": "Mídia paga na prática: por que documentar o processo (e como nomear campanhas)",
+      "title": "Nomenclatura de campanhas e UTM: o padrão da mídia paga",
       "slug": "midia-paga-na-pratica-processo-nomenclatura-utm",
       "excerpt": "Como transformei o processo de mídia paga em checklists por canal e objetivo, e o padrão de nomenclatura e UTM que uso em todas as campanhas.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido",
+      "tags": [
+        "nomenclatura de campanhas",
+        "utm",
+        "google analytics",
+        "processo"
+      ],
+      "directAnswer": "Um padrão de nomenclatura de campanhas define a ordem fixa dos blocos no nome: sigla, plataforma e canal, etapa do funil, objetivo e produto, separados por sublinhado e sem acento. O mesmo nome vira utm_campaign, e o do anúncio vira utm_content, e assim o Google Analytics mostra exatamente qual campanha e qual criativo trouxeram cada visita.",
+      "faq": [
+        {
+          "question": "Preciso de UTM nas campanhas do Google Ads?",
+          "answer": "Com a codificação automática ativa e o Google Ads vinculado ao GA4, não: o gclid já leva campanha, grupo e palavra-chave, e no GA4 ele tem prioridade sobre a UTM manual. A UTM faz diferença na Meta, no LinkedIn, no e-mail e em links fora do Google."
+        },
+        {
+          "question": "Por que não usar acento no nome da campanha?",
+          "answer": "Porque o nome vai para a URL como UTM. Acento e espaço viram códigos como %C3%A1 e %20, que dificultam a leitura e o filtro no relatório."
+        },
+        {
+          "question": "Facebook e facebook contam como a mesma origem no GA4?",
+          "answer": "Não. O GA4 trata valores escritos de forma diferente como origens diferentes. Escolha uma grafia por plataforma e use sempre a mesma."
+        },
+        {
+          "question": "Como saber por que o resultado de uma campanha mudou?",
+          "answer": "Registrando toda alteração numa planilha com data, campanha, o que mudou, por quê e quem validou. Sem esse registro, a resposta depende da memória de quem mexeu."
+        }
+      ]
     },
     {
       "seasonOrder": 1,
       "file": "01-google-ads-do-zero.html",
-      "title": "Como criar uma campanha no Google Ads do zero: objetivo, meta e tipo",
+      "title": "Como criar uma campanha no Google Ads do zero",
       "slug": "como-criar-campanha-google-ads-do-zero",
       "excerpt": "A lógica que vale para qualquer campanha no Google Ads: escolher objetivo, meta de conversão e tipo de campanha sem aceitar o padrão.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido",
+      "tags": [
+        "google ads",
+        "campanha",
+        "metas de conversão",
+        "lances inteligentes"
+      ],
+      "directAnswer": "Para criar uma campanha no Google Ads do zero, siga sempre a mesma ordem: objetivo, meta de conversão, tipo de campanha e só depois lance, orçamento e anúncios. Deixe marcada apenas a meta principal, escolha o tipo de propósito e troque o nome e o orçamento sugeridos pelos seus. Antes de publicar, peça a revisão de alguém mais sênior da conta.",
+      "faq": [
+        {
+          "question": "Posso criar uma campanha no Google Ads sem objetivo?",
+          "answer": "Pode. A campanha funciona do mesmo jeito, mas o Google deixa de mostrar as recomendações ligadas ao objetivo. Vale para quem já sabe o que configurar."
+        },
+        {
+          "question": "Por que deixar só uma meta de conversão marcada?",
+          "answer": "Porque os lances automáticos otimizam para todas as metas marcadas. Metas secundárias, como clique em botão, fazem o Google buscar ações que valem menos que a venda ou o lead."
+        },
+        {
+          "question": "Qual tipo de campanha escolher para começar?",
+          "answer": "Para serviço ou negócio local, Pesquisa costuma ser o começo mais seguro, porque aparece para quem já procura o que você vende. Performance Max exige uma conversão confiável para funcionar bem."
+        },
+        {
+          "question": "Preciso aceitar o orçamento que o Google sugere?",
+          "answer": "Não. Use o valor aprovado na planilha de verba. A sugestão da plataforma não conhece a margem do produto nem o plano do cliente."
+        }
+      ]
     },
     {
       "seasonOrder": 2,
@@ -23,47 +75,169 @@
       "title": "Como criar uma campanha de Pesquisa no Google Ads",
       "slug": "como-criar-campanha-pesquisa-google-ads",
       "excerpt": "Passo a passo para criar uma campanha de Pesquisa no Google Ads: lance, locais, palavras-chave, anúncio responsivo e o que desmarcar antes de publicar.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido",
+      "tags": [
+        "google ads",
+        "campanha de pesquisa",
+        "palavras-chave",
+        "anúncio responsivo"
+      ],
+      "directAnswer": "Para criar uma campanha de Pesquisa no Google Ads: comece com o lance Maximizar conversões sem CPA desejado, desmarque a Rede de Display, restrinja o local à área atendida (com Presença, se o negócio é local), monte um grupo por tema com 10 a 20 palavras-chave em frase ou exata, aplique as negativas e preencha o anúncio responsivo com 15 títulos e 4 descrições.",
+      "faq": [
+        {
+          "question": "Devo deixar a Rede de Display marcada na campanha de Pesquisa?",
+          "answer": "Não. Ela vem marcada por padrão e leva parte da verba para banners em sites parceiros, um público que não estava procurando o que você vende."
+        },
+        {
+          "question": "Qual a diferença entre Presença e Presença ou interesse?",
+          "answer": "Presença ou interesse, o padrão, também alcança quem só demonstrou interesse na região. Presença alcança quem está ou costuma estar no local, melhor para negócio que atende uma área definida."
+        },
+        {
+          "question": "Quando definir um CPA desejado?",
+          "answer": "Quando a campanha tiver histórico estável, uma referência de mercado é perto de 30 conversões por mês. Antes disso, Maximizar conversões sem meta costuma funcionar melhor."
+        },
+        {
+          "question": "O que é o IA Max para campanhas de pesquisa?",
+          "answer": "Um recurso que amplia as palavras-chave com correspondência ampla e tecnologia sem palavra-chave. Traz alcance, mas reduz o controle sobre quais pesquisas acionam o anúncio; ative de propósito."
+        }
+      ]
     },
     {
       "seasonOrder": 3,
       "file": "03-pesquisa-otimizar.html",
-      "title": "Como otimizar uma campanha de Pesquisa: termos, dispositivos, horários e locais",
+      "title": "Como otimizar campanha de Pesquisa no Google Ads",
       "slug": "como-otimizar-campanha-pesquisa-google-ads",
       "excerpt": "Os quatro relatórios que olho para otimizar uma campanha de Pesquisa no Google Ads e o que fazer com cada um.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido",
+      "tags": [
+        "google ads",
+        "otimização",
+        "termos de pesquisa",
+        "palavras-chave negativas"
+      ],
+      "directAnswer": "Para otimizar uma campanha de Pesquisa, revise em ordem os termos de pesquisa (negativar o irrelevante, adicionar o que converte), os dispositivos, os dias e horários e os locais. Faça uma mudança por vez, valide com alguém mais sênior da conta e registre na planilha, para saber o que funcionou.",
+      "faq": [
+        {
+          "question": "Com que frequência revisar os termos de pesquisa?",
+          "answer": "Em campanha nova, toda semana; depois de estável, a cada duas semanas costuma bastar. O importante é olhar padrões que se repetem, não termos isolados."
+        },
+        {
+          "question": "Vale ajustar lance por dispositivo com Lances Inteligentes?",
+          "answer": "Pouco. Os Lances Inteligentes já ajustam por dispositivo e dispensam ajustes manuais; o -100%, que exclui o dispositivo, continua valendo."
+        },
+        {
+          "question": "Devo cortar horários com poucas conversões?",
+          "answer": "Só olhando o volume. Corte quando o horário gasta por semanas sem converter, ou quando ninguém do cliente consegue atender o lead naquele horário."
+        },
+        {
+          "question": "Por que registrar cada alteração?",
+          "answer": "Porque, sem registro, ninguém sabe dizer daqui a um mês por que o resultado mudou. A planilha com data, motivo e quem validou responde isso."
+        }
+      ]
     },
     {
       "seasonOrder": 4,
       "file": "04-performance-max.html",
-      "title": "Como criar uma campanha de Performance Max no Google Ads",
+      "title": "Performance Max vale a pena? Como criar e revisar a campanha",
       "slug": "como-criar-campanha-performance-max-google-ads",
       "excerpt": "Passo a passo para criar uma Performance Max no Google Ads, o que o Google deixa ligado por padrão, como otimizar e um checklist para copiar.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido",
+      "tags": [
+        "google ads",
+        "performance max",
+        "merchant center",
+        "e-commerce"
+      ],
+      "directAnswer": "Performance Max vale a pena quando já existem uma conversão confiável, criativos para vários formatos e, no e-commerce, um feed limpo no Merchant Center. Na criação, deixe só a meta principal, aplique exclusão de marca, exclua páginas sem venda da expansão de URL, crie um grupo de recursos por categoria e revise os textos gerados pela IA antes de publicar.",
+      "faq": [
+        {
+          "question": "Performance Max substitui a campanha de Pesquisa?",
+          "answer": "Não. Ela complementa. A Pesquisa de marca e a de palavras-chave importantes continuam separadas, e a exclusão de marca evita que a Performance Max fique com a busca de marca."
+        },
+        {
+          "question": "Preciso enviar vídeo na Performance Max?",
+          "answer": "Não é obrigatório, mas sem vídeo o Google pode gerar um automático a partir das imagens, quase sempre genérico. Envie pelo menos um vídeo próprio."
+        },
+        {
+          "question": "Quando definir ROAS ou CPA desejado?",
+          "answer": "Só quando a conta já tem histórico. Sem histórico, o número é um chute que limita a campanha. É prática de mercado, não regra do Google."
+        },
+        {
+          "question": "Como ver onde a Performance Max está gastando?",
+          "answer": "No relatório de desempenho do canal, em Insights e relatórios. Use para diagnosticar, não para julgar canal por canal: o resultado da campanha inteira vem primeiro."
+        }
+      ]
     },
     {
       "seasonOrder": 5,
       "file": "05-demand-gen.html",
-      "title": "Demand Gen no Google Ads: como criar e o que muda com a migração do Display",
+      "title": "Demand Gen no Google Ads: como criar e o que muda no Display",
       "slug": "como-criar-campanha-demand-gen-google-ads",
       "excerpt": "Como criar uma campanha de Geração de demanda no Google Ads, o que vem errado por padrão e o que muda com a migração do Display.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido",
+      "tags": [
+        "google ads",
+        "demand gen",
+        "youtube",
+        "display"
+      ],
+      "directAnswer": "A campanha Demand Gen mostra vídeo e imagem no YouTube (com Shorts), Discover, Gmail, Maps e Rede de Display, para criar interesse em quem ainda não procura o produto. Use um público por grupo, criativos em todos os formatos e, com CPA desejado, orçamento diário de pelo menos 10 vezes o CPA. As campanhas de Display estão migrando para ela.",
+      "faq": [
+        {
+          "question": "Qual orçamento a Demand Gen precisa?",
+          "answer": "Com CPA desejado, o Google recomenda pelo menos 10 vezes o CPA por dia, e toda campanha Demand Gen exige no mínimo US$ 5 por dia ou o equivalente em reais."
+        },
+        {
+          "question": "O que é a segmentação otimizada?",
+          "answer": "Uma opção, ligada por padrão, que deixa o Google mostrar o anúncio para pessoas fora do público escolhido. Pode achar público novo, mas também encarece a campanha; decida de propósito."
+        },
+        {
+          "question": "O Display vai acabar?",
+          "answer": "As campanhas de Display estão migrando para a Geração de demanda, que também entrega na Rede de Display. Confira na ajuda do Google o estágio da migração na sua conta."
+        },
+        {
+          "question": "Quando avaliar os criativos?",
+          "answer": "Com pelo menos 30 dias de dados e sem mexer em lance ou público nas duas primeiras semanas, para não reiniciar o aprendizado."
+        }
+      ]
     },
     {
       "seasonOrder": 6,
       "file": "06-shopping.html",
-      "title": "Como criar uma campanha de Shopping no Google Ads",
+      "title": "Campanha de Shopping no Google Ads e o checklist dos padrões",
       "slug": "como-criar-campanha-shopping-google-ads",
       "excerpt": "Passo a passo de uma campanha de Shopping no Google Ads: Merchant Center, prioridade, grupos de produtos e como otimizar por produto.",
-      "category": "trafego"
-    },
-    {
-      "seasonOrder": 7,
-      "file": "07-checklist-padroes-google.html",
-      "title": "Checklist do Google Ads: o que vem ligado e você deveria desligar",
-      "slug": "checklist-google-ads-configuracoes-padrao",
-      "excerpt": "Todas as configurações padrão do Google Ads que revisei na season, em um checklist único para usar antes de publicar qualquer campanha.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido",
+      "tags": [
+        "google ads",
+        "shopping",
+        "merchant center",
+        "checklist"
+      ],
+      "directAnswer": "A campanha de Shopping mostra o produto com foto, preço e loja a partir do feed do Merchant Center, com mais controle que a Performance Max: lance por grupo de produtos e prioridade entre campanhas. Escolha o lance de propósito (vem em CPC manual), separe grupos por categoria ou marca e corrija título, imagem e preço no feed antes de mexer no lance.",
+      "faq": [
+        {
+          "question": "Shopping ou Performance Max?",
+          "answer": "Shopping quando você quer controlar lance e prioridade por produto ou categoria. Performance Max quando há conversão confiável e criativos para vários canais e você aceita dar mais controle à automação."
+        },
+        {
+          "question": "Para que serve a prioridade da campanha de Shopping?",
+          "answer": "Ela só importa quando duas campanhas de Shopping anunciam o mesmo produto: a de prioridade maior dá o lance e, em empate, ganha o maior lance."
+        },
+        {
+          "question": "Produto com muita impressão e pouco clique: o que fazer?",
+          "answer": "Olhe primeiro o feed: título, imagem e preço. Quase sempre o problema está ali, e não no lance."
+        },
+        {
+          "question": "O Google Ads aplica recomendações sozinho?",
+          "answer": "Pode, se a aplicação automática estiver ligada. Confira essas configurações todo mês e desligue o que não foi decidido pela equipe."
+        }
+      ]
     },
     {
       "seasonOrder": 8,
@@ -71,7 +245,8 @@
       "title": "Objetivos do Meta Ads: qual escolher para cada campanha",
       "slug": "objetivos-meta-ads-qual-escolher",
       "excerpt": "Os seis objetivos do Gerenciador de Anúncios da Meta, quando usar cada um e como a estrutura campanha, conjunto e anúncio funciona.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     },
     {
       "seasonOrder": 9,
@@ -79,7 +254,8 @@
       "title": "Como criar uma campanha de Cadastros e WhatsApp no Meta Ads",
       "slug": "campanha-leads-whatsapp-meta-ads",
       "excerpt": "Passo a passo para gerar cadastros e conversas no WhatsApp com o Meta Ads: formulário instantâneo, mensagens e o que revisar antes de publicar.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     },
     {
       "seasonOrder": 10,
@@ -87,7 +263,8 @@
       "title": "Como criar uma campanha de Vendas no Meta Ads",
       "slug": "campanha-vendas-meta-ads",
       "excerpt": "Como criar campanhas de Vendas no Meta Ads, manuais ou Advantage+, com Pixel, API de Conversões e catálogo bem configurados.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     },
     {
       "seasonOrder": 11,
@@ -95,7 +272,8 @@
       "title": "Como criar uma campanha de Tráfego no Meta Ads",
       "slug": "campanha-trafego-meta-ads",
       "excerpt": "Quando usar o objetivo Tráfego no Meta Ads, como configurar visualização da página de destino e o que esperar dele.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     },
     {
       "seasonOrder": 12,
@@ -103,7 +281,8 @@
       "title": "Como criar uma campanha de Reconhecimento no Meta Ads",
       "slug": "campanha-reconhecimento-meta-ads",
       "excerpt": "Como criar uma campanha de Reconhecimento no Meta Ads: alcance, frequência e como medir se a marca está sendo vista.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     },
     {
       "seasonOrder": 13,
@@ -111,7 +290,8 @@
       "title": "Como otimizar criativos e públicos no Meta Ads",
       "slug": "otimizar-criativos-publicos-meta-ads",
       "excerpt": "Fadiga de criativo, frequência, CTR, CPM e públicos: o que olho para otimizar campanhas no Meta Ads e o que mudar em cada caso.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     },
     {
       "seasonOrder": 14,
@@ -119,7 +299,8 @@
       "title": "Checklist do Meta Ads: o que revisar antes de publicar",
       "slug": "checklist-meta-ads",
       "excerpt": "O checklist que uso antes de publicar qualquer campanha no Meta Ads, por objetivo, para não depender da memória.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     },
     {
       "seasonOrder": 15,
@@ -127,7 +308,8 @@
       "title": "Objetivos do LinkedIn Ads: qual escolher e como segmentar",
       "slug": "objetivos-linkedin-ads",
       "excerpt": "Os objetivos de campanha do LinkedIn Ads, quando usar cada um e como segmentar por cargo, função, senioridade, empresa e setor.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     },
     {
       "seasonOrder": 16,
@@ -135,7 +317,8 @@
       "title": "Document Ads no LinkedIn: como criar e otimizar anúncios de documento",
       "slug": "document-ads-linkedin",
       "excerpt": "Como criar anúncios de documento no LinkedIn Ads, com ou sem formulário de leads, e o que olhar para otimizar.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     },
     {
       "seasonOrder": 17,
@@ -143,7 +326,8 @@
       "title": "Formulário de geração de leads no LinkedIn Ads: como configurar",
       "slug": "formulario-geracao-leads-linkedin-ads",
       "excerpt": "Como configurar o formulário de geração de leads do LinkedIn Ads: campos, perguntas, integração e o que revisar antes de publicar.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     },
     {
       "seasonOrder": 18,
@@ -151,7 +335,8 @@
       "title": "Checklist do LinkedIn Ads: o que revisar antes de publicar",
       "slug": "checklist-linkedin-ads",
       "excerpt": "O checklist que uso antes de publicar campanhas no LinkedIn Ads, com foco em Document Ads e geração de leads.",
-      "category": "trafego"
+      "category": "trafego",
+      "cluster": "trafego-pago-medido"
     }
   ]
 }

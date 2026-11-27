@@ -3,6 +3,13 @@
   "slug": "palavra-chave-e-promessa-sem-acento",
   "excerpt": "A dor de quem lê e o resultado que o artigo entrega, em até 160 caracteres.",
   "category": "tecnologia",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "palavra-chave",
+    "tema"
+  ],
+  "directAnswer": "A resposta para a palavra-chave em 2 a 3 frases (até 400 caracteres), que faça sentido fora do artigo.",
   "file": "content.html",
   "plannedAt": "2026-11-16T12:00:00-03:00",
   "faq": [

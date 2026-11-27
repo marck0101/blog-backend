@@ -1,0 +1,35 @@
+{
+  "title": "Login antes do dado: segurança e LGPD em dashboards",
+  "slug": "login-antes-do-dado-seguranca-lgpd-dashboards",
+  "excerpt": "Dashboard com dados de clientes é um cofre com vitrine. O que a LGPD exige, o que pedir ao fornecedor e cinco perguntas para a próxima reunião.",
+  "category": "negocios",
+  "cluster": "seguranca-na-diretoria",
+  "isPillar": false,
+  "season": "seguranca-e-pauta-de-diretoria",
+  "seasonOrder": 12,
+  "tags": [
+    "lgpd",
+    "seguranca",
+    "dashboard",
+    "diretoria",
+    "autenticacao"
+  ],
+  "directAnswer": "Em dashboard com dados de clientes, ninguém deve ver dado nenhum antes de provar quem é: login individual, segundo fator obrigatório e cada pessoa vendo só o que precisa, com a regra aplicada no servidor. A LGPD exige medidas de segurança contra acesso não autorizado e, em incidente relevante, comunicação à ANPD e aos titulares em até três dias úteis.",
+  "file": "content.html",
+  "plannedAt": "2026-12-28T08:50:00-03:00",
+  "note": "Episódio da season Segurança é pauta de diretoria: o import-draft não grava season; definir a season e a ordem no painel ao importar.",
+  "faq": [
+    {
+      "question": "O que a LGPD exige de um dashboard com dados de clientes?",
+      "answer": "Medidas de segurança técnicas e administrativas que protejam os dados pessoais de acesso não autorizado (art. 46) e, em incidente que possa causar dano relevante, comunicação à ANPD e aos titulares (art. 48), em até três dias úteis pelo regulamento da ANPD."
+    },
+    {
+      "question": "Link secreto por e-mail é seguro para mostrar o dashboard ao cliente?",
+      "answer": "Não. Link sem login é público para quem o receber, e pode ser encaminhado. Cada pessoa precisa de acesso próprio, com segundo fator."
+    },
+    {
+      "question": "O que perguntar à agência sobre a segurança do painel?",
+      "answer": "Quem vê os dados hoje, se o segundo fator é obrigatório, se um cliente consegue ver dados de outro, em quanto tempo o acesso de quem sai é cortado e quem comunica a ANPD em caso de vazamento."
+    }
+  ]
+}

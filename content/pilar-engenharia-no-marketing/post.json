@@ -1,0 +1,32 @@
+{
+  "title": "Automação de marketing com código: o que vale a pena",
+  "slug": "automacao-de-marketing-com-codigo-engenharia-no-marketing",
+  "excerpt": "Rastreamento, dashboards por API e rotinas que rodam sozinhas: onde a engenharia mais ajuda o marketing e onde a IA atrapalha quando vem sem direção.",
+  "category": "tecnologia",
+  "cluster": "engenharia-no-marketing",
+  "isPillar": true,
+  "tags": [
+    "automacao de marketing",
+    "rastreamento",
+    "dashboards",
+    "inteligencia artificial",
+    "agencias"
+  ],
+  "directAnswer": "Automação de marketing com código serve para tirar do caminho o trabalho repetitivo que atrasa a decisão: rastreamento configurado sem depender de outro time, dashboards ligados direto nas APIs das plataformas e rotinas que rodam sozinhas, como publicação agendada e alertas. A IA acelera tudo isso, mas precisa de alguém que saiba revisar o resultado.",
+  "file": "content.html",
+  "plannedAt": "2026-12-21T08:50:00-03:00",
+  "faq": [
+    {
+      "question": "O que dá para automatizar no marketing com código?",
+      "answer": "Rastreamento de conversões, relatórios e dashboards ligados às APIs do Google, da Meta e do LinkedIn, publicação agendada, newsletters segmentadas e alertas quando algo falha."
+    },
+    {
+      "question": "Preciso saber programar para automatizar o marketing?",
+      "answer": "Para tarefas simples, ferramentas prontas resolvem. Para rastreamento confiável e dashboards com dados de clientes, ter alguém que entenda de código evita erro de dado e vazamento."
+    },
+    {
+      "question": "A IA substitui o desenvolvedor na automação?",
+      "answer": "Ela acelera a construção, mas faz só o que é pedido. Permissões, validação de dados e testes precisam de alguém que saiba que eles existem."
+    }
+  ]
+}

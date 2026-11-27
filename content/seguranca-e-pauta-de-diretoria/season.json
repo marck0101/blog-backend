@@ -1,0 +1,343 @@
+{
+  "season": "seguranca-e-pauta-de-diretoria",
+  "posts": [
+    {
+      "seasonOrder": 1,
+      "file": "01-hacker-nao-e-o.html",
+      "title": "Hacker não é o vilão: quem ataca sua empresa e por quê",
+      "slug": "hacker-nao-e-o-vilao-quem-ataca-sua-empresa-e-por-que",
+      "excerpt": "Antes de investir em segurança, a diretoria precisa entender quem são os atacantes, o que os motiva e por que sua empresa entra na mira.",
+      "category": "negocios",
+      "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439635895.webp",
+      "coverImageAlt": "Capa do episódio 01 da season Segurança é pauta de diretoria: Hacker não é o vilão, com ícone de chapéu ao centro",
+      "tags": [
+        "seguranca-da-informacao",
+        "hacker",
+        "ameacas",
+        "diretoria"
+      ],
+      "directAnswer": "O \"hacker\" não é necessariamente o inimigo. O adversário real da empresa é quem explora falhas com intenção criminosa, e ele escolhe alvos pela facilidade, não pelo tamanho. Entender quem ataca e por quê é o primeiro passo para a diretoria decidir onde investir.",
+      "faq": [
+        {
+          "question": "Qual a diferença entre hacker e cracker?",
+          "answer": "O hacker (white hat) encontra vulnerabilidades e as reporta para correção. O cracker (black hat) explora falhas com intenção criminosa. O grey hat age sem autorização, mesmo sem intenção criminosa."
+        },
+        {
+          "question": "Minha empresa é pequena demais para ser atacada?",
+          "answer": "Não. Boa parte dos ataques é automatizada e oportunista: robôs procuram senhas fracas e sistemas desatualizados em qualquer empresa exposta. Empresas menores ainda servem de porta de entrada para parceiros maiores."
+        },
+        {
+          "question": "O que motiva um ataque hacker contra empresas?",
+          "answer": "Dinheiro (o motivo mais comum), ideologia, espionagem corporativa e ameaças internas de colaboradores, ex-colaboradores ou parceiros com acesso excessivo."
+        }
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
+    },
+    {
+      "seasonOrder": 2,
+      "file": "02-confidencialidade-integridade-e-disponibilidade.html",
+      "title": "Confidencialidade, Integridade e Disponibilidade: o risco de segurança em linguagem de negócio",
+      "slug": "confidencialidade-integridade-e-disponibilidade-o-risco-de-seguranca-em-linguagem-de-negocio",
+      "excerpt": "A tríade CID é a régua para medir qualquer incidente. Veja como traduzir vazamento, adulteração e parada em multa, fraude e faturamento perdido.",
+      "category": "negocios",
+      "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439720891.webp",
+      "coverImageAlt": "Capa do episódio 02 da season Segurança é pauta de diretoria: Confidencialidade, Integridade e Disponibilidade, com escudo",
+      "tags": [
+        "triade-cid",
+        "gestao-de-riscos",
+        "lgpd",
+        "diretoria"
+      ],
+      "directAnswer": "A tríade CID (Confidencialidade, Integridade e Disponibilidade) é a régua que transforma qualquer incidente de segurança em impacto de negócio: vazamento vira multa e perda de confiança, dado adulterado vira fraude, sistema fora do ar vira faturamento perdido.",
+      "faq": [
+        {
+          "question": "O que é a tríade CID na segurança da informação?",
+          "answer": "São os três pilares para medir qualquer incidente: Confidencialidade (quem pode ver), Integridade (se o dado é confiável) e Disponibilidade (se o sistema está no ar)."
+        },
+        {
+          "question": "Qual a multa da LGPD por vazamento de dados?",
+          "answer": "Até 2% do faturamento no Brasil, limitada a R$ 50 milhões por infração, além da perda de confiança dos clientes."
+        },
+        {
+          "question": "Como a diretoria prioriza riscos de segurança?",
+          "answer": "Dando uma nota de 1 a 5 para cada sistema crítico em três perguntas: se vazar, se for alterado sem ninguém perceber e se parar por um dia. O resultado é um mapa de prioridades."
+        }
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
+    },
+    {
+      "seasonOrder": 3,
+      "file": "03-por-que-o-alvo.html",
+      "title": "Por que o alvo preferido é a diretoria: phishing, whaling e golpes por mensagem",
+      "slug": "por-que-o-alvo-preferido-e-a-diretoria-phishing-whaling-e-golpes-por-mensagem",
+      "excerpt": "Executivos têm acesso, autoridade e pressa. Entenda como funcionam phishing, spear phishing, whaling, vishing e smishing, e como se proteger.",
+      "category": "negocios",
+      "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439783198.webp",
+      "coverImageAlt": "Capa do episódio 03 da season Segurança é pauta de diretoria: O alvo preferido é a diretoria, com ícone de alvo",
+      "tags": [
+        "phishing",
+        "whaling",
+        "deepfake",
+        "fraude"
+      ],
+      "directAnswer": "Quem aprova pagamentos e tem acesso a tudo é exatamente quem o atacante mais quer enganar. Golpes de phishing direcionados à alta gestão (whaling) exploram autoridade, urgência e sigilo, e hoje usam até voz e vídeo falsos gerados por IA. A defesa mais eficaz é simples: a regra do segundo canal.",
+      "faq": [
+        {
+          "question": "O que é whaling?",
+          "answer": "É o spear phishing voltado à alta gestão: mensagens que se passam pelo CEO ou por um advogado pedindo transferência urgente e confidencial."
+        },
+        {
+          "question": "Qual a diferença entre phishing, vishing e smishing?",
+          "answer": "Phishing usa e-mail, vishing usa ligações ou áudios (inclusive com voz clonada por IA) e smishing usa SMS ou WhatsApp, como no golpe do troquei de número."
+        },
+        {
+          "question": "Como se proteger de golpes que imitam executivos?",
+          "answer": "Com a regra do segundo canal: todo pedido de pagamento ou troca de conta é confirmado por outro meio independente, como um número já cadastrado, uma conversa presencial ou uma palavra-chave combinada."
+        }
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
+    },
+    {
+      "seasonOrder": 4,
+      "file": "04-o-ataque-que-entra.html",
+      "title": "O ataque que entra pela recepção: pretexting, baiting e tailgating",
+      "slug": "o-ataque-que-entra-pela-recepcao-pretexting-baiting-e-tailgating",
+      "excerpt": "Nem todo ataque começa por um e-mail. Histórias inventadas, pendrives \"perdidos\" e uma porta segurada por educação também abrem a empresa.",
+      "category": "negocios",
+      "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439844744.webp",
+      "coverImageAlt": "Capa do episódio 04 da season Segurança é pauta de diretoria: O ataque que entra pela recepção, com ícone de porta",
+      "tags": [
+        "engenharia-social",
+        "pretexting",
+        "baiting",
+        "tailgating"
+      ],
+      "directAnswer": "Nem todo ataque começa por um e-mail. Uma história bem contada ao telefone, um pendrive \"perdido\" ou uma porta segurada por educação também abrem a empresa. A engenharia social explora a vontade de ajudar e a curiosidade, e alcança colaboradores e parceiros da mesma forma.",
+      "faq": [
+        {
+          "question": "O que é pretexting?",
+          "answer": "É inventar uma história para justificar um pedido, como alguém que se diz do suporte de TI e pede para confirmar sua senha durante uma migração de e-mail."
+        },
+        {
+          "question": "O que é baiting?",
+          "answer": "É usar uma isca, como um pendrive com etiqueta Salários deixado na recepção. Num experimento com 297 pendrives, cerca de 48% foram conectados."
+        },
+        {
+          "question": "O que é tailgating?",
+          "answer": "É entrar logo atrás de um funcionário autorizado, aproveitando a porta segurada por educação, para ter acesso físico a computadores e áreas restritas."
+        },
+        {
+          "question": "Como evitar engenharia social no suporte de TI?",
+          "answer": "Só redefinir senha ou MFA com validação por um canal independente, como a confirmação do gestor ou presencial, e deixar claro que nenhum setor pede senha, nunca."
+        }
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
+    },
+    {
+      "seasonOrder": 5,
+      "file": "05-senha-fraca-custa-caro.html",
+      "title": "Senha fraca custa caro: força bruta, credential stuffing e senhas vazadas",
+      "slug": "senha-fraca-custa-caro-forca-bruta-credential-stuffing-e-senhas-vazadas",
+      "excerpt": "Atacantes não adivinham senhas, eles testam milhões por minuto. Por que gerenciador de senhas e MFA devem ser política da empresa.",
+      "category": "negocios",
+      "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439917025.webp",
+      "coverImageAlt": "Capa do episódio 05 da season Segurança é pauta de diretoria: Senha fraca custa caro, com ícone de chave",
+      "tags": [
+        "senhas",
+        "mfa",
+        "credential-stuffing",
+        "nist"
+      ],
+      "directAnswer": "Atacantes não adivinham senhas, eles testam milhões de combinações e reaproveitam senhas que já vazaram em outros sites. Senha \"complexa\" não resolve sozinha. Gerenciador de senhas e autenticação multifator (MFA) precisam ser política da empresa, começando pela diretoria.",
+      "faq": [
+        {
+          "question": "O que é credential stuffing?",
+          "answer": "É testar automaticamente pares de e-mail e senha vazados de um site em outros serviços, como VPN, e-mail e ERP. A senha não é quebrada: ela já está certa porque foi reaproveitada."
+        },
+        {
+          "question": "Senha complexa resolve o problema?",
+          "answer": "Sozinha, não. Regras de complexidade geram senhas previsíveis como Empresa@2026. A solução estrutural é gerenciador de senhas e MFA como política da empresa."
+        },
+        {
+          "question": "Qual o melhor tipo de autenticação multifator?",
+          "answer": "Aplicativos autenticadores ou chaves físicas. O SMS pode ser interceptado ou desviado por troca de chip e deve ser a última opção."
+        }
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
+    },
+    {
+      "seasonOrder": 6,
+      "file": "06-o-que-sua-empresa.html",
+      "title": "O que sua empresa expõe sem saber: fuzzing, enumeração e superfície de ataque",
+      "slug": "o-que-sua-empresa-expoe-sem-saber-fuzzing-enumeracao-e-superficie-de-ataque",
+      "excerpt": "Arquivos de configuração, painéis esquecidos e portas abertas: o que um atacante encontra em minutos e por que a diretoria deve perguntar sobre isso.",
+      "category": "negocios",
+      "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792439974628.webp",
+      "coverImageAlt": "Capa do episódio 06 da season Segurança é pauta de diretoria: O que sua empresa expõe sem saber, com ícone de lupa",
+      "tags": [
+        "superficie-de-ataque",
+        "fuzzing",
+        "vazamento-de-dados",
+        "fornecedores"
+      ],
+      "directAnswer": "Antes de atacar, o atacante faz um inventário de tudo o que a empresa deixa visível na internet. Arquivos de configuração com senhas, códigos publicados por engano, backups e painéis esquecidos costumam estar lá. A diretoria não precisa saber rodar as ferramentas, mas precisa garantir que alguém olhe a empresa como um atacante olharia.",
+      "faq": [
+        {
+          "question": "O que é superfície de ataque?",
+          "answer": "Tudo o que a empresa deixa visível na internet: sites, sistemas, servidores, subdomínios e repositórios de código. Ela cresce a cada projeto e fornecedor."
+        },
+        {
+          "question": "O que é fuzzing?",
+          "answer": "É testar milhares de endereços de um site para achar o que não aparece nos menus, como arquivos .env com senhas, pastas .git, backups e painéis administrativos."
+        },
+        {
+          "question": "Como reduzir o que a empresa expõe sem saber?",
+          "answer": "Mantendo um inventário atualizado, fazendo varreduras periódicas, desligando ambientes de projetos encerrados e exigindo requisitos de segurança nos contratos com agências e fornecedores."
+        }
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
+    },
+    {
+      "seasonOrder": 7,
+      "file": "07-quando-o-negocio-para.html",
+      "title": "Quando o negócio para: ransomware, trojans e backdoors",
+      "slug": "quando-o-negocio-para-ransomware-trojans-e-backdoors",
+      "excerpt": "Ransomware não é problema de TI, é parada de operação. O que a diretoria precisa decidir antes do ataque, e não no meio dele.",
+      "category": "negocios",
+      "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792440036985.webp",
+      "coverImageAlt": "Capa do episódio 07 da season Segurança é pauta de diretoria: Quando o negócio para, com ícone de cadeado",
+      "tags": [
+        "ransomware",
+        "backup",
+        "plano-de-resposta",
+        "continuidade"
+      ],
+      "directAnswer": "Ransomware não é problema de TI, é parada de operação. O resgate é o último passo de um ataque que começa semanas antes, com um trojan ou uma senha vazada. As decisões que mais importam (plano de resposta, backup, posição sobre resgate) precisam ser tomadas pela diretoria antes do ataque, e não no meio dele.",
+      "faq": [
+        {
+          "question": "Como começa um ataque de ransomware?",
+          "answer": "Semanas antes do resgate, geralmente com um trojan ou uma senha vazada que instala um backdoor. O atacante mapeia a rede e os backups antes de criptografar tudo."
+        },
+        {
+          "question": "O que é dupla extorsão?",
+          "answer": "É quando o atacante copia os dados antes de criptografar e ameaça publicá-los. Assim, até quem tem backup é pressionado a pagar."
+        },
+        {
+          "question": "Vale a pena pagar o resgate?",
+          "answer": "Pagar não garante a devolução dos dados nem que eles não serão vazados, e financia novos ataques. Essa posição deve ser discutida antes do incidente, com jurídico e seguradora."
+        },
+        {
+          "question": "O que a diretoria deve decidir antes de um ataque?",
+          "answer": "O plano de resposta a incidentes, um backup isolado e testado, a posição sobre resgate e o que o seguro cibernético cobre."
+        }
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
+    },
+    {
+      "seasonOrder": 8,
+      "file": "08-ver-para-crer-o.html",
+      "title": "Ver para crer: o que um teste de segurança controlado revela sobre sua empresa",
+      "slug": "ver-para-crer-o-que-um-teste-de-seguranca-controlado-revela-sobre-sua-empresa",
+      "excerpt": "Hydra, ffuf, GoPhish, Nmap e Wireshark mostram como um ataque é rápido e barato. Por que pentest e simulações valem o investimento.",
+      "category": "negocios",
+      "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792440111988.webp",
+      "coverImageAlt": "Capa do episódio 08 da season Segurança é pauta de diretoria: Ver para crer, com ícone de terminal",
+      "tags": [
+        "pentest",
+        "teste-de-seguranca",
+        "phishing-simulado",
+        "vulnerabilidades"
+      ],
+      "directAnswer": "As ferramentas usadas por atacantes são gratuitas, conhecidas e rápidas. Por isso mesmo a empresa deveria usá-las primeiro, com autorização e escopo definido. Pentest e simulações transformam riscos abstratos em evidências concretas, e dão à diretoria um critério objetivo para priorizar.",
+      "faq": [
+        {
+          "question": "O que é um pentest?",
+          "answer": "É um teste de intrusão em que especialistas, com autorização formal e escopo definido, tentam invadir sistemas específicos e entregam um relatório com as falhas priorizadas por impacto."
+        },
+        {
+          "question": "Com que frequência fazer testes de segurança?",
+          "answer": "No mínimo um pentest anual nos sistemas mais críticos e simulações de phishing trimestrais, acompanhando as taxas de clique e de reporte."
+        },
+        {
+          "question": "É legal testar a segurança de sistemas de terceiros?",
+          "answer": "Não sem permissão. Testes só devem acontecer com autorização por escrito e escopo claro, e isso inclui sistemas de parceiros conectados aos seus."
+        }
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
+    },
+    {
+      "seasonOrder": 9,
+      "file": "09-o-minimo-que-a.html",
+      "title": "O mínimo que a diretoria deve exigir: Zero Trust, menor privilégio e MFA",
+      "slug": "o-minimo-que-a-diretoria-deve-exigir-zero-trust-menor-privilegio-e-mfa",
+      "excerpt": "Um checklist de governança para a liderança: confiar menos por padrão, dar só o acesso necessário e exigir um segundo fator em tudo que importa.",
+      "category": "negocios",
+      "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792440186232.webp",
+      "coverImageAlt": "Capa do episódio 09 da season Segurança é pauta de diretoria: O mínimo que a diretoria deve exigir, com escudo",
+      "tags": [
+        "zero-trust",
+        "menor-privilegio",
+        "mfa",
+        "controle-de-acesso"
+      ],
+      "directAnswer": "Três princípios resumem o que a diretoria deve exigir de qualquer decisão de tecnologia: confiar menos por padrão (Zero Trust), dar só o acesso necessário (menor privilégio) e exigir um segundo fator em tudo que importa (MFA). Juntos, eles limitam o estrago quando, e não se, uma conta for comprometida.",
+      "faq": [
+        {
+          "question": "O que é Zero Trust?",
+          "answer": "É um modelo em que nenhum usuário, dispositivo ou conexão é confiável por padrão. Cada acesso é verificado, e estar na rede do escritório ou na VPN não libera tudo."
+        },
+        {
+          "question": "O que é o princípio do menor privilégio?",
+          "answer": "Cada pessoa e sistema recebe só as permissões de que precisa, pelo tempo que precisar. Se uma conta é comprometida, o estrago fica limitado."
+        },
+        {
+          "question": "Todo MFA protege da mesma forma?",
+          "answer": "Não. Chaves físicas e passkeys são as mais resistentes a phishing, aplicativos autenticadores são um bom padrão e SMS só deve ser usado sem alternativa."
+        }
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
+    },
+    {
+      "seasonOrder": 10,
+      "file": "10-seguranca-e-cultura-como.html",
+      "title": "Segurança é cultura: como levar o tema para colaboradores e parceiros",
+      "slug": "seguranca-e-cultura-como-levar-o-tema-para-colaboradores-e-parceiros",
+      "excerpt": "O fechamento da season: ferramenta nenhuma substitui uma cultura em que todos sabem identificar, questionar e reportar. E isso começa na diretoria.",
+      "category": "negocios",
+      "coverImage": "https://storage.googleapis.com/blog-post-storage.firebasestorage.app/covers/1792440253319.webp",
+      "coverImageAlt": "Capa do episódio 10 da season Segurança é pauta de diretoria: Segurança é cultura, com ícone de pessoas",
+      "tags": [
+        "cultura-de-seguranca",
+        "treinamento",
+        "fornecedores",
+        "diretoria"
+      ],
+      "directAnswer": "Quase todo ataque desta season passou por uma pessoa: alguém clicou, reaproveitou a senha, segurou a porta ou aprovou uma notificação. Por isso a defesa mais duradoura não é uma ferramenta, é uma cultura em que colaboradores e parceiros sabem reconhecer, questionar e reportar. E essa cultura começa na diretoria.",
+      "faq": [
+        {
+          "question": "O que é cultura de segurança?",
+          "answer": "É um ciclo em que todos sabem reconhecer sinais de golpe, questionar sem medo, reportar rápido (inclusive quando erram) e aprender com feedback e simulações."
+        },
+        {
+          "question": "Uma palestra anual de conscientização é suficiente?",
+          "answer": "Não. O que muda comportamento é frequência e prática: conteúdos curtos, simulações educativas e reconhecimento para quem reporta."
+        },
+        {
+          "question": "Por que incluir parceiros no programa de segurança?",
+          "answer": "Porque eles fazem parte do perímetro. Segundo o Verizon DBIR 2025, terceiros participaram de cerca de 30% das violações analisadas."
+        }
+      ],
+      "cluster": "seguranca-na-diretoria",
+      "isPillar": false
+    }
+  ]
+}
