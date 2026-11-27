@@ -973,3 +973,11 @@ seasons ficam só as usadas pelos posts visíveis. "Ver como lista" traz o mesmo
 - **R-MAP-05** O desenho é calculado no navegador, sem biblioteca (`graphLayout.js`): os
   mesmos dados dão sempre o mesmo desenho inicial. A conta é de todos contra todos, o que
   serve para centenas de posts; passando de ~1500 nós, trocar por d3-force (Barnes-Hut).
+
+---
+
+## 21. Capa automática
+
+**R-CAPA-01.** Post publicado sem `coverImage` tem capa gerada em `GET /api/posts/slug/:slug/cover.png`
+(1200x630, tema `claro` ou `escuro`). Post com capa própria nunca é sobrescrito (a rota redireciona para ela).
+**R-CAPA-02.** A capa usa só dados do post (título, categoria ou tema, data de publicação). Detalhes e decisões: `docs/CAPAS.md`.
