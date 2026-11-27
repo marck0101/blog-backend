@@ -1,6 +1,7 @@
 const { z } = require("zod");
 const { MAX_ITEMS, ALLOWED_KEYS, SOURCES } = require("../config/cockpit");
 const { parseDayKey } = require("../utils/dates");
+const { AREAS, STATUSES, DECISIONS, LINK_GROUPS } = require("../config/cockpitExperiments");
 
 const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 const WEEK = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/;
@@ -57,4 +58,99 @@ const jobUpdateBody = jobCreateBody
 
 const metaBody = z.object({ valor: z.number().min(0).max(100000000) }).strict();
 
-module.exports = { ingestBody, heartbeatBody, firstForbiddenKey, jobParams, jobCreateBody, jobUpdateBody, metaBody };
+// ===== Experimentos =====
+const objectId = z.string().regex(/^[a-f\d]{24}$/i, { error: "Identificador inválido" });
+const idParams = z.object({ id: objectId });
+
+const text = (max) => z.string().trim().max(max);
+const score = z.number().int().min(1).max(5);
+const dateField = z
+  .string()
+  .refine((v) => !Number.isNaN(Date.parse(v)), { error: "Data inválida" })
+  .transform((v) => new Date(v));
+
+// "Se … então … porque …"
+const HYPOTHESIS = /\bse\b[\s\S]+\bent[aã]o\b[\s\S]+\bporque\b[\s\S]+/i;
+
+const variant = z.object({ name: text(60).min(1), description: text(400).optional() }).strict();
+const resultPatch = z
+  .object({
+    summary: text(1000),
+    valueA: z.number().finite().nullable(),
+    valueB: z.number().finite().nullable(),
+    sample: z.number().int().min(0).nullable(),
+    decision: z.enum(DECISIONS).nullable(),
+    learning: text(1000),
+  })
+  .partial()
+  .strict();
+
+const experimentCreateBody = z
+  .object({
+    title: text(120).min(3),
+    hypothesis: text(600).regex(HYPOTHESIS, { error: 'hypothesis: use o formato "Se … então … porque …"' }),
+    area: z.enum(AREAS),
+    channel: text(80).optional(),
+    metric: text(120).optional(),
+    guardrailMetric: text(120).optional(),
+    ice: z.object({ impact: score, confidence: score, ease: score }).strict(),
+    minSample: z.number().int().min(0).nullable().optional(),
+    plannedEnd: dateField.nullable().optional(),
+    variants: z.array(variant).max(6).optional(),
+    result: resultPatch.optional(),
+  })
+  .strict();
+
+const experimentUpdateBody = experimentCreateBody
+  .partial()
+  .refine((b) => Object.keys(b).length > 0, { error: "Nenhum campo informado" });
+
+const experimentTransitionBody = z.object({ status: z.enum(STATUSES), result: resultPatch.optional() }).strict();
+
+const experimentListQuery = z.object({ status: z.enum(STATUSES).optional(), area: z.enum(AREAS).optional() });
+
+// ===== Links =====
+// Só https: nada de javascript:, data:, http: ou endereço sem protocolo
+const httpsUrl = z
+  .string()
+  .trim()
+  .max(2000)
+  .refine(
+    (v) => {
+      try {
+        const u = new URL(v);
+        return u.protocol === "https:" && Boolean(u.hostname) && !u.username && !u.password;
+      } catch {
+        return false;
+      }
+    },
+    { error: "url: use um endereço https:// válido" }
+  );
+
+const linkCreateBody = z
+  .object({
+    label: text(80).min(1),
+    url: httpsUrl,
+    group: z.enum(LINK_GROUPS).optional(),
+    note: text(300).optional(),
+    order: z.number().int().min(0).max(100000).optional(),
+  })
+  .strict();
+const linkUpdateBody = linkCreateBody.partial().refine((b) => Object.keys(b).length > 0, { error: "Nenhum campo informado" });
+
+module.exports = {
+  ingestBody,
+  heartbeatBody,
+  firstForbiddenKey,
+  jobParams,
+  jobCreateBody,
+  jobUpdateBody,
+  metaBody,
+  idParams,
+  experimentCreateBody,
+  experimentUpdateBody,
+  experimentTransitionBody,
+  experimentListQuery,
+  linkCreateBody,
+  linkUpdateBody,
+};

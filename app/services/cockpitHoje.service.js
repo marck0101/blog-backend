@@ -6,6 +6,8 @@ const { dayKey, addDays, monthRange } = require("../utils/dates");
 const { DEFAULT_META_MENSAL } = require("../config/cockpit");
 const { pacing, daysInMonth } = require("./cockpitPacing.service");
 const { jobStates } = require("./cockpitJobs.service");
+const { overdueRunning } = require("./cockpitExperiments.service");
+const Experiment = require("../models/experiment.model");
 
 const SNAPSHOT_STALE_SEC = 2 * 86400;
 
@@ -100,6 +102,16 @@ async function buildHoje(now = new Date()) {
   for (const j of jobs) {
     if (j.status === "falhou") items.push({ id: `job-${j.job}`, title: `${j.label} falhou`, detail: j.lastError || "Última execução terminou com erro" });
     else if (j.status === "atrasada") items.push({ id: `job-${j.job}`, title: `${j.label} atrasada`, detail: j.neverRan ? "Ainda não deu sinal de vida" : "Passou do prazo esperado" });
+  }
+
+  const overdue = await overdueRunning(Experiment, now);
+  if (overdue.length) {
+    items.push({
+      id: "experimentos-vencidos",
+      title: `Experimentos rodando: ${overdue.length} passou do prazo`,
+      detail: overdue.map((e) => e.title).slice(0, 3).join(", "),
+      count: overdue.length,
+    });
   }
 
   return {
