@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { api, asAdmin, createPost, models } from "../helpers.mjs";
 
 const require = createRequire(import.meta.url);
+const { Types } = require("mongoose");
+const EmailEvent = require("../../app/models/emailEvent.model");
 const MetricSnapshot = require("../../app/models/metricSnapshot.model");
 const { mondayOf, weekKeyOf, lastWeeks } = require("../../app/utils/weeks");
 const { compare } = require("../../app/services/cockpitPlacar.service");
@@ -58,7 +60,34 @@ describe("comparação com a meta", () => {
 });
 
 describe("rotas do placar", () => {
-  it("monta 10 números e 13 semanas com retratos e dados do blog", async () => {
+  it("sem login: placar e metas dão 401", async () => {
+    expect((await api().get("/api/cockpit/placar")).status).toBe(401);
+    expect((await api().put("/api/cockpit/placar/metas").send({ metas: { leituras: 5 } })).status).toBe(401);
+  });
+
+  it("aberturas e cliques de e-mail: contam pessoa por envio, sem robôs, e aceitam meta", async () => {
+    const week = lastWeeks()[12];
+    const mid = new Date(week.startAt.getTime() + 3600 * 1000);
+    const campaign = new Types.ObjectId();
+    const a = new Types.ObjectId();
+    const b = new Types.ObjectId();
+    await EmailEvent.create([
+      { campaign, subscriber: a, type: "open", at: mid },
+      { campaign, subscriber: a, type: "open", at: mid }, // mesma pessoa, mesmo envio: 1
+      { campaign, subscriber: b, type: "open", at: mid },
+      { campaign, subscriber: b, type: "open", at: mid, automated: true }, // robô: fora
+      { campaign, subscriber: a, type: "click", url: "https://x.dev", at: mid },
+      { campaign, subscriber: a, type: "open", at: new Date("2020-01-01") }, // fora da semana
+    ]);
+    const admin = await asAdmin();
+    expect((await admin.put("/api/cockpit/placar/metas").send({ metas: { aberturas_email: 2, cliques_email: 5 } })).status).toBe(200);
+    const by = Object.fromEntries((await admin.get("/api/cockpit/placar")).body.numeros.map((n) => [n.key, n]));
+    expect(by.aberturas_email.current).toMatchObject({ value: 2, status: "na_meta" });
+    expect(by.cliques_email.current).toMatchObject({ value: 1, status: "abaixo" });
+    expect(by.aberturas_email.unit).toBe("n");
+  });
+
+  it("monta 12 números e 13 semanas com retratos e dados do blog", async () => {
     const week = lastWeeks()[12];
     await MetricSnapshot.create([
       { source: "prospect0101", key: "contatos_semana", period: week.key, value: 30 },
@@ -69,7 +98,7 @@ describe("rotas do placar", () => {
     const admin = await asAdmin();
     expect((await admin.put("/api/cockpit/placar/metas").send({ metas: { contatos_semana: 20, posts_publicados: 1 } })).status).toBe(200);
     const body = (await admin.get("/api/cockpit/placar")).body;
-    expect(body.numeros).toHaveLength(10);
+    expect(body.numeros).toHaveLength(12);
     expect(body.weeks).toHaveLength(13);
     const by = Object.fromEntries(body.numeros.map((n) => [n.key, n]));
     expect(by.contatos_semana.current).toMatchObject({ value: 30, status: "acima" });
