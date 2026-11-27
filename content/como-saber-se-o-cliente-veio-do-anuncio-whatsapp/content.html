@@ -1,0 +1,84 @@
+<p><strong>Resumo:</strong> Quem anuncia para o WhatsApp costuma ter conversas de sobra e nenhuma certeza de qual veio do anúncio, do Google Maps, do Instagram ou da indicação. Este texto mostra cinco métodos, do mais simples ao mais robusto, para saber se o cliente veio do anúncio: perguntar, marcar a mensagem de cada canal, medir o clique com UTM e GA4, ler o relatório da Meta e registrar a origem em uma planilha até chegar ao custo por venda. Mostra também o que não funciona e como eu aplico isso nos meus próprios sites.</p>
+<p><strong>Palavras-chave:</strong> como saber se o cliente veio do anúncio; origem do cliente no WhatsApp; rastrear WhatsApp; UTM; GA4; custo por conversa; custo por venda.</p>
+<h2>Como saber se o cliente veio do anúncio quando tudo termina no WhatsApp</h2>
+<p>Você paga o anúncio, o celular enche de mensagens e, no fim do mês, ninguém sabe dizer quais conversas o anúncio pagou. Veio do anúncio? Do Google Maps? Do Instagram, sem verba nenhuma? De uma indicação? Sem essa resposta, a decisão de verba vira palpite.</p>
+<p>O custo é concreto. Se você corta a campanha que estava trazendo cliente, perde venda sem saber o motivo. Se mantém a que só trazia curioso, continua pagando por barulho. Como saber se o cliente veio do anúncio é, no fundo, a pergunta que separa investir de apostar.</p>
+<p>Este texto percorre cinco formas de responder, da mais simples (que você faz hoje, sem instalar nada) até a mais completa. E conta o que eu faço nos meus próprios sites, que atendem negócios locais como o seu.</p>
+<h2>Por que o clique no WhatsApp quebra a medição</h2>
+<p>Em um site, o Google Analytics (o GA4) acompanha a visita do início ao fim: de onde a pessoa veio, o que olhou, se enviou o formulário. No WhatsApp o cenário muda. A pessoa clica, o aplicativo abre, e a conversa acontece dentro dele, onde o site e suas ferramentas de medição não enxergam. É como contar quem entrou na loja pela porta da frente e perder a conta assim que a pessoa passa para o balcão dos fundos.</p>
+<p>O que dá para medir com segurança é o clique no botão. Tudo o que vem depois (a conversa, o orçamento, a venda) só entra no seu controle se você registrar a origem por conta própria. Os cinco métodos abaixo fazem exatamente isso, com esforço crescente.</p>
+<p><em>Moral da história: a medição não quebra por falha sua. A conversa sai do site, e a origem precisa ser anotada de propósito.</em></p>
+<h2>Método 1: perguntar "como nos conheceu?" com opções fixas</h2>
+<p>É o mais simples e já vale muito. Na primeira resposta de toda conversa nova, inclua a pergunta com opções fechadas: anúncio, Google Maps, Instagram, indicação de alguém, outro. Opções fixas importam porque respostas livres viram uma bagunça impossível de contar ("vi aí", "na internet", "uma amiga").</p>
+<p>Funciona sem site, sem código e sem permissão de ninguém. A limitação é humana: a pessoa nem sempre lembra, responde o que for mais rápido, ou confunde "vi seu anúncio" com "vi seu Instagram". Trate como indício, não como prova.</p>
+<p><em>Moral da história: perguntar é grátis e já tira você do escuro. Só não confie nisso sozinho.</em></p>
+<h2>Método 2: uma mensagem pronta diferente para cada canal</h2>
+<p>O link de conversa do WhatsApp aceita uma mensagem pré-preenchida: depois do endereço <strong>wa.me/número</strong> vai o parâmetro <strong>?text=</strong> com o texto já escrito, que aparece no campo de digitação quando a conversa abre (WHATSAPP, 2026). Isso permite que cada canal use um botão com uma frase própria.</p>
+<ul>
+<li>Botão do anúncio: "Oi! Vim pelo anúncio e quero saber mais. [ref: anuncio-janeiro]"</li>
+<li>Botão do Google Maps ou do perfil da empresa: "Oi! Vi vocês no Google. [ref: maps]"</li>
+<li>Link da bio do Instagram: "Oi! Vim pelo Instagram. [ref: instagram]"</li>
+</ul>
+<p>Pense nisso como um carimbo diferente para cada porta de entrada: quem chega já chega marcado. É o que faço nos meus sites: o botão de WhatsApp do catálogo de serviços leva uma marca no fim da mensagem, como "[ref: srv-tagueamento]", e o pedido de pré-diagnóstico que sai de um post do blog leva "[ref: blog-nome-do-post]". Assim, quando a mensagem chega, ela mesma diz de onde veio, sem eu depender da memória de ninguém.</p>
+<p>O ponto fraco: a pessoa pode apagar a marca antes de enviar. Anote esse risco e confira, na planilha, quantas conversas chegaram sem a marca.</p>
+<p><em>Moral da história: um link diferente por canal custa dez minutos e dá a você um carimbo dentro da própria conversa.</em></p>
+<h2>Método 3: evento no GA4 com UTM e consentimento</h2>
+<p>Aqui entra a parte técnica. A UTM são etiquetas colocadas no fim do endereço de uma página para dizer ao Google Analytics de onde a visita veio: <strong>utm_source</strong> (a origem), <strong>utm_medium</strong> (o tipo de mídia) e <strong>utm_campaign</strong> (a campanha). O Google orienta usar sempre esses três (GOOGLE, 2026). E os valores diferenciam maiúsculas de minúsculas: "Instagram" e "instagram" viram duas origens.</p>
+<p>O desenho completo funciona assim:</p>
+<ol>
+<li>O link do anúncio leva ao seu site com UTM, e o GA4 registra de onde a visita veio.</li>
+<li>O botão de WhatsApp do site dispara um <strong>evento</strong> (uma anotação que o GA4 guarda, como "clique no WhatsApp"), por exemplo com o nome <em>whatsapp_click</em>.</li>
+<li>No relatório, você cruza o evento com a origem e a campanha: quantos cliques no WhatsApp cada campanha gerou.</li>
+</ol>
+<p>Isso mede o <em>clique</em>, não a conversa nem a venda, e já é bem mais do que ter só a visita. Nos meus sites, o evento <em>whatsapp_click</em> só dispara depois que a pessoa aceita os cookies de análise, por causa da LGPD, que define consentimento como manifestação "livre, informada e inequívoca" do titular dos dados (BRASIL, 2018). Quem recusa não entra na medição. Isso significa que o número do GA4 é sempre um piso, nunca o total real.</p>
+<p>Um erro comum: <strong>UTM no próprio link wa.me não resolve</strong>. A página oficial do recurso documenta apenas o texto pré-preenchido (WHATSAPP, 2026) e, pelo que descreve, o link só abre o aplicativo: ele não é uma página sua com o GA4 instalado. Ou seja, nenhuma ferramenta sua tem como ler uma UTM nesse endereço. A UTM fica no link que traz a pessoa ao <em>site</em>, e a marca do WhatsApp vai no <em>texto</em> da mensagem. Cada uma faz um trabalho.</p>
+<p>Esse método depende de o Tag Manager estar organizado: o evento precisa disparar uma vez só e com os dados certos. É o que cuido no serviço de <a href="https://servicos.marck0101.com.br/servicos/tagueamento" target="_blank" rel="noopener noreferrer">Tagueamento e medição</a>.</p>
+<p><em>Moral da história: o GA4 mostra quem clicou e de onde veio. Para o que acontece depois do clique, ele não olha.</em></p>
+<h2>Método 4: o que o relatório da Meta mostra e onde ele cala</h2>
+<p>Nos anúncios que abrem uma conversa no WhatsApp, o Gestor de Anúncios da Meta mostra um resultado de "conversas iniciadas" por campanha. É útil porque liga a conversa ao anúncio específico, mesmo sem site.</p>
+<p>Mas há limites que vale conhecer:</p>
+<ul>
+<li><strong>Só vê o que passou pelo anúncio.</strong> Conversa vinda do Maps, do Instagram orgânico ou da indicação não entra.</li>
+<li><strong>Conversa não é cliente.</strong> O relatório conta quem abriu o chat. Não diz se era um orçamento de verdade, um curioso ou alguém que desistiu.</li>
+<li><strong>A ligação anúncio-conversa tem regras.</strong> A Central de Ajuda do WhatsApp descreve que a Meta recebe dados quando a pessoa inicia a conversa em até sete dias depois de interagir com o anúncio (WHATSAPP, 2025). Quem chamou depois disso, ou por outro caminho, pode ficar fora da conta.</li>
+<li><strong>É o relatório de quem vende o anúncio.</strong> Útil, mas é bom ter um segundo número seu, o da planilha, para comparar.</li>
+</ul>
+<p><em>Moral da história: o relatório da plataforma é um bom termômetro de interesse, não uma nota fiscal de venda.</em></p>
+<h2>Método 5: uma coluna "origem" na planilha e a conta semanal</h2>
+<p>Este é o método que fecha a conta e o mais robusto, porque junta os outros. Monte uma planilha simples (ou use o CRM, o sistema onde você guarda os contatos e o andamento de cada negociação) com estas colunas: data, apelido do contato, <strong>origem</strong> (anúncio, Maps, Instagram, indicação, outro), orçamento enviado (sim ou não) e venda (sim ou não, com valor).</p>
+<p>Uma vez por semana, preencha a origem de cada conversa usando o que já tem: a marca na mensagem (método 2), a resposta à pergunta (método 1) e o clique registrado (método 3). Depois faça duas contas:</p>
+<ol>
+<li><strong>Custo por conversa</strong> = verba gasta no anúncio ÷ conversas que vieram dele (pela sua planilha, não só pelo relatório da Meta).</li>
+<li><strong>Custo por venda</strong> = verba gasta ÷ vendas fechadas que vieram do anúncio.</li>
+</ol>
+<p>A segunda conta é a que importa. Um anúncio pode ter ótimo custo por conversa e péssimo custo por venda, se atrai gente que só pergunta preço. Sem a coluna de venda, você nunca descobre isso.</p>
+<p>O dado de contato é pessoal. Guarde só o necessário, em local com acesso restrito, e não publique prints com nome ou telefone.</p>
+<p><em>Moral da história: a planilha é onde a conversa vira número de negócio. Sem ela, o resto é só clique.</em></p>
+<h2>O que não dá certo</h2>
+<ul>
+<li><strong>Confiar só nas conversas que a plataforma relata.</strong> Ela só enxerga o que passou por ela, e conversa não é venda.</li>
+<li><strong>Usar o mesmo link de WhatsApp em todo lugar.</strong> Se o botão do anúncio, do Maps e do Instagram são idênticos, todas as conversas chegam iguais e a origem se perde.</li>
+<li><strong>Colocar UTM no link wa.me.</strong> Como explicado acima, nenhuma ferramenta sua lê essa etiqueta nesse endereço.</li>
+<li><strong>Medir antes de a pessoa aceitar os cookies.</strong> Além do risco com a LGPD, dá uma falsa sensação de precisão.</li>
+<li><strong>Esperar o número perfeito.</strong> A medição de WhatsApp é aproximada. O objetivo é decidir melhor, não ter certeza absoluta.</li>
+</ul>
+<p><em>Moral da história: o erro mais caro é tratar um número aproximado como exato, ou ter um número só.</em></p>
+<h2>Por onde começar esta semana</h2>
+<p>Se você fizer uma coisa só: crie um botão de WhatsApp com mensagem própria para o anúncio, abra a coluna "origem" na planilha e pergunte "como nos conheceu?" em toda conversa nova. Em quatro semanas você terá uma comparação de verdade entre canais. Depois, o evento no GA4 e o relatório da Meta entram como reforço.</p>
+<p>Para ver como organizo a medição no dia a dia, veja o <a href="https://blog.marck0101.com.br/temas/trafego-pago-medido" target="_blank" rel="noopener noreferrer">tema de tráfego pago medido</a>, o texto sobre <a href="https://blog.marck0101.com.br/blog/de-dev-a-gestor-de-trafego-como-o-codigo-virou-minha-maior-vantagem-no-marketing" target="_blank" rel="noopener noreferrer">como o código virou minha vantagem no marketing</a> e o de <a href="https://blog.marck0101.com.br/blog/cliente-nao-compra-tecnologia-compra-o-problema-resolvido" target="_blank" rel="noopener noreferrer">cliente que compra o problema resolvido</a>. Já gerenciei tráfego em nichos como turismo, hotelaria, agronegócio e varejo: o que conta como resultado muda (reserva, conversa, orçamento ou venda), mas a lógica de marcar a origem é a mesma.</p>
+<h2>Conclusão</h2>
+<p>Saber se o cliente veio do anúncio não exige ferramenta cara. Exige combinar perguntar, marcar a mensagem de cada canal, medir o clique com consentimento e registrar a origem de cada conversa até a venda. Comece pelo simples, some camadas e compare sempre pelo custo por venda, não só pelo custo por conversa.</p>
+<h2>Perguntas frequentes</h2>
+<h3>Como saber se o cliente veio do anúncio se ele chamou no WhatsApp?</h3>
+<p>Marque a origem em dois lugares: uma mensagem pré-preenchida diferente em cada botão (por exemplo, "[ref: anuncio]") e a pergunta "como nos conheceu?" com opções fixas. Registre a resposta em uma coluna "origem" da planilha. O clique no botão ainda pode ser medido no GA4 com evento e UTM.</p>
+<h3>Quanto custa não saber de onde vêm as conversas?</h3>
+<p>Custa decidir verba no escuro: você pode pausar a campanha que trazia cliente ou manter a que só trazia curioso. Como o valor depende do seu negócio, compare o custo por venda de cada canal por pelo menos quatro semanas antes de mexer na verba.</p>
+<h3>Por onde começo a medir as conversas do WhatsApp?</h3>
+<p>Pela planilha: crie a coluna "origem", troque o link do anúncio por um com mensagem própria e pergunte "como nos conheceu?" em toda conversa nova. É grátis, leva menos de uma hora e já mostra quais canais merecem mais atenção.</p>
+<h3>Dá para saber a origem do cliente sem ter site?</h3>
+<p>Dá. Sem site não há GA4, mas perguntar, usar mensagem pronta diferente por canal (link wa.me com ?text=), ler o relatório de conversas da Meta e anotar a origem na planilha funcionam normalmente. O site só acrescenta a medição do clique.</p>
+<h2>Referências</h2>
+<p>BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais (LGPD). <strong>Diário Oficial da União</strong>, Brasília, DF, 2018. Disponível em: <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer">https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm</a>. Acesso em: 27 nov. 2026.</p>
+<p>GOOGLE. URL builders: collect campaign data with custom URLs. <strong>Ajuda do Google Analytics</strong>, [s. l.], 2026. Disponível em: <a href="https://support.google.com/analytics/answer/10917952" target="_blank" rel="noopener noreferrer">https://support.google.com/analytics/answer/10917952</a>. Acesso em: 27 nov. 2026.</p>
+<p>WHATSAPP. Como usar o recurso de conversa em um clique. <strong>Central de Ajuda do WhatsApp</strong>, [s. l.], 2026. Disponível em: <a href="https://faq.whatsapp.com/5913398998672934" target="_blank" rel="noopener noreferrer">https://faq.whatsapp.com/5913398998672934</a>. Acesso em: 27 nov. 2026.</p>
+<p>WHATSAPP. Sobre conversas do WhatsApp iniciadas a partir de anúncios na Meta. <strong>Central de Ajuda do WhatsApp</strong>, [s. l.], 2025. Disponível em: <a href="https://faq.whatsapp.com/785493319976156" target="_blank" rel="noopener noreferrer">https://faq.whatsapp.com/785493319976156</a>. Acesso em: 27 nov. 2026.</p>

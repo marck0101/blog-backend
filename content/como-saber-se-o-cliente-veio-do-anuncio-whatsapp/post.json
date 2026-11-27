@@ -1,0 +1,36 @@
+{
+  "title": "Como saber se o cliente veio do anúncio no WhatsApp",
+  "slug": "como-saber-se-o-cliente-veio-do-anuncio-whatsapp",
+  "excerpt": "O WhatsApp enche e você não sabe quais conversas o anúncio pagou. 5 métodos, do mais simples ao mais robusto, para medir a origem até o custo por venda.",
+  "category": "trafego",
+  "cluster": "trafego-pago-medido",
+  "isPillar": false,
+  "tags": [
+    "whatsapp",
+    "utm",
+    "ga4",
+    "custo por venda",
+    "origem do cliente"
+  ],
+  "directAnswer": "Para saber se o cliente veio do anúncio, marque a origem de propósito: pergunte \"como nos conheceu?\" com opções fixas, use uma mensagem pronta diferente em cada botão de WhatsApp, meça o clique no GA4 com UTM e consentimento e registre a origem em uma planilha até a venda. Compare pelo custo por venda.",
+  "file": "content.html",
+  "plannedAt": null,
+  "faq": [
+    {
+      "question": "Como saber se o cliente veio do anúncio se ele chamou no WhatsApp?",
+      "answer": "Marque a origem em dois lugares: uma mensagem pré-preenchida diferente em cada botão (por exemplo, \"[ref: anuncio]\") e a pergunta \"como nos conheceu?\" com opções fixas. Registre a resposta em uma coluna \"origem\" da planilha. O clique no botão ainda pode ser medido no GA4 com evento e UTM."
+    },
+    {
+      "question": "Quanto custa não saber de onde vêm as conversas?",
+      "answer": "Custa decidir verba no escuro: você pode pausar a campanha que trazia cliente ou manter a que só trazia curioso. Como o valor depende do seu negócio, compare o custo por venda de cada canal por pelo menos quatro semanas antes de mexer na verba."
+    },
+    {
+      "question": "Por onde começo a medir as conversas do WhatsApp?",
+      "answer": "Pela planilha: crie a coluna \"origem\", troque o link do anúncio por um com mensagem própria e pergunte \"como nos conheceu?\" em toda conversa nova. É grátis, leva menos de uma hora e já mostra quais canais merecem mais atenção."
+    },
+    {
+      "question": "Dá para saber a origem do cliente sem ter site?",
+      "answer": "Dá. Sem site não há GA4, mas perguntar, usar mensagem pronta diferente por canal (link wa.me com ?text=), ler o relatório de conversas da Meta e anotar a origem na planilha funcionam normalmente. O site só acrescenta a medição do clique."
+    }
+  ]
+}
