@@ -11,6 +11,8 @@ const SiteSettingsSchema = new mongoose.Schema(
   {
     key: { type: String, required: true, unique: true, default: "site" },
     features: { type: new mongoose.Schema(featureFields, { _id: false }), default: () => ({}) },
+    // Meta de receita mensal do Cockpit (R$). Sem valor: COCKPIT_META_MENSAL ou o padrão.
+    cockpitMetaMensal: { type: Number, min: 0, max: 100000000 },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }

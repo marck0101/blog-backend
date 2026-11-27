@@ -29,6 +29,7 @@
 18. [Convenções do código (manutenção e suporte)](#18-convenções-do-código-manutenção-e-suporte)
 19. [Caixinha de sugestões](#19-caixinha-de-sugestões)
 20. [Mapa de conteúdo](#20-mapa-de-conteúdo)
+21. [Cockpit](#21-cockpit)
 
 ---
 
@@ -849,6 +850,7 @@ precisar mudar a regra, mude ali (e o teste correspondente).
 | Regras do post (o que o editor grava, validação, status, publicação) | `app/controllers/posts/post.rules.js` | `src/utils/postStatus.js` |
 | Inscrição vinda de formulário público (newsletter, sugestões) | `app/services/subscription.service.js` (`subscribeEmail`) | — |
 | Recurso do blog ligado/desligado, lido por uma rota | `app/routes/settings.routes.js` (`readFeatures`) | `src/utils/features.js` (`useFeatures`) |
+| Cockpit: ritmo da receita, sinal de vida, página Hoje | `app/services/cockpit*.service.js`, `app/routes/cockpit.routes.js` | `src/pages/admin/Cockpit.jsx` |
 | Ligações entre posts (links internos, órfãos) | `app/services/contentMap.service.js` | `src/utils/graphLayout.js` (desenho) |
 
 ### Regras de escrita
@@ -976,7 +978,81 @@ seasons ficam só as usadas pelos posts visíveis. "Ver como lista" traz o mesmo
 
 ---
 
-## 21. Capa automática
+## 21. Cockpit
+
+Visão única do negócio no painel (`/admin/cockpit`, página "Hoje"). Fundação da Sprint C0:
+retratos de números vindos de outros sistemas, sinal de vida das rotinas e a página Hoje.
+Código: `app/routes/cockpit.routes.js`, `app/services/cockpit*.service.js`,
+`app/config/cockpit.js` (fontes e chaves permitidas).
+
+**Modelos:** `MetricSnapshot` (fonte, chave, período, valor, meta; único por fonte+chave+período,
+reenviar atualiza), `JobRun` (execução de rotina; some sozinha após 90 dias),
+`JobDefinition` (de quanto em quanto tempo a rotina deve dar sinal + folga),
+`CockpitNonce` (assinaturas já usadas, contra repetição).
+
+**Rotas**
+
+| Rota | Quem | O que faz |
+|---|---|---|
+| `POST /api/cockpit/ingest` | máquina (HMAC) | grava retratos de números (`{ items: [{ key, period, value, meta? }] }`) |
+| `POST /api/cockpit/heartbeat/:job` | máquina (HMAC) | sinal de vida: `{ status: start/ok/fail, durationMs?, items?, error? }` |
+| `GET /api/cockpit/hoje` | admin | tudo da página Hoje |
+| `GET/POST /api/cockpit/jobs`, `PUT /api/cockpit/jobs/:job` | admin | rotinas esperadas (as 4 padrão nascem na 1ª leitura) |
+| `GET/PUT /api/cockpit/meta` | admin | meta mensal de receita |
+
+- **R-COCKPIT-01 Ritmo da receita:** esperado = meta × dia ÷ dias do mês; projeção =
+  acumulado ÷ dia × dias do mês. Status pelo acumulado ÷ esperado: ≥100% `no_caminho`,
+  85–100% `atencao`, <85% `fora`; sem retrato ou sem meta, `sem_dados`. Meta: valor salvo no
+  painel (`SiteSettings.cockpitMetaMensal`) > `COCKPIT_META_MENSAL` > R$ 15.000. Dia e mês em
+  Brasília (R-DATE-01).
+- **R-COCKPIT-02 Entrada de máquina:** cabeçalhos `x-cockpit-source`, `x-cockpit-timestamp`
+  (segundos, ±5 min) e `x-cockpit-signature` = HMAC-SHA256 hex de `"<timestamp>.<corpo cru>"`
+  com o segredo da fonte (variável de ambiente). Mesma assinatura não vale duas vezes (401).
+  Limite: 60 pedidos/min por IP (429), corpo até 32 KB (413), até 200 itens, só as chaves da
+  lista da fonte, só números como valor (422).
+- **R-COCKPIT-03 Sem dado de pessoa:** qualquer texto (em qualquer campo, inclusive nomes de
+  campo) com e-mail, 10+ dígitos (telefone), CPF ou CNPJ recusa o pedido inteiro com 422;
+  nada é gravado. O Cockpit guarda só agregados.
+- **R-COCKPIT-04 Estado da rotina:** `falhou` se a falha é mais nova que o último ok;
+  `rodando` se há início há menos de 30 min; `atrasada` se agora > último ok + esperado +
+  folga (ou nunca deu sinal); senão `ok`. Cada fonte só dá sinal de vida das rotinas dela.
+- **R-COCKPIT-05 Cron do blog:** `/api/cron/daily` registra a própria execução (`blog-cron-daily`)
+  por dentro, sem HTTP. Erro na rotina (`summary.errors`) conta como `fail`; falha ao registrar
+  nunca derruba o cron.
+- Blog no Hoje (leituras 7 dias vs 7 anteriores, assinantes ativos, novos no mês) sai direto do
+  banco (`PostDailyStat`, `Subscriber`); cada tile devolve `source`, `updatedAt` e `staleAfterSec`.
+
+### Experimentos e Links (Sprints C4 e C6)
+
+Registro de experimentos de crescimento (hipótese, ICE, variantes, resultado) e atalhos do
+painel. Tudo admin (sessão + 2º fator; escrita exige origem do painel). Modelos `Experiment`
+(exclusão lógica por `deletedAt`, como os posts) e `CockpitLink`. Regras em
+`app/services/cockpitExperiments.service.js`; listas fechadas em `app/config/cockpitExperiments.js`.
+
+| Rota | O que faz |
+|---|---|
+| `GET /api/cockpit/experiments?status=&area=` | lista (fora os apagados), maior ICE primeiro |
+| `POST /api/cockpit/experiments` | cria sempre em `ideia` |
+| `PUT /api/cockpit/experiments/:id` | edita campos e resultado; **não** muda status |
+| `POST /api/cockpit/experiments/:id/transition` | `{ status, result? }` muda o status com as regras abaixo |
+| `DELETE /api/cockpit/experiments/:id` | exclusão lógica |
+| `GET/POST /api/cockpit/links`, `PUT/DELETE /api/cockpit/links/:id` | atalhos (grupo, nota, ordem) |
+
+- **R-COCKPIT-06 Experimentos:** hipótese no formato "Se … então … porque …" (422 se faltar uma
+  das palavras). ICE = impacto × confiança × facilidade (cada um 1–5, inteiro), calculado no
+  servidor (1 a 125). Transições: ideia → planejado/descartado; planejado → ideia/rodando/descartado;
+  rodando → planejado/analisando/descartado; analisando → rodando/concluído/descartado;
+  concluído → analisando; descartado → ideia. **Rodando** exige métrica principal, data prevista
+  de fim e pelo menos 2 variantes. **Concluído** exige resumo, decisão (adotar/descartar/repetir) e
+  aprendizado (podem vir na própria transição ou já salvos). `startedAt` grava na 1ª ida a rodando
+  (mantido ao voltar de analisando; limpo em ideia/planejado); `finishedAt` grava em
+  concluído/descartado e é limpo ao reabrir.
+- **R-COCKPIT-07 Experimento vencido:** `rodando` com data prevista no passado vira item
+  "precisa de ação" (`experimentos-vencidos`, com `count`) na página Hoje.
+- **R-COCKPIT-08 Links só https:** `https://` com host, sem usuário/senha na URL; `http:`,
+  `javascript:`, `data:`, endereço sem protocolo e outros esquemas dão 422.
+
+## 22. Capa automática
 
 **R-CAPA-01.** Post publicado sem `coverImage` tem capa gerada em `GET /api/posts/slug/:slug/cover.png`
 (1200x630, tema `claro` ou `escuro`). Post com capa própria nunca é sobrescrito (a rota redireciona para ela).

@@ -36,7 +36,14 @@ app.use((req, res, next) => {
  * MIDDLEWARES BÁSICOS
  * ===============================
  */
-app.use(express.json());
+// rawBody só no Cockpit: a assinatura HMAC é conferida sobre os bytes recebidos
+app.use(
+  express.json({
+    verify(req, res, buf) {
+      if (req.originalUrl.startsWith("/api/cockpit/")) req.rawBody = buf;
+    },
+  })
+);
 app.use(express.urlencoded({ extended: false }));
 
 /**
@@ -104,6 +111,7 @@ app.use("/api/audiences", require("./routes/audience.routes"));
 app.use("/api/csp-report", require("./routes/csp.routes"));
 app.use("/api/settings", require("./routes/settings.routes"));
 app.use("/api/suggestions", require("./routes/suggestion.routes"));
+app.use("/api/cockpit", require("./routes/cockpit.routes"));
 app.use("/", sitemapRoutes);
 
 /**

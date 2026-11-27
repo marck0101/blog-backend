@@ -41,6 +41,7 @@ describe("tema público", () => {
     const sitemap = (await api().get("/sitemap.xml")).text;
     expect(sitemap).toContain("/temas/seguranca-na-diretoria");
     expect(sitemap).not.toContain("/temas/dashboards-e-bi");
+    expect(sitemap).toContain("https://blog.marck0101.com.br/pre-diagnostico");
 
     const llms = (await api().get("/llms.txt")).text;
     expect(llms).toContain("## Temas");
