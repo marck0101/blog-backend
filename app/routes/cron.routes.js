@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const connectDB = require("../config/db.config");
 const { runDailyJobs } = require("../services/scheduler.service");
+const { recordRunSafe } = require("../services/cockpitJobs.service");
 
 // A Vercel chama com "Authorization: Bearer <CRON_SECRET>" quando a
 // variável CRON_SECRET existe no projeto. Sem ela, a rota fica fechada.
@@ -19,7 +20,24 @@ function cronAuth(req, res, next) {
 router.get("/daily", cronAuth, async (req, res, next) => {
   try {
     await connectDB();
-    res.json(await runDailyJobs());
+    // Sinal de vida para o Cockpit (por dentro, sem HTTP); falha ao registrar nunca derruba a rotina
+    const JOB = "blog-cron-daily";
+    const startedAt = Date.now();
+    await recordRunSafe(JOB, { status: "start" });
+    let summary;
+    try {
+      summary = await runDailyJobs();
+    } catch (err) {
+      await recordRunSafe(JOB, { status: "fail", durationMs: Date.now() - startedAt, error: err.message });
+      throw err;
+    }
+    await recordRunSafe(JOB, {
+      status: summary.errors?.length ? "fail" : "ok",
+      durationMs: Date.now() - startedAt,
+      items: summary.published?.length || 0,
+      error: summary.errors?.[0],
+    });
+    res.json(summary);
   } catch (err) {
     next(err);
   }
