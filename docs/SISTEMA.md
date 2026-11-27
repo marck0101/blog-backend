@@ -1051,3 +1051,9 @@ painel. Tudo admin (sessão + 2º fator; escrita exige origem do painel). Modelo
   "precisa de ação" (`experimentos-vencidos`, com `count`) na página Hoje.
 - **R-COCKPIT-08 Links só https:** `https://` com host, sem usuário/senha na URL; `http:`,
   `javascript:`, `data:`, endereço sem protocolo e outros esquemas dão 422.
+
+## 22. Capa automática
+
+**R-CAPA-01.** Post publicado sem `coverImage` tem capa gerada em `GET /api/posts/slug/:slug/cover.png`
+(1200x630, tema `claro` ou `escuro`). Post com capa própria nunca é sobrescrito (a rota redireciona para ela).
+**R-CAPA-02.** A capa usa só dados do post (título, categoria ou tema, data de publicação). Detalhes e decisões: `docs/CAPAS.md`.
