@@ -1083,3 +1083,10 @@ painel. Tudo admin (sessão + 2º fator; escrita exige origem do painel). Modelo
 **R-CAPA-01.** Post publicado sem `coverImage` tem capa gerada em `GET /api/posts/slug/:slug/cover.png`
 (1200x630, tema `claro` ou `escuro`). Post com capa própria nunca é sobrescrito (a rota redireciona para ela).
 **R-CAPA-02.** A capa usa só dados do post (título, categoria ou tema, data de publicação). Detalhes e decisões: `docs/CAPAS.md`.
+## 23. Experimentos no site (Sprint R5)
+
+**R-EXP-01.** O experimento do Cockpit pode ter `chave` (slug estável, usada no GA4), `alvo` (espaço do site; hoje só `pre-diagnostico-cta`, lista em `app/config/cockpitExperiments.js`) e `variantes` (2 a 4 itens `{ chave, texto }`, texto até 200 caracteres, chaves diferentes). Os três andam juntos (ou nenhum): 422 se faltar algum. `chave` é única (409 se repetir). É independente de `variants` (nome/descrição para o registro interno).
+**R-EXP-02.** Só um experimento `rodando` por `alvo`: ir para rodando (ou trocar o alvo de um que já roda) com o espaço ocupado dá 422.
+**R-EXP-03.** `GET /api/experiments/ativos` (público, sem login, `Cache-Control: public, max-age=60`) devolve `[{ chave, alvo, variantes: [{ chave, texto }] }]` só dos experimentos rodando, com alvo, chave e 2+ variantes, fora da lixeira. Nunca sai hipótese, métrica, nota, resultado, id ou data. Sem experimento: `[]`. Sem rate limit próprio: é leitura barata e cacheada pela CDN (mesma linha de `/api/categories` e `/api/clusters`).
+
+Fluxo: o site busca a lista uma vez, e **só depois do consentimento de cookies** (`cookiesAccepted === "all"`) sorteia uma variante, guarda no navegador por `chave` e manda ao GA4 `experiment_impression` com `experiment_id` (a `chave`) e `variant_id`; o clique do espaço leva os mesmos dois parâmetros. Sem consentimento (ou se a API falhar) o site mostra o texto padrão, não grava nada e não envia evento. O experimento não tem dados pessoais: o sorteio é local e o evento só carrega as duas chaves. Detalhes do lado do site e da configuração no GA4: README do blog-front.

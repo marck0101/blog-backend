@@ -9,7 +9,7 @@ const SiteSettings = require("../models/siteSettings.model");
 const Experiment = require("../models/experiment.model");
 const CockpitLink = require("../models/cockpitLink.model");
 const { LINK_GROUPS } = require("../config/cockpitExperiments");
-const { planTransition } = require("../services/cockpitExperiments.service");
+const { planTransition, siteDraftError, alvoOcupado } = require("../services/cockpitExperiments.service");
 const { validate } = require("../validation/validate");
 const schemas = require("../validation/cockpit.schemas");
 const { blockedFor, hit, tooMany } = require("../services/ratelimit.service");
@@ -232,6 +232,7 @@ router.post("/experiments", auth, validate({ body: schemas.experimentCreateBody 
     const doc = await Experiment.create({ ...req.body, status: "ideia" });
     res.status(201).json({ experiment: doc });
   } catch (err) {
+    if (err?.code === 11000) return res.status(409).json(errorBody("Já existe um experimento com essa chave"));
     next(err);
   }
 });
@@ -244,9 +245,15 @@ router.put("/experiments/:id", auth, validate({ params: schemas.idParams, body: 
     const { result, ...rest } = req.body;
     doc.set(rest);
     if (result) doc.set("result", { ...doc.result.toObject(), ...result });
+    const draftError = siteDraftError(doc);
+    if (draftError) return res.status(422).json(errorBody(draftError));
+    if (doc.status === "rodando" && doc.isModified("alvo") && (await alvoOcupado(Experiment, doc))) {
+      return res.status(422).json(errorBody("Já existe outro experimento rodando nesse espaço do site"));
+    }
     await doc.save();
     res.json({ experiment: doc });
   } catch (err) {
+    if (err?.code === 11000) return res.status(409).json(errorBody("Já existe um experimento com essa chave"));
     next(err);
   }
 });
@@ -258,6 +265,9 @@ router.post("/experiments/:id/transition", auth, validate({ params: schemas.idPa
     if (!doc) return res.status(404).json(errorBody("Experimento não encontrado"));
     const plan = planTransition(doc, req.body.status, req.body.result);
     if (plan.error) return res.status(422).json(errorBody(plan.error));
+    if (plan.set.status === "rodando" && (await alvoOcupado(Experiment, doc))) {
+      return res.status(422).json(errorBody("Já existe outro experimento rodando nesse espaço do site"));
+    }
     doc.set(plan.set);
     await doc.save();
     res.json({ experiment: doc });
