@@ -55,6 +55,21 @@ do front ficam em `Front Admin/blog-panel/docs/OPERACAO.md`.
   inválida (cookie de leitor, token sem 2º fator, token forjado, sem login)
   e esperar 401 em todas. Em 2026-11-06 foram 67 rotas x 7 credenciais.
 
+## Cockpit (variáveis de ambiente)
+
+Nomes que o dono cria na Vercel (backend); os valores nunca vão para o repositório:
+
+- `COCKPIT_INGEST_SECRET_PROSPECT` — segredo HMAC do prospect0101.
+- `COCKPIT_INGEST_SECRET_BENCHMARK` — segredo HMAC do benchmark0101.
+- `COCKPIT_INGEST_SECRET_REPORTS` — segredo HMAC do bot de relatórios.
+- `COCKPIT_META_MENSAL` (opcional) — meta mensal padrão em R$ (15000 se faltar; o painel
+  pode sobrescrever).
+
+Cada sistema assina `"<timestamp>.<corpo>"` com o próprio segredo (segredos diferentes por
+fonte, para um vazamento não valer para todos). Sem o segredo, a fonte recebe 503. Detalhes e
+regras em SISTEMA.md, seção 21. Rota nova do Cockpit que muda dado de fora usa o HMAC, nunca
+sessão; rota de painel usa `auth`.
+
 ## Ambiente local
 
 - `npm run dev` sobe a API na porta 3333 com o banco local e **exige o 2º

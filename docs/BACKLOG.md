@@ -403,6 +403,19 @@ consultar o Google, e os dados ficam num lugar só.
 
 ---
 
+## Fase 7 — Cockpit
+
+- [x] **C0 · Cockpit: fundação** · `blog-backend` + `blog-front` · G — feito em 27/11/2026 (branch `feat/cockpit-c0`)
+  - Retratos de métricas (`MetricSnapshot`), ingestão assinada (HMAC, sem dado de pessoa),
+    sinal de vida das rotinas (`JobRun`/`JobDefinition`, cron do blog incluído) e página
+    `/admin/cockpit` ("Hoje"). Regras R-COCKPIT-01 a R-COCKPIT-05 (SISTEMA.md, seção 21).
+  - ⚠️ **Deploy: backend antes do front.** Variáveis a criar: ver OPERACAO.md ("Cockpit").
+- [ ] **C1 · Fontes reais** · `prospect0101`, `benchmark0101`, `reports` · M
+  - Cada sistema passa a enviar retratos e sinal de vida. **Pronto quando:** os tiles de
+    prospecção e as rotinas deixam de aparecer como "sem dados"/"atrasada".
+
+---
+
 ## Resumo
 
 | Fase | Tarefas | Tamanho estimado |
