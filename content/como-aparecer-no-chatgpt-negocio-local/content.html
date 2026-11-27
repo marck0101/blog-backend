@@ -1,0 +1,77 @@
+<p>Um cliente em Santa Rosa abre o celular e pergunta ao assistente: "qual o melhor dentista perto de mim?". A resposta vem em segundos, com dois ou três nomes. Se o seu não está entre eles, você nem fica sabendo que perdeu a venda: não houve clique, não houve visita, não sobrou rastro. É por isso que tanta gente pesquisa <strong>como aparecer no ChatGPT</strong>. O cliente passou a perguntar para a IA o que antes procurava no Google, e a resposta cita o concorrente.</p>
+<p>Este post separa o que se sabe do que ninguém sabe e mostra o que um negócio local pode fazer. O nome do jogo é GEO ("generative engine optimization"): preparar o negócio para ser citado em respostas de IA. É o velho "ser encontrado", agora com um intermediário que escreve a resposta.</p>
+
+<h2>Como aparecer no ChatGPT: o que se sabe e o que ninguém sabe</h2>
+<p>Primeiro, a parte desconfortável: <strong>resposta de IA não é um ranking que se compra ou se garante</strong>. Não existe "posição 1 no ChatGPT" como existe posição 1 no Google. A resposta muda conforme a pergunta, a conversa e o momento.</p>
+<p>O que dá para afirmar vem das próprias empresas. O Google, na página oficial sobre recursos de IA na busca (Visão Geral por IA e Modo IA), diz que não há requisitos adicionais nem "otimizações especiais" para aparecer ali. A página precisa estar indexada (guardada no catálogo do Google) e elegível a aparecer na busca com um trecho de texto (snippet). E o Google avisa que cumprir isso não garante inclusão. Também diz que não é preciso criar arquivos novos, "arquivos de texto para IA" ou marcações especiais, e que nenhum schema.org específico é exigido (GOOGLE, [s. d.]).</p>
+<p>Traduzindo: não existe botão secreto. É como ser indicado por um bom guia de turismo: você não paga para estar na lista, mas pode manter a casa arrumada, com placa certa e porta aberta, para merecer a indicação.</p>
+<p><strong>Moral da história:</strong> aparecer em IA não se compra nem se garante; se prepara, como se prepara uma casa para ser indicada.</p>
+
+<h2>Comece pelo que já vale para o Google</h2>
+<p>O Google afirma que as práticas de SEO continuam valendo para esses recursos: permitir o rastreamento, ter links internos, oferecer boa experiência de página, manter o conteúdo importante em texto, usar dados estruturados coerentes com o texto visível e manter atualizadas as informações do Perfil da Empresa (GOOGLE, [s. d.]). Nada disso é novo, e essa é a boa notícia: quem cuida do básico já está andando.</p>
+<p>O básico para negócios locais tem quatro frentes:</p>
+<ul>
+<li><p><strong>Perfil da Empresa no Google bem preenchido.</strong> Categoria correta, horário, serviços, fotos e telefone. É o seu cartão de visita dentro do Google.</p></li>
+<li><p><strong>Nome, endereço e telefone iguais em todo lugar.</strong> Site, redes sociais, diretórios, Perfil da Empresa. Se cada lugar diz uma coisa, a máquina fica em dúvida, como um carteiro com três endereços para a mesma pessoa.</p></li>
+<li><p><strong>Avaliações reais e respondidas.</strong> Elas dizem, com a voz de clientes, o que você faz bem e onde.</p></li>
+<li><p><strong>Um site rápido, legível no celular e indexável.</strong> Veja <a href="https://blog.marck0101.com.br/blog/ssr-ssg-spa-qual-arquitetura-escolher">SSR, SSG ou SPA: qual arquitetura escolher</a>. O hub <a href="https://blog.marck0101.com.br/temas/site-rapido-e-encontravel">Site rápido e encontrável</a> reúne os demais temas.</p></li>
+</ul>
+<p><strong>Moral da história:</strong> antes de pensar em IA, confira se o Google já consegue ler, entender e confiar em você.</p>
+
+<h2>Escreva respostas, não só descrições</h2>
+<p>No meu blog, cada post abre com uma "resposta direta", um parágrafo curto que serve sozinho, e fecho com um FAQ, a seção de perguntas e respostas. Esse FAQ vira dados estruturados do tipo FAQPage, um formato que diz à máquina "aqui há uma pergunta, aqui está a resposta", como etiquetas nas gavetas de um arquivo.</p>
+<p>Para um negócio local, isso significa uma página por serviço, com as perguntas que as pessoas fazem de verdade: "quanto custa", "quanto tempo demora", "atende aos sábados?". Cite a cidade e o bairro e diga também o que você não faz. O post <a href="https://blog.marck0101.com.br/blog/perguntas-que-todo-mundo-faz-sobre-blogs-e-as-respostas-diretas">Perguntas que todo mundo faz sobre blogs e as respostas diretas</a> mostra como eu monto esse formato.</p>
+<p><strong>Moral da história:</strong> escreva a página como se estivesse respondendo ao cliente no balcão.</p>
+
+<h2>Dados estruturados e llms.txt: o que são e o que esperar</h2>
+<p><strong>Dados estruturados</strong> são um texto escondido no código da página que descreve o negócio em linguagem de máquina: o tipo de empresa, os serviços, o telefone, as perguntas frequentes. É a ficha técnica na embalagem de um produto, enquanto o texto visível é a propaganda. No meu catálogo uso ProfessionalService, Service, FAQPage e Person, esta última com a propriedade <em>sameAs</em> ligando meu LinkedIn, meu GitHub e meus sites, para a máquina entender que são a mesma pessoa. O Google diz que os dados precisam bater com o texto visível e que nenhum schema especial é exigido (GOOGLE, [s. d.]): é reforço de clareza, não atalho.</p>
+<p>O <strong>llms.txt</strong> é um arquivo de texto na raiz do site, com um resumo do que a empresa faz e os links principais, pensado para assistentes de IA. É como deixar um folheto na recepção para quem chega sem conhecer a casa. Meus quatro sites publicam um. Mas seja honesto consigo: é uma <strong>proposta de padrão</strong>, apresentada por Jeremy Howard em 2024 (HOWARD, 2024), e o Google afirma que não é preciso criar "arquivos de texto para IA" para aparecer nos recursos dele (GOOGLE, [s. d.]). Mantenho porque custa pouco, não porque haja prova de que ele faça alguém aparecer.</p>
+<p><strong>Moral da história:</strong> estrutura e llms.txt são clareza extra, não fórmula mágica; vêm depois do básico, não no lugar dele.</p>
+
+<h2>Deixe os robôs de IA entrarem</h2>
+<p>Muita empresa some das respostas porque, sem saber, bloqueou os robôs. O <strong>robots.txt</strong> é um arquivo na raiz do site que funciona como a placa "entrada permitida" na porta. A OpenAI, que faz o ChatGPT, documenta robôs com funções diferentes (OPENAI, [s. d.]):</p>
+<ul>
+<li><p><strong>OAI-SearchBot:</strong> serve para mostrar sites nos resultados da busca do ChatGPT. Quem o bloqueia não aparece nas respostas de busca do ChatGPT, embora ainda possa aparecer como link de navegação.</p></li>
+<li><p><strong>GPTBot:</strong> coleta conteúdo que pode ser usado para treinar os modelos da OpenAI. Bloqueá-lo é uma escolha sobre treinamento e, segundo a documentação, é independente do robô de busca.</p></li>
+<li><p><strong>ChatGPT-User:</strong> age quando uma pessoa pede algo dentro do ChatGPT. A própria OpenAI avisa que, nesse caso, as regras do robots.txt podem não se aplicar.</p></li>
+</ul>
+<p>Segundo a OpenAI, uma mudança no robots.txt leva cerca de 24 horas para valer (OPENAI, [s. d.]). Abra seusite.com.br/robots.txt, procure um "Disallow: /" geral e confira também a hospedagem e o CDN (a camada que entrega o site), onde o rastreamento também precisa estar liberado (GOOGLE, [s. d.]).</p>
+<p><strong>Moral da história:</strong> não adianta querer ser citado e deixar a porta trancada.</p>
+
+<h2>Seja mencionado fora do seu site</h2>
+<p>Esta é a parte menos controlável. Não conheço medição pública do peso das menções em cada assistente e não vou inventar um número. Mas a lógica é a mesma de qualquer recomendação, humana ou não: o vizinho que indica vale mais do que a placa que você mesmo pendurou. Por isso, procure aparecer em diretórios do setor, na associação comercial e em parceiros, sempre com nome, endereço, telefone e link iguais.</p>
+<p><strong>Moral da história:</strong> quem é falado por outros é mais lembrado do que quem só fala de si.</p>
+
+<h2>Como medir se está funcionando</h2>
+<p>Faça também um teste manual: uma vez por mês, pergunte aos assistentes o que um cliente perguntaria ("melhor [serviço] em [cidade]") e anote quem aparece. É o cliente oculto de uma loja, e a resposta varia, então repita em dias diferentes.</p>
+<p>Medir é parcial, e isso precisa ser dito. No Google, os recursos de IA entram no tráfego geral da busca e aparecem no relatório de Desempenho do Search Console, no tipo de pesquisa "Web", sem um relatório separado (GOOGLE, [s. d.]). Você vê o conjunto, não só a IA.</p>
+<p>No Google Analytics 4 (GA4), a ferramenta que conta as visitas, dá para olhar as origens do tráfego e procurar visitas vindas de endereços como chatgpt.com ou perplexity. No meu blog, criei uma dimensão personalizada chamada "origem IA", que registra qual assistente enviou a visita. Nem toda citação gera clique, então a falta de visitas não prova que você não foi citado.</p>
+<p><strong>Moral da história:</strong> meça o que dá, teste o que não dá e não tire conclusão de uma resposta só.</p>
+
+<h2>O que não dá certo</h2>
+<ul>
+<li><p><strong>Promessa de "primeiro lugar no ChatGPT".</strong> Ninguém garante isso; nem o Google garante inclusão nas respostas de IA dele.</p></li>
+<li><p><strong>Encher o texto de palavras-chave.</strong> Repetir "melhor dentista Santa Rosa" dez vezes cansa o leitor. O Google pede conteúdo útil, feito para pessoas (GOOGLE, [s. d.]).</p></li>
+<li><p><strong>Páginas em massa geradas por IA.</strong> Cem páginas quase iguais, trocando só o bairro, não dizem nada de novo: é a loja com cem placas e nenhum produto.</p></li>
+<li><p><strong>Bloquear os robôs e esperar aparecer.</strong> Segundo a OpenAI, sites que bloqueiam o OAI-SearchBot não são mostrados nas respostas de busca do ChatGPT (OPENAI, [s. d.]).</p></li>
+</ul>
+<p><strong>Moral da história:</strong> atalho nessa área costuma custar dinheiro e credibilidade.</p>
+
+<h2>Por onde começar nesta semana</h2>
+<p>Se eu tivesse de escolher cinco passos para um negócio local, seria esta ordem: (1) conferir o Perfil da Empresa; (2) padronizar nome, endereço e telefone; (3) abrir o robots.txt e liberar os robôs que você quer; (4) escrever uma página de serviço com perguntas e respostas reais; (5) anotar, uma vez por mês, o que os assistentes respondem sobre o seu setor. Esse é o trabalho que descrevo na página <a href="https://servicos.marck0101.com.br/servicos/seo-geo">Ser encontrado no Google e no ChatGPT (SEO/GEO)</a>; mas nada nessa lista exige contratar alguém para começar.</p>
+<p><strong>Moral da história:</strong> comece pelo que depende só de você e não exige tecnologia nova.</p>
+
+<h2>Perguntas frequentes</h2>
+<h3>Como aparecer no ChatGPT, tecnicamente?</h3>
+<p>Não há cadastro. O site precisa poder ser rastreado, inclusive pelo OAI-SearchBot, o robô de busca da OpenAI, e ter conteúdo claro, em texto, sobre o que o negócio faz e onde. Nada disso garante que o nome apareça em uma resposta específica.</p>
+<h3>Quanto custa deixar de aparecer nas respostas de IA?</h3>
+<p>Não existe número confiável, porque a IA não avisa quem deixou de ser citado. O custo real é invisível: o cliente pergunta, recebe o nome do concorrente e nunca chega até você. O trabalho de base também melhora o Google, então vale a pena mesmo sem medir a IA.</p>
+<h3>Por onde começo?</h3>
+<p>Pelo Perfil da Empresa no Google e pela consistência de nome, endereço e telefone. Depois, confira o arquivo robots.txt do site para ter certeza de que ele não bloqueia robôs de busca, e escreva uma página de serviço que responda às perguntas que os clientes fazem.</p>
+<h3>Dá para pagar para aparecer no ChatGPT ou no Google com IA?</h3>
+<p>Na resposta orgânica, não: não há como comprar a citação nem garantir posição. O que se paga de forma legítima é o trabalho de deixar site e perfil bem feitos, e os anúncios, que são outro canal.</p>
+
+<h2>Referências</h2>
+<p>GOOGLE. AI features and your website. <strong>Google Search Central</strong>, [<em>s. l.</em>], [s. d.]. Disponível em: https://developers.google.com/search/docs/appearance/ai-features. Acesso em: 27 nov. 2026.</p>
+<p>HOWARD, Jeremy. The /llms.txt file. <strong>llmstxt.org</strong>, [<em>s. l.</em>], 2024. Disponível em: https://llmstxt.org/. Acesso em: 27 nov. 2026.</p>
+<p>OPENAI. Overview of OpenAI crawlers. <strong>OpenAI Developers</strong>, [<em>s. l.</em>], [s. d.]. Disponível em: https://developers.openai.com/api/docs/bots. Acesso em: 27 nov. 2026.</p>

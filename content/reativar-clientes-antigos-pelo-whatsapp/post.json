@@ -1,0 +1,18 @@
+{
+  "title": "Reativar clientes antigos pelo WhatsApp sem parecer spam",
+  "slug": "reativar-clientes-antigos-pelo-whatsapp",
+  "excerpt": "Sua lista de quem já comprou está parada enquanto você paga anúncio por desconhecidos. Veja como chamar de volta pelo WhatsApp, sem spam e com saída fácil.",
+  "category": "negocios",
+  "cluster": "engenharia-no-marketing",
+  "isPillar": false,
+  "tags": ["reativação de clientes", "whatsapp", "lgpd", "negócios locais", "pós-venda"],
+  "directAnswer": "Para reativar clientes antigos pelo WhatsApp, separe a lista por última compra, o que comprou e frequência; mande poucas mensagens pessoais, com um motivo real, uma pergunta e a opção de responder SAIR; envie em lotes pequenos, responda todos e meça resposta, vendas e pedidos de saída.",
+  "file": "content.html",
+  "plannedAt": null,
+  "faq": [
+    {"question": "Posso mandar mensagem para cliente antigo sem autorização?", "answer": "Depende do que a pessoa esperava ao dar o número. A LGPD prevê mais de uma base legal para tratar dados, mas exige finalidade informada e dá à pessoa o direito de se opor e de revogar o consentimento. O WhatsApp pede que a empresa garanta a adesão. O mais seguro é perguntar se a pessoa quer receber novidades e deixar a opção de sair em toda mensagem. Isto não é aconselhamento jurídico."},
+    {"question": "Quanto custa deixar a base parada?", "answer": "O custo é o que cada cliente esquecido deixaria de comprar, somado ao que você paga em anúncio para trazer um desconhecido no lugar. Para estimar, multiplique quantos clientes sumiram pelo valor médio da compra deles e veja quanto disso voltaria com uma conversa. Esse número é seu, não de outra empresa."},
+    {"question": "Por onde começo?", "answer": "Abra a lista e monte a planilha com nome, telefone, última compra, o que comprou e frequência. Separe quem sumiu há pouco, escolha 10 a 20 pessoas, escreva uma mensagem com motivo real, uma pergunta e o aviso para responder SAIR. Envie, responda todos e anote o resultado."},
+    {"question": "De quanto em quanto tempo posso mandar?", "answer": "Não existe um intervalo oficial que valha para todo negócio. Uma regra segura: uma mensagem por motivo real, nunca duas seguidas sem resposta, e nenhuma depois de um pedido para sair. Se o cliente costuma voltar a cada dois meses, acompanhe esse ritmo em vez de inventar um calendário."}
+  ]
+}

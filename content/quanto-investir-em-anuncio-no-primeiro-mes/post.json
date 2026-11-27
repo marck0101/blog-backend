@@ -1,0 +1,30 @@
+{
+  "title": "Quanto investir em anúncio no primeiro mês: o método",
+  "slug": "quanto-investir-em-anuncio-no-primeiro-mes",
+  "excerpt": "R$ 300 jogados ou verba demais sem medir? Veja como calcular quanto investir em anúncio no primeiro mês partindo da meta, com exemplo hipotético.",
+  "category": "trafego",
+  "cluster": "trafego-pago-medido",
+  "isPillar": false,
+  "tags": ["quanto investir em anúncio", "verba de anúncio", "tráfego pago", "negócios locais", "primeiro mês"],
+  "directAnswer": "Não existe valor certo para todos: parta da meta de vendas, do ticket médio, da margem e da taxa de fechamento para chegar a quantos contatos você precisa, e trate o custo por contato como hipótese a testar. Concentre a verba em um canal e uma campanha, meça nas semanas 1, 2 e 4 e decida pelo custo por venda.",
+  "file": "content.html",
+  "plannedAt": null,
+  "faq": [
+    {
+      "question": "Qual o valor mínimo para anunciar no Instagram ou no Google?",
+      "answer": "Este texto não afirma um valor mínimo universal. O que as páginas oficiais deixam claro é como o orçamento funciona: no Google Ads ele é diário e médio, e no fim do mês o gasto não passa de 30,4 vezes esse valor. Mais útil que o mínimo é a verba que dá volume suficiente de contatos para você tirar uma conclusão."
+    },
+    {
+      "question": "Quanto custa errar a verba?",
+      "answer": "Errar para menos custa o dinheiro e a conclusão: com poucos contatos você não sabe se o anúncio funciona e pode abandoná-lo sem motivo. Errar para mais, sem medir origem e custo por venda, custa o dinheiro e a chance de aprender. Por isso o primeiro mês deve ser dimensionado pela meta, e não por palpite."
+    },
+    {
+      "question": "Por onde começo?",
+      "answer": "Anote o ticket médio, a margem e quantas vendas a mais você quer no mês. Estime quantos contatos fecham venda, calcule os contatos necessários e multiplique por uma hipótese de custo por contato. Depois escolha um canal, uma campanha e deixe o rastreamento de origem funcionando antes de gastar."
+    },
+    {
+      "question": "Em quanto tempo vejo resultado?",
+      "answer": "Na semana 1 você confere se o anúncio e a medição funcionam; na semana 2 já vê o custo por conversa; na semana 4, o custo por venda. Julgar com 3 dias de dados é cedo demais. Na Meta, a própria Central de Ajuda recomenda não editar durante a fase de aprendizado, que normalmente se resolve após cerca de 50 resultados."
+    }
+  ]
+}

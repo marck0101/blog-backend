@@ -31,8 +31,12 @@ Rascunhos prontos, sem [A COMPLETAR] e sem data no post.json (`plannedAt: null`)
 | como-aparecer-no-google-maps | gmb | site-rapido-e-encontravel | como aparecer no Google Maps |
 | como-saber-se-o-cliente-veio-do-anuncio-whatsapp | tagueamento | trafego-pago-medido | como saber se o cliente veio do anúncio |
 | painel-de-vendas-para-dono-de-negocio | dashboard | dashboards-e-bi | painel de vendas para dono de negócio |
+| como-aparecer-no-chatgpt-negocio-local | seo-geo | site-rapido-e-encontravel | como aparecer no ChatGPT |
+| follow-up-de-orcamento-pelo-whatsapp | follow-up | engenharia-no-marketing | follow-up de orçamento pelo WhatsApp |
+| quanto-investir-em-anuncio-no-primeiro-mes | trafego | trafego-pago-medido | quanto investir em anúncio no primeiro mês |
+| reativar-clientes-antigos-pelo-whatsapp | reativacao | engenharia-no-marketing | reativar clientes antigos pelo WhatsApp |
 
-Faltam 4 (seo-geo, follow-up, verba de anúncios, reativação), escritos na próxima rodada.
+Os 7 estão escritos (os 4 últimos em 27/11, PR seguinte ao #29).
 
 **Agenda proposta** (aplicar no painel, no calendário; a ordem relativa dos posts já agendados não muda):
 
@@ -44,18 +48,18 @@ Faltam 4 (seo-geo, follow-up, verba de anúncios, reativação), escritos na pr�
 | 04/01 | Automação de marketing com código (pilar) |
 | 11/01 | Painel de vendas para dono de negócio (novo) |
 | 18/01 | Login antes do dado |
-| 25/01 | Como aparecer no ChatGPT e na IA do Google (a escrever) |
+| 25/01 | Como aparecer no ChatGPT (novo) |
 | 01/02 | Segurança é pauta de diretoria, ep. 1 |
-| 08/02 | Orçamento sem resposta: follow-up que não incomoda (a escrever) |
+| 08/02 | Follow-up de orçamento pelo WhatsApp sem incomodar (novo) |
 | 15/02 | Segurança é pauta de diretoria, ep. 2 |
-| 22/02 | Quanto investir em anúncios no primeiro mês (a escrever) |
+| 22/02 | Quanto investir em anúncio no primeiro mês (novo) |
 | 01/03 | Segurança é pauta de diretoria, ep. 3 |
-| 08/03 | Clientes antigos: reativar pelo WhatsApp sem spam (a escrever) |
+| 08/03 | Reativar clientes antigos pelo WhatsApp sem parecer spam (novo) |
 | 15/03 | Segurança é pauta de diretoria, ep. 4 |
 | 22/03 a 12/04 | Bastidores do blog (4 posts, na ordem atual) |
 | 19/04 a 24/05 | Segurança é pauta de diretoria, ep. 5 a 10 |
 
-Depois de publicar o post do WhatsApp, vale linkar nele o post do funil por UTM (sai antes, em 21/12).
+Links a acrescentar quando os posts estiverem no ar: o funil por UTM (21/12) no post do WhatsApp (28/12) e no de reativação; o do Google Maps (14/12) no do ChatGPT (25/01); o do WhatsApp (28/12) no de follow-up e no de verba.
 
 Importar (o Marcos roda, no PowerShell, simulando antes):
 

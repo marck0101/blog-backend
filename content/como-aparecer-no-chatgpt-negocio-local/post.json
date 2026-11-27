@@ -1,0 +1,36 @@
+{
+  "title": "Como aparecer no ChatGPT: guia para negócios locais",
+  "slug": "como-aparecer-no-chatgpt-negocio-local",
+  "excerpt": "O cliente pergunta à IA e ela cita o concorrente. Veja o que dá para fazer, o que ninguém garante e como medir, sem promessa de primeiro lugar.",
+  "category": "marketing",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": [
+    "como aparecer no chatgpt",
+    "geo",
+    "seo local",
+    "llms.txt",
+    "negócios locais"
+  ],
+  "directAnswer": "Não existe cadastro nem posição garantida. O que ajuda é o básico de SEO: Perfil da Empresa no Google, nome, endereço e telefone iguais em todo lugar, avaliações, um site com respostas claras e robôs de busca liberados no robots.txt. Menções em outros sites reforçam. Quem promete primeiro lugar no ChatGPT promete o que ninguém controla.",
+  "file": "content.html",
+  "plannedAt": null,
+  "faq": [
+    {
+      "question": "Como aparecer no ChatGPT, tecnicamente?",
+      "answer": "Não há cadastro. O site precisa poder ser rastreado, inclusive pelo OAI-SearchBot, o robô de busca da OpenAI, e ter conteúdo claro, em texto, sobre o que o negócio faz e onde. Nada disso garante que o nome apareça em uma resposta específica."
+    },
+    {
+      "question": "Quanto custa deixar de aparecer nas respostas de IA?",
+      "answer": "Não existe número confiável, porque a IA não avisa quem deixou de ser citado. O custo real é invisível: o cliente pergunta, recebe o nome do concorrente e nunca chega até você. O trabalho de base também melhora o Google, então vale a pena mesmo sem medir a IA."
+    },
+    {
+      "question": "Por onde começo?",
+      "answer": "Pelo Perfil da Empresa no Google e pela consistência de nome, endereço e telefone. Depois, confira o arquivo robots.txt do site para ter certeza de que ele não bloqueia robôs de busca, e escreva uma página de serviço que responda às perguntas que os clientes fazem."
+    },
+    {
+      "question": "Dá para pagar para aparecer no ChatGPT ou no Google com IA?",
+      "answer": "Na resposta orgânica, não: não há como comprar a citação nem garantir posição. O que se paga de forma legítima é o trabalho de deixar site e perfil bem feitos, e os anúncios, que são outro canal."
+    }
+  ]
+}

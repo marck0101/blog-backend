@@ -1,0 +1,30 @@
+{
+  "title": "Follow-up de orçamento pelo WhatsApp sem incomodar",
+  "slug": "follow-up-de-orcamento-pelo-whatsapp",
+  "excerpt": "Orçamento enviado e sem resposta? Uma rotina simples de follow-up pelo WhatsApp, com mensagens prontas e 10 minutos por semana, sem parecer insistente.",
+  "category": "negocios",
+  "cluster": "engenharia-no-marketing",
+  "isPillar": false,
+  "tags": ["follow-up", "orçamento", "whatsapp business", "vendas", "negócios locais"],
+  "directAnswer": "Faça o follow-up de orçamento pelo WhatsApp em até três contatos: um dia depois (confirmar e tirar dúvidas), três dias (informação útil) e sete dias (pergunta direta com saída fácil). Registre tudo numa planilha, pare no primeiro \"não\" e guarde só os dados necessários.",
+  "file": "content.html",
+  "plannedAt": null,
+  "faq": [
+    {
+      "question": "Quantas vezes posso cobrar um orçamento?",
+      "answer": "Uma sugestão prática é três contatos em uma semana (um, três e sete dias depois do envio) e um encerramento educado. Se a pessoa responder \"não\", pare na hora. Não há número mágico: ajuste ao prazo de decisão do seu ramo."
+    },
+    {
+      "question": "Quanto custa não fazer follow-up?",
+      "answer": "Cada orçamento parado é uma venda que pode ir para quem respondeu de novo. Para estimar o seu custo, some a coluna \"valor\" dos orçamentos que ficaram sem resposta no último mês: é o que estava em jogo. Recuperar só uma parte deles já mostra quanto o silêncio custa."
+    },
+    {
+      "question": "Por onde começo?",
+      "answer": "Crie a planilha com cinco colunas (data do orçamento, origem, valor, próxima ação e status) e lance os orçamentos dos últimos sete dias. Depois envie hoje a primeira mensagem, a de confirmação, para quem está nessa lista."
+    },
+    {
+      "question": "Como cobrar sem parecer chato?",
+      "answer": "Cite o serviço, ofereça ajuda (tirar dúvida, mandar uma informação útil) e deixe sempre uma saída fácil, como \"se não for mais o momento, sem problema\". Não mande mensagem todo dia e pare assim que a pessoa disser não."
+    }
+  ]
+}
