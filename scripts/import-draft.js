@@ -7,6 +7,9 @@
  *   node scripts/import-draft.js content/pagespeed-clarity-parte-2 --apply          # grava no banco DEV
  *   node scripts/import-draft.js content/pagespeed-clarity-parte-2 --apply --prod
  *   ... --update   atualiza o rascunho que já existe com o mesmo slug
+ *   ... --update --slug-antigo=<slug>   acha o rascunho pelo slug antigo e troca título/slug
+ *                  (só rascunho; recusa se o slug novo já estiver em uso)
+ *   Em --update a data do calendário (plannedAt) nunca muda: ela é gerida no painel.
  *
  * Regras de segurança (as mesmas do import-season.js):
  * - Sempre grava status "draft" (published false) — nunca publica nem dispara e-mail.
@@ -26,6 +29,7 @@ const dir = args.find((a) => !a.startsWith("--"));
 const APPLY = args.includes("--apply");
 const PROD = args.includes("--prod");
 const UPDATE = args.includes("--update");
+const OLD_SLUG = (args.find((a) => a.startsWith("--slug-antigo=")) || "").split("=")[1] || null;
 
 if (!dir) {
   console.error("Informe a pasta do post. Ex.: node scripts/import-draft.js content/pagespeed-clarity-parte-2");
@@ -59,15 +63,22 @@ async function main() {
 
   await mongoose.connect(MONGO_URI);
 
-  const existing = await BlogPost.findOne({ slug: data.slug }).select("_id status");
-  if (existing && existing.status !== "draft") {
+  const lookupSlug = OLD_SLUG || data.slug;
+  const existing = await BlogPost.findOne({ slug: lookupSlug }).select("_id status plannedAt");
+  if (OLD_SLUG && !existing) {
+    console.log(`  pular   nenhum post com o slug antigo ${OLD_SLUG}`);
+  } else if (OLD_SLUG && OLD_SLUG !== data.slug && (await BlogPost.exists({ slug: data.slug }))) {
+    console.log(`  pular   o slug novo ${data.slug} já está em uso`);
+  } else if (existing && existing.status !== "draft") {
     console.log(`  pular   já existe com status ${existing.status}`);
   } else if (existing && !UPDATE) {
     console.log("  pular   rascunho já existe; use --update");
   } else if (!APPLY) {
-    console.log(`  ${existing ? "atualiz." : "criar  "} ${data.title}`);
+    const troca = OLD_SLUG && OLD_SLUG !== data.slug ? ` (slug ${OLD_SLUG} -> ${data.slug})` : "";
+    console.log(`  ${existing ? "atualiz." : "criar  "} ${data.title}${troca}`);
   } else {
     const draft = { ...data, status: "draft", published: false };
+    if (existing) delete draft.plannedAt; // --update nunca mexe na data do calendário (é do painel)
     if (existing) {
       await BlogPost.updateOne({ _id: existing._id }, { $set: draft }, { runValidators: true });
       console.log(`  atualizado ${data.slug}`);

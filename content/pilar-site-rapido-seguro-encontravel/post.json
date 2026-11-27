@@ -1,6 +1,6 @@
 {
-  "title": "Site rápido, seguro e encontrável: guia para PMEs",
-  "slug": "site-rapido-seguro-encontravel-guia-pequenas-empresas",
+  "title": "Site rápido, seguro e encontrável: guia para negócios locais",
+  "slug": "site-rapido-seguro-encontravel-guia-negocios-locais",
   "excerpt": "Site lento perde venda, inseguro perde confiança e escondido não existe. O que medir, o que proteger e por onde começar, com números e fontes.",
   "category": "tecnologia",
   "cluster": "site-rapido-e-encontravel",
@@ -10,7 +10,7 @@
     "core web vitals",
     "seguranca",
     "seo",
-    "pequenas empresas"
+    "negócios locais"
   ],
   "directAnswer": "Um site de empresa precisa de três coisas antes de qualquer efeito visual: ser rápido (LCP até 2,5 s, INP até 200 ms e CLS até 0,1), ser seguro (login forte no painel, bibliotecas atualizadas, teste antes de publicar) e ser encontrável (sitemap no Search Console, noindex no que não deve aparecer e páginas que respondem quem busca).",
   "file": "content.html",
