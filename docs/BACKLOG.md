@@ -195,22 +195,22 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
     data ao meio-dia UTC, campos públicos, 1ª publicação dispara email + LinkedIn e
     republicação não.
 
-- [ ] **TEST-03 · Regras de email** · `blog-backend` · M
+- [ ] **TEST-03 · Regras de email** · `blog-backend` · M — 🔎 **PR aberto em 28/11/2026, aguardando revisão:** PR #32 (52 testes, R-EMAIL-01 a 13, nenhum bug)
   - R-EMAIL-01 a 13: um aviso por post, público congelado, lotes e retomada, envio iniciado
     não editável, UTMs, rastreio ignorando robôs, teste nunca rastreado.
 
-- [ ] **TEST-04 · LinkedIn** · `blog-backend` · P
+- [ ] **TEST-04 · LinkedIn** · `blog-backend` · P — 🔎 **PR aberto em 28/11/2026, aguardando revisão:** PR #34 (40 testes, R-LI-01 a 07, nenhum bug; campos de sistema do painel são ignorados em silêncio, não dão 422)
   - R-LI-01 a 07 com `fetch` simulado: idempotência, só comentário na nova tentativa,
     "posting" travado exige confirmação, falha não desfaz publicação.
 
-- [ ] **TEST-05 · Rotina diária, seasons, lixeira, histórico** · `blog-backend` · M
+- [ ] **TEST-05 · Rotina diária, seasons, lixeira, histórico** · `blog-backend` · M — 🔎 **PR aberto em 28/11/2026, aguardando revisão:** PR #33 (56 testes, nenhum bug)
   - R-SEASON, R-TRASH, R-REV e cron (publica vencidos, restaurar agendado vencido vira
     rascunho, retoma envios).
 
-- [ ] **TEST-06 · Assinantes, públicos, comentários, vitrine** · `blog-backend` · M
+- [ ] **TEST-06 · Assinantes, públicos, comentários, vitrine** · `blog-backend` · M — 🔎 **PR aberto em 28/11/2026, aguardando revisão:** PR #36 (87 testes; bug: nome de público diferencia acento, contra a R-LIST-01; teste marcado `it.fails` até decidir entre migrar o índice ou mudar a regra)
   - R-SUB, R-LIST, R-COM, R-VIT, R-ENG, incluindo os limites de taxa.
 
-- [ ] **TEST-07 · Front: utilitários e editor** · `blog-front` · M
+- [ ] **TEST-07 · Front: utilitários e editor** · `blog-front` · M — 🔎 **PR aberto em 28/11/2026, aguardando revisão:** blog-front PR #35 (77 testes, nenhum bug)
   - `postStatus`, `campaignAudience`, `parseContacts`, `seasonProgress`, `share`.
   - Editor: não salva sem título/categoria/data do agendado; confirma antes de publicar com
     email; aviso de alterações não salvas.
@@ -272,7 +272,7 @@ Cada item cobre as regras do SISTEMA.md que ainda não ganharam teste nas fases 
 Itens anotados em paralelo, na `main`, durante o trabalho de SEO/IA. Regras de operação
 (deploy, npm 12 no lockfile, SEO/IA) estão em [OPERACAO.md](OPERACAO.md).
 
-- [ ] **OPS-01 · Uma fonte só para o FAQ do blog** · os dois · M
+- [ ] **OPS-01 · Uma fonte só para o FAQ do blog** · os dois · M — 🔎 **PR aberto em 28/11/2026, aguardando revisão:** PR #38 + blog-front PR #37 (`GET /api/site/faq`; o front usa a cópia de reserva se a API falhar; hash igual nos dois testes; deploy do backend primeiro)
   - O FAQ da home (`BLOG_FAQ`) e o de `/seasons` (`SEASONS_FAQ`) existem no front
     (`src/seo/site.js`, página e schema FAQPage) e numa cópia aqui (`app/config/siteFaq.js`,
     que alimenta o `/llms-full.txt`). Mudar um e esquecer o outro faz a IA ler um FAQ
@@ -393,10 +393,10 @@ consultar o Google, e os dados ficam num lugar só.
 - [x] **MAP-01 · Mapa de conteúdo no painel** · `blog-backend` + `blog-front` · M — feito em 24/11/2026 (mesma branch)
   - `/admin/mapa`: grafo de posts, tags e seasons + órfãos, links internos com problema e tags
     usadas uma vez. Regras R-MAP-01 a R-MAP-05 (SISTEMA.md, seção 20).
-- [ ] **SUG-02 · Contador de sugestões no resumo diário** · `blog-backend` · P
+- [ ] **SUG-02 · Contador de sugestões no resumo diário** · `blog-backend` · P — 🔎 **PR aberto em 28/11/2026, aguardando revisão:** PR #37 (R-SUG-09)
   - O email "[Blog] N pendência(s)" (`alerts.service`) passa a citar sugestões em Novas há mais
     de 7 dias. **Pronto quando:** sugestão parada aparece no resumo com o link do painel.
-- [ ] **MAP-02 · Sugestão de link interno no editor** · `blog-front` · M
+- [ ] **MAP-02 · Sugestão de link interno no editor** · `blog-front` · M — 🔎 **PR aberto em 28/11/2026, aguardando revisão:** PR #35 + blog-front PR #36 (`POST /api/content-map/suggestions`, R-MAP-06; deploy do backend primeiro)
   - No editor do post, listar posts com tags em comum que ainda não recebem link dele (usa
     `contentMap.service`). **Pronto quando:** o editor mostra até 5 sugestões e um clique
     insere o link no texto.
