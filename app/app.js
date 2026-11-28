@@ -107,6 +107,7 @@ app.use("/api/seasons", require("./routes/season.routes"));
 app.use("/api/clusters", require("./routes/cluster.routes"));
 app.use("/api/upload", uploadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/content-map", require("./routes/contentMap.routes"));
 app.use("/api/subscribers", subscriberRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/cron", cronRoutes);

@@ -865,7 +865,9 @@ precisar mudar a regra, mude ali (e o teste correspondente).
 - **R-API-02 Entrada:** toda rota que recebe dados declara o formato num esquema Zod
   (`app/validation/<área>.schemas.js`) e passa por `validate({ body, query })` antes do
   controller. Formato inválido = 422 `{ error }` em português (login: 400 "Dados
-  inválidos"); campo fora do esquema é descartado. O esquema cuida do **formato** (tipo,
+  inválidos"); campo fora do esquema é descartado (também na query: o `validate` troca `req.query` por
+  versão validada, com padrão e número do Zod; chave usada pelo controller precisa estar no
+  esquema). O esquema cuida do **formato** (tipo,
   tamanho, valores permitidos); o controller cuida da **regra** (agendado precisa de data,
   categoria existe, endereço livre). Rota nova sem esquema não passa na revisão.
   Peças comuns em `app/validation/fields.js` (`text`, `id`, `idList`, `categoryList`,
@@ -934,6 +936,11 @@ um post) ou `archived` (Arquivadas). Dá para voltar qualquer uma para Novas.
   post ("Sua sugestão virou post"). Só com o post publicado e **uma vez só** (`notifiedAt`).
 - **R-SUG-08** O autor do blog recebe email a cada sugestão nova; a sidebar mostra quantas
   estão em Novas.
+- **R-SUG-09** O resumo diário de pendências (email `[Blog] N pendência(s)`, `alerts.service`)
+  ganha um item "Sugestões paradas" quando há sugestão em **Novas há mais de 7 dias**
+  (`createdAt` anterior a 7 dias; outros status não contam). O item traz a contagem e o link
+  para `/admin/sugestoes`, conta como 1 pendência e sem sugestão parada o email não muda.
+  O resumo da manhã no Telegram usa outra fonte (`buildHoje`) e não inclui esse item.
 
 ---
 
@@ -975,6 +982,16 @@ seasons ficam só as usadas pelos posts visíveis. "Ver como lista" traz o mesmo
 - **R-MAP-05** O desenho é calculado no navegador, sem biblioteca (`graphLayout.js`): os
   mesmos dados dão sempre o mesmo desenho inicial. A conta é de todos contra todos, o que
   serve para centenas de posts; passando de ~1500 nós, trocar por d3-force (Barnes-Hut).
+- **R-MAP-06** **Sugestão de link interno no editor**: `POST /api/content-map/suggestions`
+  (só admin; corpo `{ postId?, tags, content }` validado por Zod) devolve até **5** posts para o
+  autor linkar. Entram só posts **publicados**, fora da lixeira, que dividem ao menos uma tag
+  com o post em edição, que não são o próprio post e que o texto **ainda não linka** (vale o
+  endereço atual e os antigos, como em R-MAP-02). Ordem: mais tags em comum e, empatando, o
+  publicado mais recente. A conta usa as **tags e o texto que estão no editor**, salvos ou
+  não (funciona em rascunho e em post novo); o servidor não grava nada. Cada item traz título,
+  slug, `url` (`https://blog.marck0101.com.br/blog/<slug>`) e as tags em comum. Um clique no
+  painel insere o link: o texto selecionado vira a âncora; sem seleção, entra uma frase
+  "Leia também: <título>" no fim do texto.
 
 ---
 

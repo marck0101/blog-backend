@@ -7,6 +7,17 @@ Formato livre, mais recente primeiro. Mudança de regra de negócio também vai 
 - Novo: `GET /api/site/faq` (público, cache 5 min no navegador e 1h na CDN) com `{ blog, seasons }`, vindo de `app/config/siteFaq.js` (o mesmo arquivo do `/llms-full.txt`).
 - Teste de contrato: hash do conteúdo pinado, igual ao do front. Ver `docs/OPERACAO.md`.
 
+## 28/11/2026 · MAP-02 · Sugestão de link interno
+
+- Novo: `POST /api/content-map/suggestions` (admin, Zod) devolve até 5 posts publicados com tag em comum que o texto do editor ainda não linka. Regra R-MAP-06 em `docs/SISTEMA.md`.
+- Testes: 401 sem login, validação, ordem (tags em comum, depois recência), limite de 5, exclusões, post novo sem id.
+
+## 28/11/2026 · Correção · validação da query no Express 5
+
+- Corrigido: `validate({ query })` não trocava `req.query` (no Express 5 é só leitura), então padrão, conversão e descarte de campo extra nunca chegavam ao controller; agora chegam. R-API-02 passa a valer para a query.
+- Esquemas de lista de assinantes e de envios ganham `sort` (senão a ordenação seria descartada).
+- Testes: padrão/número/campo extra na query, params e body, ordenação das listas.
+
 ## 27/11/2026 · Sprint R4 · Placar do conteúdo
 
 - Novo: Placar com `aberturas_email` e `cliques_email` (pessoas distintas por envio na semana, sem robôs), meta semanal editável como os demais. Agora são 12 números.
