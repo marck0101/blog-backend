@@ -982,6 +982,16 @@ seasons ficam só as usadas pelos posts visíveis. "Ver como lista" traz o mesmo
 - **R-MAP-05** O desenho é calculado no navegador, sem biblioteca (`graphLayout.js`): os
   mesmos dados dão sempre o mesmo desenho inicial. A conta é de todos contra todos, o que
   serve para centenas de posts; passando de ~1500 nós, trocar por d3-force (Barnes-Hut).
+- **R-MAP-06** **Sugestão de link interno no editor**: `POST /api/content-map/suggestions`
+  (só admin; corpo `{ postId?, tags, content }` validado por Zod) devolve até **5** posts para o
+  autor linkar. Entram só posts **publicados**, fora da lixeira, que dividem ao menos uma tag
+  com o post em edição, que não são o próprio post e que o texto **ainda não linka** (vale o
+  endereço atual e os antigos, como em R-MAP-02). Ordem: mais tags em comum e, empatando, o
+  publicado mais recente. A conta usa as **tags e o texto que estão no editor**, salvos ou
+  não (funciona em rascunho e em post novo); o servidor não grava nada. Cada item traz título,
+  slug, `url` (`https://blog.marck0101.com.br/blog/<slug>`) e as tags em comum. Um clique no
+  painel insere o link: o texto selecionado vira a âncora; sem seleção, entra uma frase
+  "Leia também: <título>" no fim do texto.
 
 ---
 
