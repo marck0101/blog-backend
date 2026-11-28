@@ -2,7 +2,12 @@
 
 Formato livre, mais recente primeiro. Mudança de regra de negócio também vai em `docs/SISTEMA.md`.
 
-## 27/11/2026 · Sprint R4 · Placar do conteúdo
+## 28/11/2026 · Correção · validação da query no Express 5
+
+- Corrigido: `validate({ query })` não trocava `req.query` (no Express 5 é só leitura), então padrão, conversão e descarte de campo extra nunca chegavam ao controller; agora chegam. R-API-02 passa a valer para a query.
+- Esquemas de lista de assinantes e de envios ganham `sort` (senão a ordenação seria descartada).
+- Testes: padrão/número/campo extra na query, params e body, ordenação das listas.
+ · Placar do conteúdo
 
 - Novo: Placar com `aberturas_email` e `cliques_email` (pessoas distintas por envio na semana, sem robôs), meta semanal editável como os demais. Agora são 12 números.
 - Decisão: pedido de pré-diagnóstico não é guardado no backend (WhatsApp/e-mail); a origem vai só como `[ref: blog-<slug>]` na mensagem e `origin_path` no GA4. Ver `docs/SISTEMA.md` §24.

@@ -865,7 +865,9 @@ precisar mudar a regra, mude ali (e o teste correspondente).
 - **R-API-02 Entrada:** toda rota que recebe dados declara o formato num esquema Zod
   (`app/validation/<área>.schemas.js`) e passa por `validate({ body, query })` antes do
   controller. Formato inválido = 422 `{ error }` em português (login: 400 "Dados
-  inválidos"); campo fora do esquema é descartado. O esquema cuida do **formato** (tipo,
+  inválidos"); campo fora do esquema é descartado (também na query: o `validate` troca `req.query` por
+  versão validada, com padrão e número do Zod; chave usada pelo controller precisa estar no
+  esquema). O esquema cuida do **formato** (tipo,
   tamanho, valores permitidos); o controller cuida da **regra** (agendado precisa de data,
   categoria existe, endereço livre). Rota nova sem esquema não passa na revisão.
   Peças comuns em `app/validation/fields.js` (`text`, `id`, `idList`, `categoryList`,
