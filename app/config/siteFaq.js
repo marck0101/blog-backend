@@ -1,6 +1,8 @@
-// FAQ do blog para o llms-full.txt (arquivo para IA).
-// CÓPIA de BLOG_FAQ e SEASONS_FAQ do front (Front Admin/blog-panel/src/seo/site.js),
-// que aparecem na home e em /seasons (com schema FAQPage). Mudou lá? Mude aqui também.
+// FONTE ÚNICA do FAQ do blog (OPS-01): home (BLOG_FAQ) e /seasons (SEASONS_FAQ).
+// Sai por GET /api/site/faq (front: página, schema FAQPage e prerender) e alimenta o
+// /llms-full.txt. O front guarda uma cópia só como reserva (se a API cair) e um teste
+// de contrato nos dois repositórios trava o hash do conteúdo: mudou o texto aqui,
+// atualize a reserva em src/seo/site.js do front e o hash nos dois testes.
 module.exports = {
   BLOG_FAQ: [
     {

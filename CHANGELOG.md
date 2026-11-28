@@ -2,6 +2,11 @@
 
 Formato livre, mais recente primeiro. Mudança de regra de negócio também vai em `docs/SISTEMA.md`.
 
+## 28/11/2026 · OPS-01 · FAQ em fonte única
+
+- Novo: `GET /api/site/faq` (público, cache 5 min no navegador e 1h na CDN) com `{ blog, seasons }`, vindo de `app/config/siteFaq.js` (o mesmo arquivo do `/llms-full.txt`).
+- Teste de contrato: hash do conteúdo pinado, igual ao do front. Ver `docs/OPERACAO.md`.
+
 ## 27/11/2026 · Sprint R4 · Placar do conteúdo
 
 - Novo: Placar com `aberturas_email` e `cliques_email` (pessoas distintas por envio na semana, sem robôs), meta semanal editável como os demais. Agora são 12 números.

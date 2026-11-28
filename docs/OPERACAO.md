@@ -33,9 +33,14 @@ do front ficam em `Front Admin/blog-panel/docs/OPERACAO.md`.
 - Só entra conteúdo público: post publicado e fora da lixeira, season com ao
   menos um episódio publicado. Qualquer campo novo nesses arquivos precisa
   respeitar o mesmo filtro.
-- `app/config/siteFaq.js` é **cópia** do FAQ da home e de `/seasons` que está
-  no front (`src/seo/site.js`). Mudou lá, mude aqui no mesmo dia (ver
-  backlog: "Uma fonte só para o FAQ do blog").
+- `app/config/siteFaq.js` é a **fonte única** do FAQ da home e de `/seasons`
+  (OPS-01). Sai em `GET /api/site/faq` (público, CDN 1h) e alimenta o
+  `/llms-full.txt`. O front lê daí na página, no schema FAQPage e no prerender,
+  e guarda uma cópia só como reserva se a API falhar. Para mudar o texto:
+  1) edite `siteFaq.js`; 2) copie para `BLOG_FAQ`/`SEASONS_FAQ` em
+  `src/seo/site.js` do front; 3) atualize `FAQ_HASH` em
+  `tests/site/faq.test.mjs` (aqui) e em `src/seo/site.test.js` (front) com o
+  mesmo valor. Esquecer qualquer passo derruba um teste. Deploy: API primeiro.
 
 ## Segurança (regras do painel e dos comentários)
 
