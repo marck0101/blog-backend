@@ -6,7 +6,7 @@ const require = createRequire(import.meta.url);
 const { runDailyJobs } = require("../../app/services/scheduler.service");
 const { collectAlerts } = require("../../app/services/alerts.service");
 const LinkedInAccount = require("../../app/models/linkedinAccount.model");
-const { BlogPost, Campaign, Subscriber } = models;
+const { BlogPost, Campaign, Subscriber, Suggestion } = models;
 
 const DAY = 24 * 60 * 60 * 1000;
 const titles = (alerts) => alerts.map((a) => a.title);
@@ -144,6 +144,59 @@ describe("alertas (SEC-07)", () => {
 
     await createPost({ status: "planned", plannedAt: new Date(Date.now() + 12 * DAY) });
     expect(titles(await collectAlerts())).not.toContain("Fila de posts curta");
+  });
+
+  describe("sugestões paradas (R-SUG-09)", () => {
+    const stale = "Sugestões paradas";
+    const sugestao = async (daysAgo, extra = {}) => {
+      const s = await Suggestion.create({ category: "design", message: "Uma ideia", email: `${Math.random()}@x.dev`, ...extra });
+      // createdAt é imutável no mongoose: grava direto na coleção
+      await Suggestion.collection.updateOne({ _id: s._id }, { $set: { createdAt: new Date(Date.now() - daysAgo * DAY) } });
+      return s;
+    };
+
+    it("em Novas há mais de 7 dias: aparece com o link do painel", async () => {
+      await sugestao(8);
+      const item = (await collectAlerts()).find((a) => a.title === stale);
+      expect(item).toBeTruthy();
+      expect(item.level).toBe("atenção");
+      expect(item.detail).toContain("1 sugestão");
+      expect(item.url).toMatch(/\/admin\/sugestoes$/);
+    });
+
+    it("até 7 dias ou outro status: não aparece", async () => {
+      await sugestao(6);
+      await sugestao(30, { status: "planned" });
+      await sugestao(30, { status: "done" });
+      await sugestao(30, { status: "archived" });
+      expect(titles(await collectAlerts())).not.toContain(stale);
+    });
+
+    it("a contagem reflete N e vira um item só", async () => {
+      await sugestao(8);
+      await sugestao(20);
+      await sugestao(10);
+      await sugestao(2);
+      const items = (await collectAlerts()).filter((a) => a.title === stale);
+      expect(items).toHaveLength(1);
+      expect(items[0].detail).toContain("3 sugestão");
+    });
+
+    it("o email cita a sugestão parada com o link; sem ela o email some", async () => {
+      Object.assign(process.env, { GMAIL_USER: "blog@teste.dev", GMAIL_APP_PASSWORD: "x", ADMIN_EMAIL: "eu@teste.dev" });
+      await sugestao(9);
+      const summary = await runDailyJobs();
+      expect(summary.alertEmail).toBe(true);
+      const mail = transporter.sendMail.mock.calls.map((c) => c[0]).find((m) => m.to === "eu@teste.dev");
+      expect(mail.subject).toMatch(/^\[Blog\] 1 pendência/);
+      expect(mail.html).toContain(stale);
+      expect(mail.html).toContain("/admin/sugestoes");
+    });
+
+    it("sem sugestão parada: o resumo continua sem alerta", async () => {
+      await sugestao(3);
+      expect(await collectAlerts()).toEqual([]);
+    });
   });
 
   it("sem email configurado: a rotina segue, só não manda", async () => {

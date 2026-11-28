@@ -936,6 +936,11 @@ um post) ou `archived` (Arquivadas). Dá para voltar qualquer uma para Novas.
   post ("Sua sugestão virou post"). Só com o post publicado e **uma vez só** (`notifiedAt`).
 - **R-SUG-08** O autor do blog recebe email a cada sugestão nova; a sidebar mostra quantas
   estão em Novas.
+- **R-SUG-09** O resumo diário de pendências (email `[Blog] N pendência(s)`, `alerts.service`)
+  ganha um item "Sugestões paradas" quando há sugestão em **Novas há mais de 7 dias**
+  (`createdAt` anterior a 7 dias; outros status não contam). O item traz a contagem e o link
+  para `/admin/sugestoes`, conta como 1 pendência e sem sugestão parada o email não muda.
+  O resumo da manhã no Telegram usa outra fonte (`buildHoje`) e não inclui esse item.
 
 ---
 
