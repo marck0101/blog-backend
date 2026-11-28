@@ -3,6 +3,7 @@ const router = express.Router();
 const connectDB = require("../config/db.config");
 const auth = require("../middlewares/auth.middleware");
 const linkedin = require("../services/linkedin.service");
+const audit = require("../services/audit.service");
 const { z } = require("zod");
 const { validate } = require("../validation/validate");
 
@@ -65,6 +66,7 @@ router.post("/posts/:id/share", auth, validate({ body: shareBody }), async (req,
   try {
     await connectDB();
     const result = await linkedin.retryShare(req.params.id, { force: req.body.force === true });
+    await audit.record(req, "linkedin.share", { type: "post", id: req.params.id }, { force: req.body.force === true });
     res.json(result);
   } catch (err) {
     if (err.status) {

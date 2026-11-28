@@ -24,6 +24,7 @@ const resetPasswordEmail = require("../templates/resetPassword.email");
 const { str } = require("../utils/sanitize");
 const { FRONTEND_URL } = require("../config/urls");
 const limiter = require("../services/ratelimit.service");
+const audit = require("../services/audit.service");
 const jwt = require("jsonwebtoken");
 const { validate } = require("../validation/validate");
 const { loginBody, forgotBody, resetBody, codeBody } = require("../validation/auth.schemas");
@@ -113,6 +114,11 @@ function secretUnreadable(res) {
   );
 }
 
+// Registro de auditoria do login (SEC-09). Falha: ninguém identificado, só o motivo.
+const loginOk = (req, user, method, extra = {}) =>
+  audit.record(req, "auth.login_success", { type: "auth" }, { method, ...extra }, { id: user._id, email: user.email });
+const loginFail = (req, reason, method) => audit.record(req, "auth.login_failure", { type: "auth" }, { method, reason });
+
 function finishLogin(res, user) {
   clearPendingCookie(res);
   setSessionCookie(res, user);
@@ -143,6 +149,7 @@ router.post("/login", requireAllowedOrigin, validate({ body: loginBody }, { stat
 
     if (!passwordMatch) {
       await limiter.hit("login", req, LOGIN_WINDOW_MIN);
+      await loginFail(req, "credenciais", "password");
       return res.status(401).json(errorBody("Credenciais inválidas"));
     }
 
@@ -150,6 +157,7 @@ router.post("/login", requireAllowedOrigin, validate({ body: loginBody }, { stat
 
     if (skip2fa()) {
       finishLogin(res, user);
+      await loginOk(req, user, "password", { skip2fa: true });
       return res.json({ next: "done", user: publicUser(user) });
     }
 
@@ -186,12 +194,14 @@ router.get("/google/callback", async (req, res) => {
     const user = await User.findOne({ email: profile.email }).select("+googleSub");
     if (!user || !user.active || user.role !== "admin") {
       console.warn("[AUTH] Google: conta sem acesso ao painel:", profile.email);
+      await loginFail(req, "conta_sem_acesso", "google");
       return loginRedirect(res, { error: "google-account" });
     }
 
     // Primeiro login com Google vincula a conta; depois, só a mesma conta entra
     if (user.googleSub && user.googleSub !== profile.sub) {
       console.warn("[AUTH] Google: sub diferente do vinculado para", profile.email);
+      await loginFail(req, "conta_diferente", "google");
       return loginRedirect(res, { error: "google-account" });
     }
     if (!user.googleSub) {
@@ -200,6 +210,7 @@ router.get("/google/callback", async (req, res) => {
 
     if (skip2fa()) {
       finishLogin(res, user);
+      await loginOk(req, user, "google", { skip2fa: true });
       return res.redirect(`${FRONTEND_URL}/admin`);
     }
 
@@ -264,6 +275,7 @@ router.post("/2fa/enable", requireAllowedOrigin, validate({ body: codeBody }, { 
     const step = verifyTotp(await userSecret(user, "pendingSecret"), req.body.code);
     if (step === null) {
       await limiter.hit("mfa", req, MFA_WINDOW_MIN);
+      await loginFail(req, "codigo_2fa", pending.method);
       return res.status(401).json(errorBody("Código incorreto. Confira o horário do celular e tente o código atual."));
     }
 
@@ -283,6 +295,7 @@ router.post("/2fa/enable", requireAllowedOrigin, validate({ body: codeBody }, { 
     await limiter.reset("mfa", req);
 
     finishLogin(res, user);
+    await loginOk(req, user, pending.method, { firstSetup: true });
     res.set("Cache-Control", "no-store");
     return res.json({ user: publicUser(user), recoveryCodes: codes });
   } catch (err) {
@@ -330,11 +343,13 @@ router.post("/2fa/verify", requireAllowedOrigin, validate({ body: codeBody }, { 
 
     if (!accepted) {
       await limiter.hit("mfa", req, MFA_WINDOW_MIN);
+      await loginFail(req, "codigo_2fa", pending.method);
       return res.status(401).json(errorBody("Código incorreto"));
     }
 
     await limiter.reset("mfa", req);
     finishLogin(res, user);
+    await loginOk(req, user, pending.method, { recovery: usedRecovery });
     const left = usedRecovery ? user.mfa.recoveryCodes.length - 1 : undefined;
     return res.json({ user: publicUser(user), recoveryCodesLeft: left });
   } catch (err) {

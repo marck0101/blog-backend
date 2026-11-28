@@ -2,6 +2,13 @@
 
 Formato livre, mais recente primeiro. Mudança de regra de negócio também vai em `docs/SISTEMA.md`.
 
+## 28/11/2026 · SEC-09 · Registro de ações do admin
+
+- Novo: coleção `adminauditlogs` (expira em 365 dias) e serviço `audit.record` que nunca lança. Registra publicar/tirar do ar, lixeira, restaurar, excluir de vez, envio e reenvio de falhas, plano/status e exclusão de assinante (só o id), exclusão de season, LinkedIn manual e login (sucesso/falha).
+- Novo: `GET /api/admin/audit` (login, paginado, filtros `action`, `from`, `to`). Sem tela ainda.
+- Decisões: IP em HMAC curto, nunca email de assinante nem do login que falhou, nenhum token/código. Regras R-AUD-01..07 em `docs/SISTEMA.md` §25.
+- Testes: uma entrada por ação, falha do registro não derruba a ação, email de assinante não é gravado, índice TTL, endpoint (login, paginação, filtros).
+
 ## 27/11/2026 · Sprint R4 · Placar do conteúdo
 
 - Novo: Placar com `aberturas_email` e `cliques_email` (pessoas distintas por envio na semana, sem robôs), meta semanal editável como os demais. Agora são 12 números.

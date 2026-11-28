@@ -10,6 +10,7 @@ const { recordUnsubscribe } = require("../services/tracking.service");
 const { str, escapeRegex } = require("../utils/sanitize");
 const { COLLATION_PT, pickSort, sortedFind } = require("../utils/listSort");
 const limiter = require("../services/ratelimit.service");
+const audit = require("../services/audit.service");
 const { FRONTEND_URL } = require("../config/urls");
 const { dayRangeFilter } = require("../utils/dates");
 const { categoriesError } = require("../utils/validators");
@@ -275,6 +276,7 @@ exports.remove = async (req, res, next) => {
     // "Excluir" na caixinha, R-SUG-06)
     await Suggestion.updateMany({ subscriber: subscriber._id }, { $set: { subscriber: null } });
 
+    await audit.record(req, "subscriber.delete", { type: "subscriber", id: subscriber._id });
     res.json({ message: "Assinante removido com sucesso" });
   } catch (err) {
     next(err);
@@ -307,6 +309,11 @@ exports.update = async (req, res, next) => {
 
     if (!subscriber) {
       return res.status(404).json({ error: "Assinante não encontrado" });
+    }
+
+    // Só mudança de plano ou de status entra (nome/notas não); assinante: só o id, sem email
+    if (tier !== undefined || rest.status !== undefined) {
+      await audit.record(req, "subscriber.update", { type: "subscriber", id: subscriber._id }, { tier, status: rest.status });
     }
 
     res.json(subscriber);
