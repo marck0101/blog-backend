@@ -70,6 +70,7 @@ const listQuery = z.object({
   dateTo: text(20).optional(),
   page: text(10).optional(),
   limit: text(10).optional(),
+  sort: text(30).optional(),
 });
 
 module.exports = { subscribeBody, unsubscribeBody, manualBody, updateBody, listQuery };

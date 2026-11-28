@@ -13,6 +13,7 @@ const trackingRoutes = require("./routes/tracking.routes");
 const metricsRoutes = require("./routes/metrics.routes");
 const sitemapRoutes = require("./routes/sitemap.routes");
 const CATEGORIES = require("./config/categories");
+const SITE_FAQ = require("./config/siteFaq");
 const allowedOrigins = require("./config/origins");
 
 const app = express();
@@ -93,6 +94,12 @@ app.get("/api/categories", (req, res) => {
   res.json(CATEGORIES);
 });
 
+// FAQ da home e de /seasons: o texto mora em app/config/siteFaq.js e o front (página,
+// schema FAQPage e prerender) lê daqui. Muda só com deploy: navegador 5 min, CDN 1h.
+app.get("/api/site/faq", (req, res) => {
+  res.set("Cache-Control", "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400");
+  res.json({ blog: SITE_FAQ.BLOG_FAQ, seasons: SITE_FAQ.SEASONS_FAQ });
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", blogpostRoutes);
@@ -100,6 +107,7 @@ app.use("/api/seasons", require("./routes/season.routes"));
 app.use("/api/clusters", require("./routes/cluster.routes"));
 app.use("/api/upload", uploadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/content-map", require("./routes/contentMap.routes"));
 app.use("/api/subscribers", subscriberRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/cron", cronRoutes);
