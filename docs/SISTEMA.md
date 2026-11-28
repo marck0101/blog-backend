@@ -1114,3 +1114,9 @@ Fluxo: o site busca a lista uma vez, e **só depois do consentimento de cookies*
 **R-PLACAR-02.** Leituras (`PostDailyStat.views`) e inscritos novos já existiam no Placar e não mudaram. A fonte de leituras é a contagem própria do blog, não o GA4.
 **R-PLACAR-03.** Pedidos de pré-diagnóstico **não** são guardados no backend: o pedido acontece por WhatsApp ou e-mail, fora do sistema. A origem (post) viaja só no texto da mensagem (`[ref: blog-<slug>]`) e no evento GA4 `origin_path`; por isso não há "pedidos por post" no Placar (decisão: não inventar armazenamento de dado pessoal). A leitura por post fica no GA4 (evento `pre_diagnostico_cta`, dimensão `origin_path`).
 **R-PLACAR-04.** Números do Search Console (impressões, cliques, posição) aparecem no painel como "Search Console: aguardando acesso", sem valor. Quando houver acesso, entram como retratos semanais pela rota de ingestão do Cockpit (`source` nova + chaves em `app/config/cockpit.js`).
+
+## 25. FAQ do blog em fonte única (OPS-01)
+
+**R-FAQ-01.** O FAQ da home (`BLOG_FAQ`) e o de `/seasons` (`SEASONS_FAQ`) têm um dono só: `app/config/siteFaq.js`. Ele alimenta o `/llms-full.txt` e o endpoint público `GET /api/site/faq` (`{ blog, seasons }`, cache de 1h na CDN).
+**R-FAQ-02.** O front lê o endpoint na página, no schema FAQPage e no prerender. Se a API falhar ou responder fora do formato, vale a reserva embutida no front (`src/seo/site.js`), então a página e o schema nunca ficam sem FAQ.
+**R-FAQ-03.** Um teste de contrato nos dois repositórios trava o hash do conteúdo (`FAQ_HASH`). Mudar o texto exige atualizar a reserva do front e o hash nos dois testes. Texto do FAQ segue a regra de cópia: "negócios locais", nunca pequeno/grande/PME.
