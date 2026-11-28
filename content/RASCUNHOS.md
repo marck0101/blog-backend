@@ -35,8 +35,9 @@ Rascunhos prontos, sem [A COMPLETAR] e sem data no post.json (`plannedAt: null`)
 | follow-up-de-orcamento-pelo-whatsapp | follow-up | engenharia-no-marketing | follow-up de orçamento pelo WhatsApp |
 | quanto-investir-em-anuncio-no-primeiro-mes | trafego | trafego-pago-medido | quanto investir em anúncio no primeiro mês |
 | reativar-clientes-antigos-pelo-whatsapp | reativacao | engenharia-no-marketing | reativar clientes antigos pelo WhatsApp |
+| como-deixar-o-site-mais-rapido-no-celular | performance | site-rapido-e-encontravel | como deixar o site mais rápido no celular |
 
-Os 7 estão escritos (os 4 últimos em 27/11, PR seguinte ao #29).
+Os 8 estão escritos (os 4 últimos em 27/11, PR seguinte ao #29; o de performance em 28/11), um por serviço do catálogo. Ainda sem data na agenda abaixo.
 
 **Agenda proposta** (aplicar no painel, no calendário; a ordem relativa dos posts já agendados não muda):
 
