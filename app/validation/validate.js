@@ -36,6 +36,18 @@ z.config({
   },
 });
 
+// No Express 5 `req.query` é só um getter (atribuir é ignorado em silêncio):
+// sem isto o controller veria a query crua (sem padrão, sem número, com campo
+// extra). Redefine a propriedade na própria requisição. params e body são
+// propriedades comuns e aceitam atribuição.
+function setPart(req, part, value) {
+  if (part === "query") {
+    Object.defineProperty(req, "query", { value, writable: true, configurable: true, enumerable: true });
+  } else {
+    req[part] = value;
+  }
+}
+
 /**
  * status: código da resposta quando o formato não serve. Padrão 422; as rotas
  * de login usam 400 "Dados inválidos" (contrato coberto por tests/security).
@@ -46,7 +58,7 @@ function validate(schemas, { status = 422 } = {}) {
       if (!schemas[part]) continue;
       const result = schemas[part].safeParse(req[part] ?? {});
       if (!result.success) return res.status(status).json({ error: result.error.issues[0].message });
-      req[part] = result.data;
+      setPart(req, part, result.data);
     }
     next();
   };
