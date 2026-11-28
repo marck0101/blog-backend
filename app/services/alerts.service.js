@@ -1,5 +1,6 @@
 const BlogPost = require("../models/blogpost.model");
 const Campaign = require("../models/campaign.model");
+const Suggestion = require("../models/suggestion.model");
 const transporter = require("../config/mailer");
 const alertsEmail = require("../templates/alerts.email");
 const { getStatus: linkedinStatus } = require("./linkedin.service");
@@ -18,6 +19,8 @@ const LINKEDIN_WARN_DAYS = 7;
 // Calendário editorial: pelo menos 2 agendados nas próximas 2 semanas (1 por semana)
 const QUEUE_DAYS = 14;
 const QUEUE_MIN = 2;
+// Sugestão em Novas há mais de 7 dias entra no resumo (R-SUG-09)
+const SUGGESTION_STALE_DAYS = 7;
 
 const panel = (path) => `${FRONTEND_URL}${path}`;
 
@@ -100,6 +103,20 @@ async function collectAlerts(summary = {}, now = new Date()) {
     );
   }
 
+  // 9. Sugestões paradas em Novas há mais de 7 dias (R-SUG-09): um item só, com a contagem
+  const staleSuggestions = await Suggestion.countDocuments({
+    status: "new",
+    createdAt: { $lt: new Date(now.getTime() - SUGGESTION_STALE_DAYS * DAY_MS) },
+  });
+  if (staleSuggestions > 0) {
+    add(
+      "atenção",
+      "Sugestões paradas",
+      `${staleSuggestions} sugestão(ões) em Novas há mais de ${SUGGESTION_STALE_DAYS} dias. Responda, planeje ou arquive.`,
+      panel("/admin/sugestoes")
+    );
+  }
+
   return alerts;
 }
 
@@ -118,4 +135,4 @@ async function sendAlerts(alerts) {
   return true;
 }
 
-module.exports = { collectAlerts, sendAlerts, LINKEDIN_WARN_DAYS, QUEUE_DAYS, QUEUE_MIN };
+module.exports = { collectAlerts, sendAlerts, LINKEDIN_WARN_DAYS, QUEUE_DAYS, QUEUE_MIN, SUGGESTION_STALE_DAYS };
