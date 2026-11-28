@@ -5,6 +5,7 @@ const Campaign = require("../models/campaign.model");
 const User = require("../models/user.model");
 const Subscriber = require("../models/subscriber.model");
 const campaignService = require("../services/campaign.service");
+const audit = require("../services/audit.service");
 const { SITE_URL } = require("../config/urls");
 const { calendarRange } = require("../utils/calendarRange");
 const { sanitizeHtml } = require("../utils/sanitizeHtml");
@@ -334,6 +335,7 @@ exports.send = async (req, res, next) => {
       return res.json(serialize(campaign, { withRecipients: true }));
     }
 
+    let startedNow = null;
     if (campaign.status === "draft") {
       if (!campaign.subject?.trim() || !campaign.content?.trim()) {
         return res.status(422).json({ error: "Preencha assunto e conteúdo antes de enviar" });
@@ -345,8 +347,11 @@ exports.send = async (req, res, next) => {
       if (count === 0) {
         return res.status(422).json({ error: "Nenhum assinante ativo neste público" });
       }
+      startedNow = count;
     }
 
+    // Só o 1º lote conta: o painel chama /send de novo a cada lote
+    if (startedNow !== null) await audit.record(req, "campaign.send", { type: "campaign", id: campaign._id, label: campaign.subject }, { audienceSize: startedNow });
     await campaignService.processCampaign(campaign);
     res.json(serialize(campaign, { withRecipients: true }));
   } catch (err) {
@@ -425,6 +430,7 @@ exports.retryFailed = async (req, res, next) => {
     campaign.sentAt = undefined;
     campaign.markModified("recipients");
     await campaign.save();
+    await audit.record(req, "campaign.retry", { type: "campaign", id: campaign._id, label: campaign.subject }, { failed: failed.length });
 
     res.json(serialize(campaign, { withRecipients: true }));
   } catch (err) {

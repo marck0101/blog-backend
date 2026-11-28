@@ -4,6 +4,7 @@ const Comment = require("../../models/comment.model");
 const Campaign = require("../../models/campaign.model");
 const PostDailyStat = require("../../models/postDailyStat.model");
 const revisions = require("../../services/postRevision.service");
+const audit = require("../../services/audit.service");
 const { seasonExists } = require("../../services/season.service");
 const { pingPost } = require("../../services/indexnow.service");
 const { str, escapeRegex } = require("../../utils/sanitize");
@@ -71,6 +72,7 @@ exports.create = async (req, res, next) => {
 
     if (post.status === "published") {
       await announcePost(post);
+      await audit.recordPostStatus(req, null, post);
     }
 
     res.status(201).json(await withRelatedForEditor(post));
@@ -214,6 +216,7 @@ exports.update = async (req, res, next) => {
     await rememberOldSlug(post._id, existing?.slug, post.slug);
     await revisions.safeRecordRevision(post, { author: revisionAuthor(req) });
 
+    await audit.recordPostStatus(req, existing, post);
     if (post.status === "published" && existing?.status !== "published") {
       await announcePost(post);
     } else if (post.status === "published" || existing?.status === "published") {
@@ -276,6 +279,7 @@ exports.softDelete = async (req, res, next) => {
 
     // A URL passa a dar 404: avisa para sair do índice mais rápido
     if (post.published) await pingPost(post);
+    await audit.record(req, "post.trash", { type: "post", id: post._id, label: post.slug });
 
     res.json(post);
   } catch (err) {
@@ -305,6 +309,7 @@ exports.restore = async (req, res, next) => {
     if (!post) {
       return res.status(404).json({ error: "Post não encontrado" });
     }
+    await audit.record(req, "post.restore", { type: "post", id: post._id, label: post.slug });
 
     res.json(post);
   } catch (err) {
@@ -355,6 +360,7 @@ exports.deletePermanent = async (req, res, next) => {
       Campaign.updateMany({ post: post._id }, { $set: { post: null } }, { timestamps: false }),
     ]);
 
+    await audit.record(req, "post.delete_permanent", { type: "post", id: post._id, label: post.slug });
     res.json({ message: "Post removido definitivamente" });
   } catch (err) {
     next(err);

@@ -4,6 +4,7 @@ const Season = require("../models/season.model");
 const BlogPost = require("../models/blogpost.model");
 const { ensureDefaultSeasons } = require("../services/season.service");
 const { str } = require("../utils/sanitize");
+const audit = require("../services/audit.service");
 const { readingMinutes, withReadingMinutes } = require("../utils/readingTime");
 
 // Campos de episódio que o leitor vê (lista de permitidos, como nos posts)
@@ -220,6 +221,7 @@ exports.remove = async (req, res, next) => {
     }
 
     await season.deleteOne();
+    await audit.record(req, "season.delete", { type: "season", id: season._id, label: season.slug });
     res.json({ ok: true });
   } catch (err) {
     next(err);

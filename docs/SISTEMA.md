@@ -676,6 +676,7 @@ Olhe nesta ordem, 7 e 30 dias depois da publicação:
   5/15 min, esqueci a senha 5/h, inscrição 5/30 min, comentário 5/10 min, engajamento
   60/10 min.
 - "Esqueci a senha" responde igual para email existente ou não; token vale 1 h.
+- **Registro de ações do admin** (SEC-09, seção 25): publicar, lixeira, exclusão definitiva, envios, plano/exclusão de assinante, season, LinkedIn manual e login (sucesso e falha), por 365 dias, sem dado pessoal de assinante e com IP em hash. Consulta: `GET /api/admin/audit`.
 
 ### Entrada de dados
 - HTML de posts e envios limpo ao salvar e de novo ao exibir (seção 2.5).
@@ -1120,3 +1121,15 @@ Fluxo: o site busca a lista uma vez, e **só depois do consentimento de cookies*
 **R-FAQ-01.** O FAQ da home (`BLOG_FAQ`) e o de `/seasons` (`SEASONS_FAQ`) têm um dono só: `app/config/siteFaq.js`. Ele alimenta o `/llms-full.txt` e o endpoint público `GET /api/site/faq` (`{ blog, seasons }`, cache de 1h na CDN).
 **R-FAQ-02.** O front lê o endpoint na página, no schema FAQPage e no prerender. Se a API falhar ou responder fora do formato, vale a reserva embutida no front (`src/seo/site.js`), então a página e o schema nunca ficam sem FAQ.
 **R-FAQ-03.** Um teste de contrato nos dois repositórios trava o hash do conteúdo (`FAQ_HASH`). Mudar o texto exige atualizar a reserva do front e o hash nos dois testes. Texto do FAQ segue a regra de cópia: "negócios locais", nunca pequeno/grande/PME.
+
+## 26. Registro de ações do admin (SEC-09)
+
+Coleção `adminauditlogs` (`app/models/adminAuditLog.model.js`), gravada por `app/services/audit.service.js`. Serve para saber quem fez o quê e quando (outro autor no futuro, ou conta invadida). Registra **a ação, nunca o conteúdo**.
+
+**R-AUD-01.** Ações registradas: `post.publish`, `post.unpublish`, `post.trash`, `post.restore`, `post.delete_permanent`, `campaign.send` (só o 1º lote, com `audienceSize`), `campaign.retry` (`failed`), `subscriber.update` (só mudança de plano `tier` ou `status`), `subscriber.delete`, `season.delete`, `linkedin.share` (publicação manual), `auth.login_success` e `auth.login_failure` (senha errada, 2º fator errado, conta Google sem acesso). Só ação que deu certo entra (exceto falha de login). Publicar/tirar do ar vale ao criar ou editar com mudança de status pelo painel; a rotina automática (cron) não é ação do admin e não entra.
+**R-AUD-02.** Gravar o registro **nunca lança**: se o banco falhar, o erro vai para o log do servidor (`[AUDIT]`) e a ação do admin segue normalmente. Em contrapartida, uma ação pode ficar sem registro nessa falha.
+**R-AUD-03.** Cada entrada guarda: `action`, `actor` (`userId` e `email` do admin logado; vazio em falha de login), `target` (`type`, `id` e `label` curto de até 120 caracteres: slug do post, assunto do envio, slug da season), `ipHash`, `userAgent` (até 120 caracteres), `at` e `meta` (até 10 chaves, só número, booleano ou texto de até 80 caracteres).
+**R-AUD-04.** Dado pessoal mínimo (LGPD): **assinante só por id**, nunca email nem nome (o id deixa de apontar para alguém quando o cadastro é excluído, R-SUB-07). Nunca entram token, senha, cookie, código do 2º fator, conteúdo de post ou de envio, nem o email digitado em login que falhou. O serviço descarta chaves de `meta` com nome sensível (`token`, `password`, `secret`, `email`, `name`...).
+**R-AUD-05.** O IP não é gravado: vira `ipHash`, HMAC-SHA256 (chave `JWT_SECRET`) cortado em 16 hexadecimais. Dá para comparar com um IP conhecido (calcular o mesmo hash), não para ler o IP. Trocar `JWT_SECRET` invalida a comparação com entradas antigas.
+**R-AUD-06.** Entradas expiram sozinhas **365 dias** depois (índice TTL em `at`). Não há rota para editar ou apagar entradas.
+**R-AUD-07.** `GET /api/admin/audit` (login do painel): `page` (padrão 1), `limit` (1 a 100, padrão 20), `action` (uma das ações acima) e `from`/`to` (`AAAA-MM-DD`, dias inteiros em Brasília). Do mais novo para o mais antigo. Resposta `{ entries, total, page, totalPages }`. Parâmetro inválido: 422. Sem tela no painel ainda (próximo passo: página `/admin/auditoria` no blog-front).
