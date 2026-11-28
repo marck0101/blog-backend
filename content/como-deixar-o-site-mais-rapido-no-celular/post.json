@@ -1,0 +1,34 @@
+{
+  "title": "Como deixar o site mais rápido no celular: o que corrigir primeiro",
+  "slug": "como-deixar-o-site-mais-rapido-no-celular",
+  "excerpt": "O cliente clica, o site demora e ele fecha. Veja como medir, o que corrigir primeiro e quando otimizar ou refazer para deixar o site rápido no celular.",
+  "category": "tecnologia",
+  "cluster": "site-rapido-e-encontravel",
+  "isPillar": false,
+  "tags": ["site rápido no celular", "pagespeed", "core web vitals", "performance web", "negócios locais"],
+  "directAnswer": "Para deixar o site mais rápido no celular, meça as páginas principais no PageSpeed Insights, anote o antes e corrija na ordem do peso: imagens, fontes e códigos de terceiros. Use LCP até 2,5 s, INP até 200 ms e CLS até 0,1 como referência. Refaça o site só se o problema for estrutural, e meça todo mês.",
+  "file": "content.html",
+  "plannedAt": null,
+  "faq": [
+    {
+      "question": "Site lento: otimizar ou refazer?",
+      "answer": "Na maioria das vezes, otimizar. Se o peso está em imagens, fontes e códigos de terceiros, as correções pontuais resolvem. Refazer só compensa quando o problema é estrutural, como um tema que carrega centenas de arquivos impossíveis de remover. Peça o diagnóstico antes de decidir."
+    },
+    {
+      "question": "Site lento atrapalha o Google e os anúncios?",
+      "answer": "O Google diz que os Core Web Vitals são usados pelos sistemas de classificação e ajudam no sucesso na Busca, sem garantir posição, porque o conteúdo relevante pesa mais. Nos anúncios, o efeito é prático: o clique é cobrado e, se a página demora, a pessoa pode fechar antes de ver a oferta."
+    },
+    {
+      "question": "Como saber se meu site está lento no celular?",
+      "answer": "Abra o PageSpeed Insights, informe o endereço de 3 a 5 páginas importantes e leia o resultado no celular. Rode mais de uma vez, anote a nota e a data. Compare LCP, INP e CLS com as referências de bom do Google: 2,5 s, 200 ms e 0,1."
+    },
+    {
+      "question": "Quanto tempo leva para deixar o site rápido?",
+      "answer": "Depende do que pesa. Imagens e códigos de terceiros costumam ser corrigidos em pouco tempo, enquanto problema de arquitetura exige mais trabalho. O diagnóstico mostra o tamanho do serviço. Depois, mantenha a medição mensal para a lentidão não voltar."
+    },
+    {
+      "question": "Quanto custa deixar o site rápido?",
+      "answer": "O valor depende do diagnóstico, por isso o serviço é sob consulta. O pré-diagnóstico é gratuito: meço as principais páginas no celular e mostro onde está o peso, e você decide com a conta de remendar contra refazer."
+    }
+  ]
+}

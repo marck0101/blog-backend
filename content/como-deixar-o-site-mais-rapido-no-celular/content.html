@@ -1,0 +1,77 @@
+<p>Como deixar o site mais rápido no celular é a pergunta de quem abre o próprio site na rua, com o 4G oscilando, e fica olhando a tela em branco. Se você enxerga isso, o cliente também enxerga, só que ele não espera: fecha e abre o do concorrente. Quem pagou um anúncio para trazer essa pessoa paga duas vezes, porque o clique foi cobrado e a visita foi embora antes de ver a oferta.</p>
+<p>A boa notícia é que, na maioria dos casos, a lentidão vem de poucas causas, e dá para medi-las, corrigi-las em ordem e conferir o resultado com a mesma ferramenta. Este texto mostra o caminho para quem é dono de um negócio local e para quem vai mexer no código. Os números de exemplo são hipotéticos, porque o seu site tem os próprios.</p>
+
+<h2>Por que o site abre devagar no celular</h2>
+<p>O celular é o caso difícil: processador mais fraco que o do computador, rede móvel instável e uma tela de poucas polegadas que ainda precisa baixar a mesma página. Quando o site foi feito há anos, o que costuma pesar é sempre parecido:</p>
+<ul>
+<li><strong>Imagens enormes:</strong> a foto de 4 MB que ninguém comprimiu, mostrada num espaço reduzido.</li>
+<li><strong>Fontes e efeitos:</strong> várias famílias de fonte baixadas para usar duas.</li>
+<li><strong>Códigos de terceiros:</strong> chat, pixel de anúncio, mapa, aviso de cookies, cada um puxando seus próprios arquivos.</li>
+<li><strong>Plugins que ninguém usa:</strong> recurso instalado e esquecido continua sendo baixado em toda visita.</li>
+</ul>
+<p>É como uma mala de viagem: ninguém tira nada porque "vai que precisa", e no fim carrega-se o peso inteiro em todo trajeto. O visitante no celular sente cada quilo.</p>
+<p><strong>Moral da história:</strong> o site raramente é lento por um motivo só. Ele é lento por acúmulo, e o acúmulo tem conserto.</p>
+
+<h2>Como medir a velocidade do site no celular</h2>
+<p>Antes de mexer em qualquer coisa, meça. Sem medição você não sabe o que melhorou, nem se piorou. O PageSpeed Insights, do próprio Google, é a ferramenta de partida e traz dois tipos de dado. Segundo a documentação, os dados de laboratório vêm do Lighthouse, que simula o carregamento da página e serve para depurar; os dados de campo vêm de usuários reais, pelo Chrome User Experience Report, e cobrem os 28 dias anteriores (<a href="https://developers.google.com/speed/docs/insights/v5/about">Google, PageSpeed Insights</a>). Um negócio local pode não ter visitas suficientes para aparecer nos dados de campo, e nesse caso resta o laboratório.</p>
+<p>Na prática, o protocolo é simples:</p>
+<ol>
+<li>Escolha de 3 a 5 páginas que importam: a inicial, a de serviços e a que recebe o clique do anúncio.</li>
+<li>Meça cada uma no celular, mais de uma vez, e anote a data e a nota. A variação entre rodadas é normal; como decidir com ela está em <a href="https://blog.marck0101.com.br/blog/pagespeed-e-clarity-como-decido-o-que-otimizar-primeiro">PageSpeed e Clarity: como decido o que otimizar primeiro</a>.</li>
+<li>Guarde esse "antes". Ele é a única prova de que o trabalho funcionou.</li>
+</ol>
+<p><strong>Moral da história:</strong> medir antes é tirar a foto do "antes" da reforma. Sem ela, qualquer melhora vira opinião.</p>
+
+<h2>Os três números que o Google usa: LCP, INP e CLS</h2>
+<p>Esses são os Core Web Vitals, a medida do Google para a experiência de quem usa a página. Cada um tem uma referência de "bom", avaliada no percentil 75 dos acessos, isto é, para a maior parte dos visitantes e não só para os mais rápidos (<a href="https://web.dev/articles/vitals">web.dev, Web Vitals</a>):</p>
+<ul>
+<li><strong>LCP (maior conteúdo visível):</strong> o tempo até o maior elemento da tela aparecer, em geral a foto principal ou o título. A referência é 2,5 segundos ou menos. É a sensação de "a página abriu".</li>
+<li><strong>INP (resposta ao toque):</strong> quanto a página demora a reagir quando você toca. A referência é 200 milissegundos ou menos. É o botão que aperta e nada acontece.</li>
+<li><strong>CLS (estabilidade visual):</strong> o quanto o layout pula durante o carregamento. A referência é 0,1 ou menos. É o botão que muda de lugar na hora em que você vai clicar.</li>
+</ul>
+<p>O Google informa que os Core Web Vitals são usados pelos sistemas de classificação e que bons valores ajudam no sucesso na Busca. Ele também avisa que isso não garante posição: o conteúdo relevante continua pesando mais (<a href="https://developers.google.com/search/docs/appearance/core-web-vitals">Google Search Central, Core Web Vitals</a>). Portanto, tratar velocidade como atalho para o topo do ranking é exagero; tratá-la como condição para o visitante ficar é o que faz sentido.</p>
+<p><strong>Moral da história:</strong> LCP é a pressa, INP é a resposta e CLS é o susto. Os três juntos dizem se a visita foi boa.</p>
+
+<h2>O que corrigir primeiro: imagens, fontes e códigos de terceiros</h2>
+<p>Corrija pela ordem do que mais pesa, não do que é mais fácil. Em um site de negócio local, a ordem costuma ser esta:</p>
+<ol>
+<li><strong>Imagens.</strong> Comprima, entregue no tamanho que a tela realmente usa e em formato moderno (WebP ou AVIF). Marque largura e altura para o espaço ficar reservado e a página não pular (é o CLS). A imagem principal, a do LCP, deve carregar primeiro e sem atraso; as de baixo podem esperar a rolagem.</li>
+<li><strong>Fontes.</strong> Fique com uma ou duas famílias e poucos pesos. Cada variação é um arquivo a mais.</li>
+<li><strong>Códigos de terceiros.</strong> Liste tudo o que carrega de fora e pergunte, para cada item, se alguém usa o dado. Um pixel antigo de uma campanha encerrada continua pesando. O que ficar, carregue depois do conteúdo principal.</li>
+<li><strong>JavaScript e CSS.</strong> Remova o que não é usado e adie o que não é necessário para a primeira tela. É o ponto que mais exige quem programa.</li>
+</ol>
+<p>Para o leitor técnico: o guia da web.dev sobre otimizar o LCP mostra como dividir o tempo em partes (resposta do servidor, descoberta do recurso, download e renderização) e atacar a maior (<a href="https://web.dev/articles/optimize-lcp">web.dev, Optimize LCP</a>). Em vez de otimizar às cegas, descubra qual parte consome mais tempo.</p>
+<p><strong>Moral da história:</strong> comece pelo que pesa mais. Trocar uma imagem de 4 MB rende mais que ajustar dez detalhes de código.</p>
+
+<h2>Site lento: otimizar ou refazer?</h2>
+<p>Esta é a dúvida que mais custa dinheiro, porque refazer parece a solução limpa e costuma ser a mais cara. A regra é conferir o diagnóstico antes de decidir:</p>
+<ul>
+<li><strong>Otimizar compensa</strong> quando o peso está em imagens, fontes e terceiros. São correções pontuais, e a base do site aguenta.</li>
+<li><strong>Refazer compensa</strong> quando o problema é estrutural: um tema ou construtor que carrega centenas de arquivos que você não consegue remover, ou uma arquitetura que renderiza tudo no navegador do visitante. A comparação entre as opções de arquitetura está em <a href="https://blog.marck0101.com.br/blog/ssr-ssg-spa-qual-arquitetura-escolher">SSR, SSG ou SPA: qual arquitetura escolher</a>.</li>
+</ul>
+<p>Um exemplo hipotético: se a página inicial pesa 6 MB e 5 MB são fotos sem compressão, o remendo resolve; se o tema carrega 80 arquivos de script e você só precisa de 5, talvez a base seja o problema. Em ambos os casos a conta é a mesma: quanto custa remendar contra quanto custa refazer, e quanto tempo cada um leva.</p>
+<p><strong>Moral da história:</strong> refazer é a última opção, não a primeira. Diagnóstico primeiro, decisão depois.</p>
+
+<h2>Acompanhar todo mês para ele não voltar a ficar lento</h2>
+<p>Um site rápido hoje pode estar lento em três meses. Alguém sobe uma foto sem comprimir, instala um plugin, cola um código de campanha novo. A velocidade se mantém como a limpeza da casa: com rotina curta e constante, não com faxina anual.</p>
+<ul>
+<li><strong>Medir todo mês</strong> as mesmas páginas, com a mesma ferramenta, e registrar a data.</li>
+<li><strong>Conferir a cada mudança</strong> no site, antes e depois de publicar.</li>
+<li><strong>Comparar com o "antes"</strong> guardado, para ver se a tendência é de melhora ou de piora.</li>
+</ul>
+<p>Já trabalhei com sites de turismo, hotelaria, restaurantes, indústria e varejo, e o padrão se repete: o que muda de um nicho para outro é o que mais pesa, não o método.</p>
+<p><strong>Moral da história:</strong> velocidade não é projeto com data final, é hábito.</p>
+
+<h2>Quando pedir ajuda</h2>
+<p>Vale buscar ajuda quando o diagnóstico aponta correção de código, quando você não tem tempo de acompanhar todo mês ou quando a decisão entre otimizar e refazer envolve dinheiro. O serviço <a href="https://servicos.marck0101.com.br/servicos/performance">Site rápido no celular</a> começa por um pré-diagnóstico gratuito: eu meço as principais páginas do seu site no celular e mostro onde está o peso. Depois, a entrega mensal é a medição com a nota do Google e a data, a correção do que pesa e um relatório de antes e depois, nas mesmas páginas e com a mesma ferramenta.</p>
+
+<h2>Conclusão</h2>
+<p>Para deixar o site mais rápido no celular: meça as páginas que importam, entenda LCP, INP e CLS, corrija primeiro imagens, fontes e códigos de terceiros, só refaça se o problema for estrutural e acompanhe todo mês. Esse é um dos três eixos do tema; o guia completo, com segurança e visibilidade, está em <a href="https://blog.marck0101.com.br/blog/site-rapido-seguro-encontravel-guia-negocios-locais">Site rápido, seguro e encontrável: guia para negócios locais</a>, e os demais textos estão em <a href="https://blog.marck0101.com.br/temas/site-rapido-e-encontravel">Site rápido e encontrável</a>.</p>
+
+<h2>Referências</h2>
+<ol>
+<li>GOOGLE. <em>About PageSpeed Insights</em>. Google for Developers. Disponível em: <a href="https://developers.google.com/speed/docs/insights/v5/about">https://developers.google.com/speed/docs/insights/v5/about</a>. Acesso em: 28 nov. 2026.</li>
+<li>GOOGLE. <em>Understanding Core Web Vitals and Google search results</em>. Google Search Central. Disponível em: <a href="https://developers.google.com/search/docs/appearance/core-web-vitals">https://developers.google.com/search/docs/appearance/core-web-vitals</a>. Acesso em: 28 nov. 2026.</li>
+<li>WEB.DEV. <em>Web Vitals</em>. Google. Disponível em: <a href="https://web.dev/articles/vitals">https://web.dev/articles/vitals</a>. Acesso em: 28 nov. 2026.</li>
+<li>WEB.DEV. <em>Optimize Largest Contentful Paint</em>. Google. Disponível em: <a href="https://web.dev/articles/optimize-lcp">https://web.dev/articles/optimize-lcp</a>. Acesso em: 28 nov. 2026.</li>
+</ol>
