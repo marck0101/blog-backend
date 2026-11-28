@@ -1,6 +1,11 @@
 # Changelog
 
 Formato livre, mais recente primeiro. Mudança de regra de negócio também vai em `docs/SISTEMA.md`.
+## 28/11/2026 · MAP-02 · Sugestão de link interno
+
+- Novo: `POST /api/content-map/suggestions` (admin, Zod) devolve até 5 posts publicados com tag em comum que o texto do editor ainda não linka. Regra R-MAP-06 em `docs/SISTEMA.md`.
+- Testes: 401 sem login, validação, ordem (tags em comum, depois recência), limite de 5, exclusões, post novo sem id.
+
 
 ## 27/11/2026 · Sprint R4 · Placar do conteúdo
 

@@ -198,4 +198,40 @@ function buildContentMap({ posts, seasons = [] }) {
   };
 }
 
-module.exports = { buildContentMap, internalSlugs };
+const MAX_SUGGESTIONS = 5;
+
+/**
+ * Sugestões de link interno para o editor (R-MAP-06).
+ * candidates: posts publicados fora da lixeira, com title slug previousSlugs tags publishedAt.
+ * tags: tags do post em edição (já normalizadas). content: HTML atual do editor.
+ * Fora: o próprio post (excludeId) e quem o texto já linka (pelo slug atual ou antigo).
+ * Ordem: mais tags em comum, depois o publicado mais recente.
+ */
+function suggestInternalLinks({ candidates, tags = [], content = "", excludeId = null, limit = MAX_SUGGESTIONS }) {
+  const mine = new Set(tags);
+  const linked = new Set(internalSlugs(content));
+  const ranked = [];
+  for (const post of candidates) {
+    if (excludeId && String(post._id) === String(excludeId)) continue;
+    if (linked.has(post.slug) || (post.previousSlugs || []).some((old) => linked.has(old))) continue;
+    const sharedTags = (post.tags || []).filter((tag) => mine.has(tag));
+    if (!sharedTags.length) continue;
+    ranked.push({
+      id: String(post._id),
+      title: post.title,
+      slug: post.slug,
+      url: `${SITE_URL}/blog/${post.slug}`,
+      sharedTags,
+      publishedAt: post.publishedAt || null,
+    });
+  }
+  ranked.sort(
+    (a, b) =>
+      b.sharedTags.length - a.sharedTags.length ||
+      new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0) ||
+      a.title.localeCompare(b.title, "pt-BR")
+  );
+  return ranked.slice(0, Math.min(limit, MAX_SUGGESTIONS));
+}
+
+module.exports = { buildContentMap, internalSlugs, suggestInternalLinks, MAX_SUGGESTIONS };
